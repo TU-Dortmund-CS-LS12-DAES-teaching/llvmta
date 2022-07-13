@@ -3,7 +3,7 @@
 For setup and building LLVMTA please refer to the [linked llvm repository](https://gitlab.cs.uni-saarland.de/reineke/llvm)
 
 ## Using LLVMTA
-This sections showcases how to use LLVMTA on a simple test case of a nested loop example.
+This section showcases how to use LLVMTA on a simple test case of a nested loop example.
 
 1.) Change into the llvmta/testcases folder.
 ```
