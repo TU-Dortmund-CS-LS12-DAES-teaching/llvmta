@@ -1,0 +1,37 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "config dev",
+      "type": "shell",
+      "command": "rm complile_commands.json ; ./config.sh dev",
+      "group": "build"
+    },
+    {
+      "label": "config release",
+      "type": "shell",
+      "command": "rm complile_commands.json ; mkdir build ; ./config.sh rel",
+      "group": "build"
+    },
+    {
+      "label": "config lowRes",
+      "type": "shell",
+      "command": "rm complile_commands.json ; mkdir build ; ./config.sh lowRes",
+      "group": "build"
+    },
+    {
+      "label": "build llvmta",
+      "type": "shell",
+      "command": " cd build ; ninja llvmta",
+      "group": "build"
+    },
+    {
+      "label": "build all",
+      "type": "shell",
+      "command": " cd build ; ninja",
+      "group": "build"
+    }
+  ]
+}
