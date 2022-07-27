@@ -141,7 +141,7 @@ private:
   constexpr static unsigned numOfRegisters =
       ISA == Triple::ArchType::riscv32 ? 32 : 16;
   /// Stack pointer
-  constexpr static unsigned stackPointerRegister =
+  unsigned stackPointerRegister =
       ISA == Triple::ArchType::riscv32 ? 2 : 13;
   /// General-Purpose Register Class
   constexpr static const TargetRegisterClass &GPRegClass =
