@@ -1,6 +1,7 @@
 #!/bin/bash
 
 deve () {
+  git submodule update --init --recursive
   mkdir build ; cd build
   cmake -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
@@ -24,6 +25,7 @@ deve () {
 }
 
 lowRes () {
+  git submodule update --init --recursive
   mkdir build ; cd build
   cmake -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
@@ -47,6 +49,7 @@ lowRes () {
 }
 
 rele () {
+  git submodule update --init --recursive
   mkdir build ; cd build
   cmake -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
