@@ -25,7 +25,7 @@ set(LLVM_LINK_COMPONENTS
 message (STATUS "${PROJECT_BINARY_DIR}$")
 message (STATUS "${PROJECT_SOURCE_DIR}$")
 
-include_directories(${PROJECT_BINARY_DIR}/../../lib/Target/ARM ${PROJECT_SOURCE_DIR}/../../lib/Target/ARM ${PROJECT_BINARY_DIR}/../../lib/Target/RISCV ${PROJECT_SOURCE_DIR}/../../lib/Target/RISCV ${PROJECT_BINARY_DIR}/include ${PROJECT_SOURCE_DIR}/include)
+include_directories(include ${LLVM_BINARY_DIR}/lib/Target/ARM ${LLVM_SOURCE_DIR}/lib/Target/ARM ${LLVM_BINARY_DIR}/lib/Target/RISCV ${LLVM_SOURCE_DIR}/lib/Target/RISCV)
 
 add_llvm_tool(llvmta
   tools/driver/llvmta.cpp
