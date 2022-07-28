@@ -27,12 +27,7 @@ docker run -i -d \
 
 If using VS code all config and build tasks can be triggered by shift+ctr+b.
 
-1.) Fetch llvm fork via git sumbodule.
-```
-git submodule update --init --recursive
-```
-
-2.) Config the project with the ./config.sh script. Be aware that llvm and LLVMTA requires a lot or RAM, should your System have only 16GB of RAM choose the "lowRes" configuration.
+1.) Config the project with the ./config.sh script. Be aware that llvm and LLVMTA requires a lot or RAM, should your System have only 16GB of RAM choose the "lowRes" configuration.
 ```
 Script to configure llvm and LLVMTA:
   dev | development          Configure for development.
@@ -40,6 +35,7 @@ Script to configure llvm and LLVMTA:
   lowRes | lowResources      Configure for low Ram PC.
   clean                      Removes build folder.
 ```
+You will be asked to download llvm and clang at the first setup. The script will do so automatically.
 
 3.) Build llvm, clang and LLVMTA with ninja. This is necessary at least once, so that the llvm and LLVMTA toolchain are of the same version.
 ```
@@ -63,7 +59,4 @@ cd testcases
 ```
 ./runTestcase loopexamples/nested
 ```
-All test cases are in the Benchmarks folder and only their relative path has to be handed. This will generate the following output.
-```
-./runTestcase loopexamples/nested
-```
+All test cases are in the Benchmarks folder and only their relative path has to be handed. The full path for the command above ist "testcases/Benchmarks/loopexamples/nested", keep this in mind while using the script.
