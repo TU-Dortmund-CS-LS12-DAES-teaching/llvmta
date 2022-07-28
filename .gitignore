@@ -5,7 +5,10 @@
 # This file is intentionally different from the output of `git svn show-ignore`,
 # as most of those are useless.
 #==============================================================================#
-
+/clang*/
+/llvm-*
+*build
+/cmake/
 #==============================================================================#
 # Nested build directory.
 #==============================================================================#

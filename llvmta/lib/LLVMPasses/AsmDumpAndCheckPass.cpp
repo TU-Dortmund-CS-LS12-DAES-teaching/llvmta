@@ -54,7 +54,7 @@ AsmDumpAndCheckPass::AsmDumpAndCheckPass(TargetMachine &TM)
   }
   std::error_code ErrInfo;
   ;
-  raw_fd_ostream Myfile("Assembler.txt", ErrInfo, sys::fs::F_None);
+  raw_fd_ostream Myfile("Assembler.txt", ErrInfo, sys::fs::OF_None);
   Myfile << "Textual Machine Code Representation\n"
          << "------------------------------------\n\n";
   Myfile.close();
@@ -83,7 +83,7 @@ bool AsmDumpAndCheckPass::doFinalization(Module &) {
 bool AsmDumpAndCheckPass::runOnMachineFunction(MachineFunction &F) {
   // If we want to see the assembler code that we analyse, dump it
   std::error_code ErrInfo;
-  raw_fd_ostream Myfile("Assembler.txt", ErrInfo, sys::fs::F_Append);
+  raw_fd_ostream Myfile("Assembler.txt", ErrInfo, sys::fs::OF_Append);
   F.print(Myfile);
   Myfile.close();
 

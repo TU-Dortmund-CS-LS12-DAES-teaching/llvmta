@@ -6,19 +6,19 @@
     {
       "label": "config dev",
       "type": "shell",
-      "command": "rm complile_commands.json ; ./config.sh dev",
+      "command": "./config.sh dev",
       "group": "build"
     },
     {
       "label": "config release",
       "type": "shell",
-      "command": "rm complile_commands.json ; mkdir build ; ./config.sh rel",
+      "command": "./config.sh rel",
       "group": "build"
     },
     {
       "label": "config lowRes",
       "type": "shell",
-      "command": "rm complile_commands.json ; mkdir build ; ./config.sh lowRes",
+      "command": "./config.sh lowRes",
       "group": "build"
     },
     {
