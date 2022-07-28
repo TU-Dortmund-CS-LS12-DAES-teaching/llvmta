@@ -5,23 +5,24 @@ LLVM_VER="llvm-14.0.6"
 
 deve() {
   cd build || exit
-  cmake -DCMAKE_C_COMPILER=gcc \
+  cmake \
+    -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
     -DCMAKE_BUILD_TYPE=Debug \
-    -DLLVM_ENABLE_RTTI=ON \
-    -DLLVM_ENABLE_EH=ON \
-    -DLLVM_USE_LINKER=lld \
-    -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
-    -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../$CLANG_VER.src \
-    -DLLVM_PARALLEL_LINK_JOBS=4 \
-    -DLLVM_PARALLEL_COMPILE_JOBS=16 \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
-    -DLLVM_OPTIMIZED_TABLEGEN=OFF \
-    -DLLVM_INCLUDE_BENCHMARKS=OFF \
     -Wno-dev \
     -Wno-suggest-override \
+    -DLLVM_USE_LINKER=lld \
+    -DLLVM_CCACHE_BUILD=ON \
+    -DLLVM_ENABLE_RTTI=ON \
+    -DLLVM_ENABLE_EH=ON \
+    -DLLVM_INCLUDE_BENCHMARKS=OFF \
+    -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
+    -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../$CLANG_VER.src \
     -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=../llvmta \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
+    -DLLVM_PARALLEL_LINK_JOBS=4 \
+    -DLLVM_PARALLEL_COMPILE_JOBS=16 \
     -GNinja \
     ../$LLVM_VER.src
   mv compile_commands.json ../compile_commands.json
@@ -29,53 +30,59 @@ deve() {
 
 lowRes() {
   cd build || exit
-  cmake -DCMAKE_C_COMPILER=gcc \
+  cmake \
+    -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
     -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+    -Wno-dev \
+    -Wno-suggest-override \
+    -DLLVM_USE_LINKER=lld \
+    -DLLVM_CCACHE_BUILD=ON \
     -DLLVM_ENABLE_RTTI=ON \
     -DLLVM_ENABLE_EH=ON \
-    -DLLVM_USE_LINKER=lld \
+    -DLLVM_INCLUDE_BENCHMARKS=OFF \
     -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
-    -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
-    -DCLANG_ENABLE_ARCMT=OFF \
-    -DLLVM_PARALLEL_LINK_JOBS=1 \
-    -DLLVM_PARALLEL_COMPILE_JOBS=4 \
-    -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
-    -DLLVM_OPTIMIZED_TABLEGEN=ON \
-    -Wno-dev \
-    -GNinja \
+    -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../$CLANG_VER.src \
     -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=../llvmta \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
+    -DLLVM_PARALLEL_LINK_JOBS=1 \
+    -DLLVM_PARALLEL_COMPILE_JOBS=6 \
+    -GNinja \
     ../$LLVM_VER.src
   mv compile_commands.json ../compile_commands.json
 }
 
 rele() {
   cd build || exit
-  cmake -DCMAKE_C_COMPILER=gcc \
+  cmake \
+    -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
     -DCMAKE_BUILD_TYPE=MinSizeRel \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+    -Wno-dev \
+    -Wno-suggest-override \
+    -DLLVM_USE_LINKER=lld \
+    -DLLVM_CCACHE_BUILD=ON \
     -DLLVM_ENABLE_RTTI=ON \
     -DLLVM_ENABLE_EH=ON \
-    -DLLVM_USE_LINKER=lld \
+    -DLLVM_INCLUDE_BENCHMARKS=OFF \
     -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
-    -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
-    -DCLANG_ENABLE_ARCMT=OFF \
-    -DLLVM_PARALLEL_LINK_JOBS=8 \
-    -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
-    -DLLVM_ENABLE_LTO=Full \
-    -DLLVM_OPTIMIZED_TABLEGEN=ON \
-    -DLLVM_CCACHE_BUILD=ON \
-    -Wno-dev \
-    -GNinja \
+    -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../$CLANG_VER.src \
     -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=../llvmta \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
+    -DLLVM_PARALLEL_LINK_JOBS=4 \
+    -DLLVM_PARALLEL_COMPILE_JOBS=16 \
+    -GNinja \
     ../$LLVM_VER.src
   mv compile_commands.json ../compile_commands.json
 }
 
 cl() {
   rm -rf build
+  rm -rf $LLVM_VER.src
+  rm -rf $CLANG_VER.src
+  rm -rf cmake
 }
 
 getllvm() {
@@ -108,6 +115,7 @@ getllvm() {
 getclang() {
   if [ ! -d $CLANG_VER.src ]; then
     while true; do
+      echo ""
       echo "Do you wish to install $CLANG_VER [Y/N]?"
       read -r yn
       case $yn in
