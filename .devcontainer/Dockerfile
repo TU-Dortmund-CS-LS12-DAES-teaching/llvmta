@@ -7,20 +7,26 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 SHELL ["/bin/bash", "-c"]
 
 # [Optional] Uncomment this section to install additional OS packages.
- RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         && apt-get -y install --no-install-recommends build-essential \
-        lldb gcc gdb cmake make ninja-build libboost-all-dev git ccache \
-        htop wget fish zsh lld time parallel lp-solve liblpsolve55-dev clangd
+        lldb gcc gdb cmake make ninja-build libboost-all-dev git clangd \
+        htop wget fish zsh lld time parallel lp-solve liblpsolve55-dev \
+        icecc icecream-sundae
+
+
 
 # Set environment variables
 ENV PATH=$PATH:/workspaces/llvmta/build/bin
 ENV PATH=$PATH:/workspaces/llvm/build/bin
-ENV CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/llvm/lib/Target/ARM
-ENV CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/llvm/lib/Target/RISCV
-
-RUN mv /usr/lib/lp_solve/liblpsolve55.so /usr/lib/liblpsolve55.so
+# ENV CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/llvm/lib/Target/ARM
+# ENV CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/llvm/lib/Target/RISCV
+#RUN mv /usr/lib/lp_solve/liblpsolve55.so /usr/lib/liblpsolve55.so
 #RUN echo "/usr/lib/lpsolve" >> /etc/ld.so.conf.d/lpsolve.conf ; ldconfig
 
 RUN echo "set completion-ignore-case on" >> /etc/inputrc
 
-
+#Seting up icecc (icecream) distributed compiler.
+ENV PATH=/usr/lib/icecc/bin:$PATH
+RUN iceccd &
+#IceCream uses Ports: TCP: 10245 8765 8766 and for UDP 8765
+EXPOSE 10245 8766 8765/TCP 8765/UDP

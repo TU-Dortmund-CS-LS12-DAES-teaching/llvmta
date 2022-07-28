@@ -22,6 +22,12 @@
       "group": "build"
     },
     {
+      "label": "config distributed",
+      "type": "shell",
+      "command": "./config.sh dis",
+      "group": "build"
+    },
+    {
       "label": "clean",
       "type": "shell",
       "command": "./config.sh clean",

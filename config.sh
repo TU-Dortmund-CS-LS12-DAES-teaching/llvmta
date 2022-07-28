@@ -87,7 +87,7 @@ dist() {
     -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
     -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=../llvmta \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
-    -DLLVM_PARALLEL_COMPILE_JOBS=64 \
+    -DLLVM_PARALLEL_COMPILE_JOBS=128 \
     -GNinja \
     ../dependencies/$LLVM_VER.src
   mv compile_commands.json ../compile_commands.json
@@ -102,7 +102,7 @@ cl() {
 }
 
 getllvm() {
-  if [ ! -d $LLVM_VER.src ]; then
+  if [ ! -d dependencies/$LLVM_VER.src ]; then
     while true; do
       echo "Do you wish to install $LLVM_VER [Y/N]?"
       read -r yn
@@ -130,7 +130,7 @@ getllvm() {
 }
 
 getclang() {
-  if [ ! -d $CLANG_VER.src ]; then
+  if [ ! -d dependencies/$CLANG_VER.src ]; then
     while true; do
       echo ""
       echo "Do you wish to install $CLANG_VER [Y/N]?"
