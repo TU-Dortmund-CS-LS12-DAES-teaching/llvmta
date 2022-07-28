@@ -29,10 +29,11 @@ If using VS code all config and build tasks can be triggered by shift+ctr+b.
 
 1.) Config the project with the ./config.sh script. Be aware that llvm and LLVMTA requires a lot or RAM, should your System have only 16GB of RAM choose the "lowRes" configuration.
 ```
-Script to configure llvm and LLVMTA:
+Script to configure llvm, clang and LLVMTA:
   dev | development          Configure for development.
   rel | release              Configure for Release.
   lowRes | lowResources      Configure for low Ram PC.
+  distributed | dis          Configure for icecc distributed compiler.
   clean                      Removes build folder.
 ```
 You will be asked to download llvm and clang at the first setup. The script will do so automatically.
