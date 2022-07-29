@@ -26,7 +26,7 @@ ENV PATH=$PATH:/workspaces/llvm/build/bin
 RUN echo "set completion-ignore-case on" >> /etc/inputrc
 
 #Seting up icecc (icecream) distributed compiler.
-ENV PATH=/usr/lib/icecc/bin:$PATH
+#ENV PATH=/usr/lib/icecc/bin:$PATH
 RUN iceccd &
 #IceCream uses Ports: TCP: 10245 8765 8766 and for UDP 8765
 EXPOSE 10245 8766 8765/TCP 8765/UDP

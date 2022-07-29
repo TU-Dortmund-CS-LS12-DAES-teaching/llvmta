@@ -73,8 +73,8 @@ rele() {
 dist() {
   cd build || exit
   cmake \
-    -DCMAKE_C_COMPILER=gcc \
-    -DCMAKE_CXX_COMPILER=g++ \
+    -DCMAKE_C_COMPILER=/usr/lib/icecc/bin/gcc \
+    -DCMAKE_CXX_COMPILER=/usr/lib/icecc/bin/g++ \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
     -Wno-dev \
@@ -88,17 +88,22 @@ dist() {
     -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=../llvmta \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
     -DLLVM_PARALLEL_COMPILE_JOBS=128 \
+    -DLLVM_PARALLEL_LINK_JOBS=1 \
     -GNinja \
     ../dependencies/$LLVM_VER.src
   mv compile_commands.json ../compile_commands.json
 }
 
-cl() {
+cla() {
   rm -rf build
   rm compile_commands.json
   cd dependencies || exit
   rm -rf llvm* clang* cmake
   cd ..
+}
+
+cl() {
+  rm -rf build
 }
 
 getllvm() {
@@ -190,6 +195,9 @@ distributed | dis)
 clean)
   cl
   ;;
+cleanall)
+  cl
+  ;;
 *)
   if [ $1 ]; then
     echo "Unknown argument: $1"
@@ -200,6 +208,7 @@ clean)
   echo "  lowRes | lowResources      Configure for low Ram PC."
   echo "  distributed | dis          Configure for icecc distributed compiler."
   echo "  clean                      Removes build folder."
+  echo "  cleanall                   Removes build folder and llvm + clang."
   exit
   ;;
 esac
