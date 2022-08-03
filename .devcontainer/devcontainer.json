@@ -6,7 +6,7 @@
 		"dockerfile": "Dockerfile",
 		// Update 'VARIANT' to pick an Ubuntu version: jammy / ubuntu-22.04, focal / ubuntu-20.04, bionic /ubuntu-18.04
 		// Use ubuntu-22.04 or ubuntu-18.04 on local arm64/Apple Silicon.
-		"args": { "VARIANT": "ubuntu-22.04" },
+		"args": { "VARIANT": "ubuntu-22.04" }
 		
 	},
 	"runArgs": ["--network=host"],
@@ -23,7 +23,8 @@
 		"rreverser.llvm",
 		"jakob-erzar.llvm-tablegen",
 		"zhwu95.riscv",
-		"gruntfuggly.todo-tree"
+		"gruntfuggly.todo-tree",
+		"codechecker.vscode-codechecker"
 		],
 
 	"appPort": [ 10245, 8765, 8766 ],

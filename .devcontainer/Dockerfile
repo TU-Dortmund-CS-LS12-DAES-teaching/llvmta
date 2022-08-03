@@ -11,17 +11,16 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         && apt-get -y install --no-install-recommends build-essential \
         lldb gcc gdb cmake make ninja-build libboost-all-dev git clangd \
         htop wget fish zsh lld time parallel lp-solve liblpsolve55-dev \
-        icecc icecream-sundae
-
-
+        icecc icecream-sundae python3-pip libcolamd2
+RUN pip3 install codechecker
 
 # Set environment variables
 ENV PATH=$PATH:/workspaces/llvmta/build/bin
 ENV PATH=$PATH:/workspaces/llvm/build/bin
 # ENV CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/llvm/lib/Target/ARM
 # ENV CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/llvm/lib/Target/RISCV
-#RUN mv /usr/lib/lp_solve/liblpsolve55.so /usr/lib/liblpsolve55.so
-#RUN echo "/usr/lib/lpsolve" >> /etc/ld.so.conf.d/lpsolve.conf ; ldconfig
+RUN mv /usr/lib/lp_solve/liblpsolve55.so /usr/lib/liblpsolve55.so
+#RUN echo "/usr/lib/lp_solve" >> /etc/ld.so.conf.d/lpsolve.conf ; ldconfig
 
 RUN echo "set completion-ignore-case on" >> /etc/inputrc
 
