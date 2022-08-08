@@ -120,7 +120,7 @@ getllvm() {
         #Create patch with
         #diff -ur $LLVM_VER.src  $LLVM_VER.src.patched > $LLVM_VER.llvmta.diff
         cd $LLVM_VER.src
-        patch -p1 < ../Y../patches/$LLVM_VER.llvmta.diff
+        patch -p1 < ../../patches/$LLVM_VER.llvmta.diff
         cd ../..
         break
         ;;

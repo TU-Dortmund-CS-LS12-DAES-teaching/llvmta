@@ -34,7 +34,7 @@
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "uname -a",
-	"postStartCommand": "nohup bash -c 'iceccd &'",
+	"postStartCommand": "nohup bash -c 'iceccd &' >/dev/null 2>&1",
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 	"features": {
