@@ -11,7 +11,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         && apt-get -y install --no-install-recommends build-essential \
         lldb gcc gdb cmake make ninja-build libboost-all-dev git clangd \
         htop wget fish zsh lld time parallel lp-solve liblpsolve55-dev \
-        icecc icecream-sundae python3-pip libcolamd2
+        icecc icecream-sundae python3-pip libcolamd2 clang-tidy
 RUN pip3 install codechecker
 
 # Set environment variables
