@@ -167,7 +167,7 @@ void CallGraph::parseAnnotationsExternalFunctions(const char *filename) {
   boost::escaped_list_separator<char> sep('\\', '|', '"');
   std::ifstream file(filename);
   if (!file.good()) {
-    errs() << "File could not be opened!\n";
+    errs() << filename << "File could not be opened!\n";
     return;
   }
   for (std::string line; getline(file, line);) {

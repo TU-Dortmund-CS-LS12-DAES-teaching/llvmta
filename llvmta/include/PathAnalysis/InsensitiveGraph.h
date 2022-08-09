@@ -377,105 +377,210 @@ template <class MicroArchDom>
 void InsensitiveGraph<MicroArchDom>::dump(
     std::ostream &mystream,
     const std::map<std::string, double> *optTimesTaken) const {
-  mystream
-      << "graph : { \n	layoutalgorithm : hierarchic\n	graph : {\n	title "
-         ": \"State Graph\"\n	label : \"Microarchitectural State Graph\"\n";
+  if (!DumpVcgGraph) {
+    int clusterNr = 0;
+    mystream << "digraph WCET {\n    label = \"Microarchitectural State "
+                "Graph\"\n    color=blue;\n    node [color=black, "
+                "shape=square];\n  subgraph cluster_"
+             << clusterNr++ << " {";
 
-  // Build nodes for all states in functions and basic blocks
-  for (MachineFunction *currFunc :
-       machineFunctionCollector->getAllMachineFunctions()) {
-    std::string funcName = currFunc->getName().str();
-    mystream << "graph : {\n	title : \"" << funcName << "\"\n	label : \""
-             << funcName << "\"\n";
-    for (auto &currMBB : *currFunc) {
-      std::string mbbName = currMBB.getFullName();
-      mystream << "graph : {\n	title : \"" << mbbName << "\"\n	label : \""
-               << mbbName << "\"\n";
+    // Build nodes for all states in functions and basic blocks
+    for (MachineFunction *currFunc :
+         machineFunctionCollector->getAllMachineFunctions()) {
+      std::string funcName = currFunc->getName().str();
+      mystream << "subgraph cluster_" << clusterNr++ << " {\n	label = \""
+               << funcName << "\"\n";
+      for (auto &currMBB : *currFunc) {
+        std::string mbbName = currMBB.getFullName();
+        mystream << "subgraph cluster_" << clusterNr++ << "{\n	label =  \""
+                 << mbbName << "\"\n";
 
-      if (inVertexPerMBB.count(&currMBB) > 0) {
-        auto inSts = inVertexPerMBB.at(&currMBB);
-        mystream << "node : {\n	title : \"" << inSts << "\"\n	label : \"In-"
-                 << inSts << "\"\n";
-        mystream << "info1 : \"" << states.at(inSts).print() << "\"\n}\n";
-      }
-      if (outVertexPerMBB.count(&currMBB) > 0) {
-        auto outSts = outVertexPerMBB.at(&currMBB);
-        mystream << "node : {\n	title : \"" << outSts << "\"\n	label : \"Out-"
-                 << outSts << "\"\n";
-        mystream << "info1 : \"" << states.at(outSts).print() << "\"\n}\n";
-      }
-      const auto &callsites = CallGraph::getGraph().getCallSitesInMBB(&currMBB);
-      for (auto callsite : callsites) {
-        if (callVertices.count(callsite) > 0) {
-          assert(returnVertices.count(callsite) > 0 &&
-                 "Calling states but no return states");
-          auto cSt = callVertices.at(callsite);
-          mystream << "node : {\n	title : \"" << cSt
-                   << "\"\n	label : \"Call-" << cSt << "\"\n";
-          mystream << "info1 : \"" << states.at(cSt).print() << "\"\n}\n";
-          auto rSt = returnVertices.at(callsite);
-          mystream << "node : {\n	title : \"" << rSt
-                   << "\"\n	label : \"Return-" << rSt << "\"\n";
-          mystream << "info1 : \"" << states.at(rSt).print() << "\"\n}\n";
+        if (inVertexPerMBB.count(&currMBB) > 0) {
+          auto inSts = inVertexPerMBB.at(&currMBB);
+          mystream << inSts << "[ label = \"In-" << inSts << "\", tooltip = <"
+                   << states.at(inSts).print() << ">];\n";
         }
+        if (outVertexPerMBB.count(&currMBB) > 0) {
+          auto outSts = outVertexPerMBB.at(&currMBB);
+          mystream << outSts << "[ label = \"Out-" << outSts
+                   << "\", tooltip = <" << states.at(outSts).print() << ">];\n";
+        }
+        const auto &callsites =
+            CallGraph::getGraph().getCallSitesInMBB(&currMBB);
+        for (auto callsite : callsites) {
+          if (callVertices.count(callsite) > 0) {
+            assert(returnVertices.count(callsite) > 0 &&
+                   "Calling states but no return states");
+            auto cSt = callVertices.at(callsite);
+            mystream << cSt << "[ label = \"Call-" << cSt << "\", tooltip = <"
+                     << states.at(cSt).print() << ">];\n";
+            auto rSt = returnVertices.at(callsite);
+            mystream << rSt << "[ label = \"Return-" << rSt << "\", tooltip = <"
+                     << states.at(rSt).print() << ">];\n";
+          }
+        }
+        mystream << "}\n";
       }
       mystream << "}\n";
     }
-    mystream << "}\n";
-  }
 
-  for (auto &extFunc : extFuncVertices) {
-    mystream << "graph : {\n	title : \"" << extFunc.first
-             << "\"\n	label : \"" << extFunc.first << "\"\n";
-    mystream << "node : {\n	title : \"" << extFunc.second.first
-             << "\"\n	label : \"In-" << extFunc.second.first << "\"\n";
-    mystream
-        << "info1 : \"No information about state in external function.\"\n}\n";
-    mystream << "node : {\n	title : \"" << extFunc.second.second
-             << "\"\n	label : \"Out-" << extFunc.second.second << "\"\n";
-    mystream
-        << "info1 : \"No information about state in external function.\"\n}\n";
-    mystream << "}\n";
-  }
-
-  /* TODO we probably can pull this entire code into super->dumpEdge */
-  // add all edges with weight from graph
-  for (auto &vtpair : graph.getVertices()) {
-    // skip special vertex and its edges
-    if (vtpair.first == 0)
-      continue;
-    auto &vt = vtpair.second;
-    for (auto &vt_succ : vt.getSuccessors()) {
-      // skip edges to the special vertex
-      if (vt_succ == 0)
-        continue;
-      std::string weight;
-      bool emitComma = false;
-      std::pair<unsigned, unsigned> edge = std::make_pair(vt.getId(), vt_succ);
-
-      for (auto &ccb : this->constructionCallbacks) {
-        if (emitComma) {
-          weight += ",\n";
-        }
-        weight += ccb->getWeightDescr(edge.first, edge.second);
-        emitComma = true;
-      }
-
-      bool onWCETPath = false;
-      if (optTimesTaken) {
-        Variable edgeVar =
-            Variable::getEdgeVar(Variable::Type::timesTaken, edge);
-        auto frequency = optTimesTaken->find(edgeVar.getName());
-        if (frequency != optTimesTaken->end() && frequency->second > 0) {
-          weight += "Frequency: " + std::to_string(frequency->second) + "\n";
-          onWCETPath = true;
-        }
-      }
-
-      this->dumpEdge(mystream, edge, weight, onWCETPath);
+    for (auto &extFunc : extFuncVertices) {
+      mystream << "subgraph cluster_" << clusterNr++ << " {\n	label = \""
+               << extFunc.first << "\"\n";
+      mystream << extFunc.second.first << "[ label = \"In-"
+               << extFunc.second.first
+               << "\" , tooltip = \"No information about state in external "
+                  "	function.\"]\n";
+      mystream << extFunc.second.second << "[ label = \"Out-"
+               << extFunc.second.second
+               << "\" , tooltip = \"No information about state in external "
+                  "	function.\"]\n";
+      mystream << "}\n";
     }
+
+    /* TODO we probably can pull this entire code into super->dumpEdge */
+    // add all edges with weight from graph
+    for (auto &vtpair : graph.getVertices()) {
+      // skip special vertex and its edges
+      if (vtpair.first == 0)
+        continue;
+      auto &vt = vtpair.second;
+      for (auto &vt_succ : vt.getSuccessors()) {
+        // skip edges to the special vertex
+        if (vt_succ == 0)
+          continue;
+        std::string weight;
+        bool emitComma = false;
+        std::pair<unsigned, unsigned> edge =
+            std::make_pair(vt.getId(), vt_succ);
+
+        for (auto &ccb : this->constructionCallbacks) {
+          if (emitComma) {
+            weight += ",\n";
+          }
+          weight += ccb->getWeightDescr(edge.first, edge.second);
+          emitComma = true;
+        }
+
+        bool onWCETPath = false;
+        if (optTimesTaken) {
+          Variable edgeVar =
+              Variable::getEdgeVar(Variable::Type::timesTaken, edge);
+          auto frequency = optTimesTaken->find(edgeVar.getName());
+          if (frequency != optTimesTaken->end() && frequency->second > 0) {
+            weight += "Frequency: " + std::to_string(frequency->second) + "\n";
+            onWCETPath = true;
+          }
+        }
+
+        this->dumpEdge(mystream, edge, weight, onWCETPath);
+      }
+    }
+    mystream << "}\n}";
+  } else {
+    mystream
+        << "graph : { \n	layoutalgorithm : hierarchic\n	graph : "
+           "{\n	title "
+           ": \"State Graph\"\n	label : \"Microarchitectural State Graph\"\n";
+
+    // Build nodes for all states in functions and basic blocks
+    for (MachineFunction *currFunc :
+         machineFunctionCollector->getAllMachineFunctions()) {
+      std::string funcName = currFunc->getName().str();
+      mystream << "graph : {\n	title : \"" << funcName
+               << "\"\n	label : \"" << funcName << "\"\n";
+      for (auto &currMBB : *currFunc) {
+        std::string mbbName = currMBB.getFullName();
+        mystream << "graph : {\n	title : \"" << mbbName
+                 << "\"\n	label : \"" << mbbName << "\"\n";
+
+        if (inVertexPerMBB.count(&currMBB) > 0) {
+          auto inSts = inVertexPerMBB.at(&currMBB);
+          mystream << "node : {\n	title : \"" << inSts
+                   << "\"\n	label : \"In-" << inSts << "\"\n";
+          mystream << "info1 : \"" << states.at(inSts).print() << "\"\n}\n";
+        }
+        if (outVertexPerMBB.count(&currMBB) > 0) {
+          auto outSts = outVertexPerMBB.at(&currMBB);
+          mystream << "node : {\n	title : \"" << outSts
+                   << "\"\n	label : \"Out-" << outSts << "\"\n";
+          mystream << "info1 : \"" << states.at(outSts).print() << "\"\n}\n";
+        }
+        const auto &callsites =
+            CallGraph::getGraph().getCallSitesInMBB(&currMBB);
+        for (auto callsite : callsites) {
+          if (callVertices.count(callsite) > 0) {
+            assert(returnVertices.count(callsite) > 0 &&
+                   "Calling states but no return states");
+            auto cSt = callVertices.at(callsite);
+            mystream << "node : {\n	title : \"" << cSt
+                     << "\"\n	label : \"Call-" << cSt << "\"\n";
+            mystream << "info1 : \"" << states.at(cSt).print() << "\"\n}\n";
+            auto rSt = returnVertices.at(callsite);
+            mystream << "node : {\n	title : \"" << rSt
+                     << "\"\n	label : \"Return-" << rSt << "\"\n";
+            mystream << "info1 : \"" << states.at(rSt).print() << "\"\n}\n";
+          }
+        }
+        mystream << "}\n";
+      }
+      mystream << "}\n";
+    }
+
+    for (auto &extFunc : extFuncVertices) {
+      mystream << "graph : {\n	title : \"" << extFunc.first
+               << "\"\n	label : \"" << extFunc.first << "\"\n";
+      mystream << "node : {\n	title : \"" << extFunc.second.first
+               << "\"\n	label : \"In-" << extFunc.second.first << "\"\n";
+      mystream << "info1 : \"No information about state in external "
+                  "function.\"\n}\n";
+      mystream << "node : {\n	title : \"" << extFunc.second.second
+               << "\"\n	label : \"Out-" << extFunc.second.second << "\"\n";
+      mystream << "info1 : \"No information about state in external "
+                  "function.\"\n}\n";
+      mystream << "}\n";
+    }
+
+    /* TODO we probably can pull this entire code into super->dumpEdge */
+    // add all edges with weight from graph
+    for (auto &vtpair : graph.getVertices()) {
+      // skip special vertex and its edges
+      if (vtpair.first == 0)
+        continue;
+      auto &vt = vtpair.second;
+      for (auto &vt_succ : vt.getSuccessors()) {
+        // skip edges to the special vertex
+        if (vt_succ == 0)
+          continue;
+        std::string weight;
+        bool emitComma = false;
+        std::pair<unsigned, unsigned> edge =
+            std::make_pair(vt.getId(), vt_succ);
+
+        for (auto &ccb : this->constructionCallbacks) {
+          if (emitComma) {
+            weight += ",\n";
+          }
+          weight += ccb->getWeightDescr(edge.first, edge.second);
+          emitComma = true;
+        }
+
+        bool onWCETPath = false;
+        if (optTimesTaken) {
+          Variable edgeVar =
+              Variable::getEdgeVar(Variable::Type::timesTaken, edge);
+          auto frequency = optTimesTaken->find(edgeVar.getName());
+          if (frequency != optTimesTaken->end() && frequency->second > 0) {
+            weight += "Frequency: " + std::to_string(frequency->second) + "\n";
+            onWCETPath = true;
+          }
+        }
+
+        this->dumpEdge(mystream, edge, weight, onWCETPath);
+      }
+    }
+    mystream << "}\n}";
   }
-  mystream << "}\n}";
 }
 
 template <class MicroArchDom>

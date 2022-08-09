@@ -50,6 +50,11 @@ cl::opt<bool>
                        "for performance measurements (default 'false')"),
               cl::cat(LLVMTACat));
 
+cl::opt<bool>
+    DumpVcgGraph("ta-dumpb-vcg-graph",
+                 cl::desc("Dumps the StateGraph in .vcg format (default:.dot)"),
+                 cl::init(false), cl::cat(LLVMTACat));
+
 cl::opt<std::string> AnalysisEntryPoint(
     "ta-analysis-entry-point", cl::init("main"),
     cl::desc("The entry point for the analysis (default 'main')"),
@@ -146,8 +151,8 @@ cl::bits<LocalWorstCaseType> StallOnLocalWorstType(
     cl::CommaSeparated,
     cl::values(
         //			clEnumValN(LocalWorstCaseType::ICMISS, "icmiss",
-        //"Instruction cache miss"), 			clEnumValN(LocalWorstCaseType::DCMISS,
-        //"dcmiss", "Data cache miss"),
+        //"Instruction cache miss"),
+        //clEnumValN(LocalWorstCaseType::DCMISS, "dcmiss", "Data cache miss"),
         //			clEnumValN(LocalWorstCaseType::WRITEBACK,
         //"writeback", "Writeback upon eviction of dirty line"),
         clEnumValN(LocalWorstCaseType::DRAMREFRESH, "dramrefresh",
