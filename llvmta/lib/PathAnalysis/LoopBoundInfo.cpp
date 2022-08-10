@@ -1031,7 +1031,7 @@ void LoopBoundInfoPass::parseManualLoopBounds(
 
   std::ifstream File(Filename);
   if (!(File.good())) {
-    errs() << "File could not be opened!\n";
+    errs() << Filename << "File could not be opened!\n";
     return;
   }
   std::string Line;

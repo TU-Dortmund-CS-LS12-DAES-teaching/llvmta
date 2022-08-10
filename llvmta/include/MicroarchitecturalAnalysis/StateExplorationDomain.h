@@ -609,14 +609,14 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::print() const {
   } else if (states.empty()) {
     stream << "BOT";
   } else {
-    stream << "{\n";
+    stream << "[\n";
     // Dump the states
     unsigned i = 0;
     for (auto &st : states) {
-      stream << "STATE " << i << ":\n";
+      stream << "[STATE " << i++ << ":\n";
       stream << st << "\n";
     }
-    stream << "}";
+    stream << "]";
   }
   return stream.str();
 }

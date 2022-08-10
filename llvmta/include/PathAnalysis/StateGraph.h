@@ -107,23 +107,34 @@ protected:
   virtual void dumpEdge(std::ostream &stream,
                         std::pair<unsigned, unsigned> edge, std::string &label,
                         bool onWCETPath) const {
-    stream << "edge : {\n";
-    stream << "\tsourcename : \"" << edge.first << "\" ";
-    stream << "targetname : \"" << edge.second << "\"\n";
-    stream << "\tlabel : \"" << label << "\"\n";
+    if (!DumpVcgGraph) {
+      stream << edge.first << "->" << edge.second << "[ label = \"" << label
+             << "\"\n";
 
-    if (onWCETPath) {
-      stream << "\tcolor : " << this->WCETPathStyle.color << "\n";
-      stream << "\tthickness: " << this->WCETPathStyle.thickness << "\n";
+      if (onWCETPath) {
+        stream << ", color = " << this->WCETPathStyle.color
+               << ", penwidth = " << this->WCETPathStyle.thickness << " ";
+      }
+      stream << "]\n";
+    } else {
+      stream << "edge : {\n";
+      stream << "\tsourcename : \"" << edge.first << "\" ";
+      stream << "targetname : \"" << edge.second << "\"\n";
+      stream << "\tlabel : \"" << label << "\"\n";
+
+      if (onWCETPath) {
+        stream << "\tcolor : " << this->WCETPathStyle.color << "\n";
+        stream << "\tthickness: " << this->WCETPathStyle.thickness << "\n";
+      }
+      stream << "}\n";
     }
-    stream << "}\n";
   }
 
   std::list<StateGraphConstrCallback *> constructionCallbacks;
   std::list<StateGraphIsEdgeJoinableCallback *> isEdgeJoinableCallbacks;
   const struct {
     std::string color = "red";
-    int thickness = 4;
+    int thickness = 3;
   } WCETPathStyle;
 };
 

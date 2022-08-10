@@ -536,7 +536,11 @@ boost::optional<BoundItv> dispatchTimingPathAnalysisWeightProvider(
   if (!QuietMode) {
     VERBOSE_PRINT(" -> Finished Microarchitectural State Graph Construction\n");
     std::ofstream myfile;
-    myfile.open("StateGraph_Time.vcg", std::ios_base::trunc);
+    if (!DumpVcgGraph) {
+      myfile.open("StateGraph_Time.dot", std::ios_base::trunc);
+    } else {
+      myfile.open("StateGraph_Time.vcg", std::ios_base::trunc);
+    }
     sg->dump(myfile, nullptr);
     myfile.close();
   } else // Quiet mode
@@ -592,7 +596,11 @@ boost::optional<BoundItv> dispatchTimingPathAnalysisWeightProvider(
    * previous dump */
   if (!QuietMode) {
     std::ofstream myfile;
-    myfile.open("StateGraph_Time.vcg", std::ios_base::trunc);
+    if (!DumpVcgGraph) {
+      myfile.open("StateGraph_Time.dot", std::ios_base::trunc);
+    } else {
+      myfile.open("StateGraph_Time.vcg", std::ios_base::trunc);
+    }
     sg->dump(myfile, &longestPath);
     myfile.close();
   }
@@ -695,10 +703,19 @@ boost::optional<BoundItv> dispatchCachePathAnalysis(const PAI &cacheAnaInfo) {
   if (!QuietMode) {
     VERBOSE_PRINT(" -> Finished Microarchitectural State Graph Construction\n");
     std::ofstream myfile;
-    myfile.open(std::string("StateGraph_Misses") +
-                    (MuArchDomain::State::LocalMetrics::dCache ? "D$" : "I$") +
-                    ".vcg",
-                std::ios_base::trunc);
+    if (!DumpVcgGraph) {
+      myfile.open(
+          std::string("StateGraph_Misses") +
+              (MuArchDomain::State::LocalMetrics::dCache ? "D$" : "I$") +
+              ".dot",
+          std::ios_base::trunc);
+    } else {
+      myfile.open(
+          std::string("StateGraph_Misses") +
+              (MuArchDomain::State::LocalMetrics::dCache ? "D$" : "I$") +
+              ".vcg",
+          std::ios_base::trunc);
+    }
     sg->dump(myfile, nullptr);
     myfile.close();
   }
@@ -776,8 +793,8 @@ boost::optional<BoundItv> dispatchCRPDPathAnalysis(const PAI &muAnaInfo,
   // TODO Uncomment the following to activate data address provider
   /* tblass: Don't! First fix the FIXME in GraphIterator */
   //	auto getDJustAccessed = [](const typename MuState::LocalMetrics& lm) {
-  //return lm.memoryTopology.justUpdatedDataCache; }; 	const auto *sgdcacc = new
-  //StateGraphAddressProvider<MuState>(sg, true, getDJustAccessed);
+  // return lm.memoryTopology.justUpdatedDataCache; }; 	const auto *sgdcacc =
+  // new StateGraphAddressProvider<MuState>(sg, true, getDJustAccessed);
 
   // Build the state graph
   sg->buildGraph();
@@ -785,7 +802,11 @@ boost::optional<BoundItv> dispatchCRPDPathAnalysis(const PAI &muAnaInfo,
   if (!QuietMode) {
     VERBOSE_PRINT(" -> Finished Microarchitectural State Graph Construction\n");
     std::ofstream myfile;
-    myfile.open(std::string("StateGraph_CRPD.vcg", std::ios_base::trunc));
+    if (!DumpVcgGraph) {
+      myfile.open(std::string("StateGraph_CRPD.dot", std::ios_base::trunc));
+    } else {
+      myfile.open(std::string("StateGraph_CRPD.vcg", std::ios_base::trunc));
+    }
     sg->dump(myfile, nullptr);
     myfile.close();
   }
@@ -963,15 +984,24 @@ boost::optional<BoundItv> doCoRunnerSensitivePathAnalysis(
     if (&sg == &arrivalCurveStateGraph ||
         (&sg != &arrivalCurveStateGraph && !CoRunnerSensitiveNoWcetBound)) {
       std::ofstream myfile;
-      myfile.open("StateGraph_Time.vcg", std::ios_base::trunc);
+      if (!DumpVcgGraph) {
+        myfile.open("StateGraph_Time.dot", std::ios_base::trunc);
+      } else {
+        myfile.open("StateGraph_Time.vcg", std::ios_base::trunc);
+      }
       sg.dump(myfile, nullptr);
       myfile.close();
     }
     if (&sg != &arrivalCurveStateGraph &&
         !CoRunnerSensitiveNoArrivalCurveValues) {
       std::ofstream myFile;
-      myFile.open("StateGraph_ArrivalCurveAccessCycles.vcg",
-                  std::ios_base::trunc);
+      if (!DumpVcgGraph) {
+        myFile.open("StateGraph_ArrivalCurveAccessCycles.dot",
+                    std::ios_base::trunc);
+      } else {
+        myFile.open("StateGraph_ArrivalCurveAccessCycles.vcg",
+                    std::ios_base::trunc);
+      }
       arrivalCurveStateGraph.dump(myFile, nullptr);
       myFile.close();
     }
