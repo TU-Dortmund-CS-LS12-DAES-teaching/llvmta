@@ -6,7 +6,11 @@ This Repository contains LLVMTA a static timing analysis tool based on the LLVM 
 
 1.) Get [VS CODE](https://code.visualstudio.com/) and necessary [extensions](https://code.visualstudio.com/docs/remote/remote-overview) for remote container development.
 
+![alt text](img/extension.gif)
+
 2.a.) This repository supports VS code development containers. Just press F1 inside VS code and execute "Remote-Containers: Open Worksapce in Container..". Now continue with [building](#build-the-project)  the Project. Should you prefere to build the container yourself continue with the next steps.
+
+![alt text](img/open.gif)
 
 2.b.) Build the Docker container from the Docker file. The default Dockerfile uses Ubuntu and Dockerfile.Arch uses Arch Linux.
 
@@ -38,6 +42,8 @@ Script to configure llvm, clang and LLVMTA:
 ```
 You will be asked to download llvm and clang at the first setup. The script will do so automatically.
 
+![alt text](img/config.gif)
+
 3.) Build llvm, clang and LLVMTA with ninja. This is necessary at least once, so that the llvm and LLVMTA toolchain are of the same version.
 ```
 cd build
@@ -48,6 +54,8 @@ For later rebuilds it is enough to just build LLVMTA.
 cd build
 ninja -j [#CPUs] llvmta
 ```
+
+![alt text](img/build.gif)
 
 ## Using LLVMTA
 This section showcases how to use LLVMTA on a simple test case of a nested loop example. Make sure LLVMTA is compiled and in your $PATH variable.
