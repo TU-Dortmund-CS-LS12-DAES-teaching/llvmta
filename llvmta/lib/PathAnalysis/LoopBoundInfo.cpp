@@ -326,7 +326,7 @@ bool LoopBoundInfoPass::getSCEVBoundFromCVDomain(
   switch (static_cast<SCEVTypes>(Equation->getSCEVType())) {
   case scConstant: {
     DEBUG_WITH_TYPE("loopbound", dbgs() << "Type: Constant\n");
-    int64_t TmpValue = cast<SCEVConstant>(Equation)->getValue()->getSExtValue();
+    volatile int64_t TmpValue = dyn_cast<SCEVConstant>(Equation)->getValue()->getSExtValue();
     if (TmpValue >= std::numeric_limits<int>::max() ||
         TmpValue <= std::numeric_limits<int>::min()) {
       DEBUG_WITH_TYPE("loopbound", dbgs() << "Skipping too large constant\n");
@@ -699,7 +699,8 @@ unsigned LoopBoundInfoPass::getLoopBound(
       if (FoundBoundManual && (Bound != ManualBoundVal)) {
         errs() << "Warning: Both CtxSens and Plain manual loop bounds were "
                   "found and bounds differ! (CtxSens was used) for:\n"
-               << *Loop << "\n";
+               << *Loop << "| ManualBoundVal: " << ManualBoundVal
+               << ", Bound: " << Bound << "\n";
       }
       Bound = ManualBoundVal;
     }
@@ -713,7 +714,8 @@ unsigned LoopBoundInfoPass::getLoopBound(
         errs() << "Warnings Both automatic and manual loop bounds were found "
                   "and bounds differ! (Automatic used) for:\n"
                << Loop->getHeader()->getParent()->getName().str() << " | "
-               << *Loop << "\n";
+               << *Loop << "| AutoBound: " << AutoBound << ", Bound: " << Bound
+               << "\n";
       }
       Bound = AutoBound;
     }
