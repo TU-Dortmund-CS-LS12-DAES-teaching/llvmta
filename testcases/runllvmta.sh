@@ -164,7 +164,7 @@ else
 fi
 
 if [ "$enable_optimizations" = false ]; then
-	llvmtaopts+=("-O0")
+	llvmtaopts+=("-O0 -disable-O0-optnone")
 else
 	# Note: if conversion can unfortunately not be disabled completely.
 	# One would need to comment the call to createIfConversion to stop if-conversion completely.
@@ -210,7 +210,7 @@ llvm-link $(LC_COLLATE=C ls ./*.ll) "${llvm_link_libraries[@]}" -o $UNOPTIMIZEDL
 # Provide definitions of used library functions, e.g. integer division
 
 # Optimize LLVM IR, e.g. do -mem2reg, -instcombine, -loop-simplify, -indvars to find loop bounds
-opt -S $UNOPTIMIZEDLL -mem2reg -indvars -loop-simplify -instcombine -o optimized.ll
+opt -S $UNOPTIMIZEDLL -mem2reg -indvars -loop-simplify -instcombine -globaldce -dce -o optimized.ll
 
 # Run WCET Analysis itself
 for entrypoint in "${llvmta_entry[@]}"; do

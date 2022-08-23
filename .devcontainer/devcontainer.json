@@ -7,7 +7,6 @@
 		// Update 'VARIANT' to pick an Ubuntu version: jammy / ubuntu-22.04, focal / ubuntu-20.04, bionic /ubuntu-18.04
 		// Use ubuntu-22.04 or ubuntu-18.04 on local arm64/Apple Silicon.
 		"args": { "VARIANT": "ubuntu-22.04" }
-		
 	},
 	"runArgs": ["--network=host"],
 	"extensions": [
@@ -24,14 +23,11 @@
 		"jakob-erzar.llvm-tablegen",
 		"zhwu95.riscv",
 		"gruntfuggly.todo-tree",
-		"codechecker.vscode-codechecker"
+		"cschlosser.doxdocgen"
 		],
-
 	"appPort": [ 10245, 8765, 8766 ],
-
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": ["host:10245", "host:8765", "host:8766" ],
-
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "uname -a",
 	"postStartCommand": "nohup bash -c 'iceccd &' >/dev/null 2>&1",
