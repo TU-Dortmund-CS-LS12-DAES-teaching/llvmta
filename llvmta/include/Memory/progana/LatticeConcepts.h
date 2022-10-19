@@ -26,7 +26,6 @@
 #ifndef PROGANA_LATTICES_H_
 #define PROGANA_LATTICES_H_
 
-#include "Memory/progana/Lattice.h"
 #include <boost/concept/requires.hpp>
 #include <boost/concept_check.hpp>
 

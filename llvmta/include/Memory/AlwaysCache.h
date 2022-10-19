@@ -28,9 +28,13 @@
 
 #include <ostream>
 
+#include "Memory/AbstractCache.h"
+#include "Memory/CacheTraits.h"
 #include "Memory/Classification.h"
 #include "Memory/progana/Lattice.h"
+#include "Util/AbstractAddress.h"
 #include "Util/Options.h"
+#include "Util/PersistenceScope.h"
 
 namespace TimingAnalysisPass {
 

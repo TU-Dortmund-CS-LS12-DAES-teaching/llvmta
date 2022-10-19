@@ -34,8 +34,10 @@
 #include "PathAnalysis/StateGraphAddressProvider.h"
 #include "PathAnalysis/StateGraphCacheMissProvider.h"
 #include "PathAnalysis/StateGraphDRAMRefreshProvider.h"
+#include "PathAnalysis/StateGraphDirtifyingStoreProvider.h"
 #include "PathAnalysis/StateGraphNumericWeightProvider.h"
 #include "PathAnalysis/StateGraphPreemptionCacheMissProvider.h"
+#include "PathAnalysis/StateGraphWritebackProvider.h"
 #include "PathAnalysis/StateSensitiveGraph.h"
 
 #include "LLVMPasses/DispatchMemory.h"

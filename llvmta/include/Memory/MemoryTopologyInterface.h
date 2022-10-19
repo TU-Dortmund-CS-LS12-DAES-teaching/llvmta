@@ -28,6 +28,7 @@
 #define MEMORYTOPOLOGYINTERFACE_H
 
 #include "Memory/PersistenceScopeInfo.h"
+#include "Util/AbstractAddress.h"
 #include "Util/Util.h"
 
 #include <boost/optional/optional.hpp>
