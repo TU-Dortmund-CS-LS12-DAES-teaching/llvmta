@@ -33,5 +33,4 @@ add_llvm_tool(llvmta
 
 add_subdirectory(lib)
 
-target_link_libraries(llvmta PRIVATE lpsolve55 llvmtaLLVMPasses llvmtaUtil llvmtaPathAnalysis llvmtaAnalysisFramework llvmtaPartitionUtil llvmtaPreprocessing llvmtaMemory llvmtaMicroarchitecture llvmtaMicroarchitectureOutOfOrder llvmtacrpd)
-
+target_link_libraries(llvmta PRIVATE lpsolve55 gurobi llvmtaLLVMPasses llvmtaUtil llvmtaPathAnalysis llvmtaAnalysisFramework llvmtaPartitionUtil llvmtaPreprocessing llvmtaMemory llvmtaMicroarchitecture llvmtaMicroarchitectureOutOfOrder llvmtacrpd)

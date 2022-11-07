@@ -383,6 +383,14 @@ std::string getFilenameFromDebugLoc(const llvm::DebugLoc &dbgLoc);
  * Get peak Memory Usage up to now
  */
 long getPeakRSS();
+
+/**
+ * @brief executes a shell command and returns its output
+ *
+ * @param Command
+ * @return std::string
+ */
+std::string exec(std::string Command);
 } // namespace TimingAnalysisPass
 
 #endif

@@ -69,3 +69,8 @@ cd testcases
 ./runTestcase loopexamples/nested
 ```
 All test cases are in the Benchmarks folder and only their relative path has to be handed. The full path for the command above ist "testcases/Benchmarks/loopexamples/nested", keep this in mind while using the script.
+
+## Using Gurobi
+
+To use Gurobi, simply place your gurobi.lic file in the dependencies folder.
+The license will not be found, if its not named gurobi.lic! Otherwise LLVMTA will fallback to using LPsolve.

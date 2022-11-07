@@ -27,11 +27,13 @@
 #include "PathAnalysis/PathAnalysisCPLEX.h"
 #include "PathAnalysis/PathAnalysisGUROBI.h"
 #include "PathAnalysis/PathAnalysisLPSolve.h"
+#include "Util/Options.h"
 #include "Util/Util.h"
 
 #include "llvm/Support/Format.h"
 
 #include <boost/multiprecision/cpp_int.hpp>
+#include <iostream>
 
 #include "LLVMPasses/DispatchPathAnalysis.h"
 
@@ -57,19 +59,34 @@ doPathAnalysis(const std::string identifier, const ExtremumType extremumType,
                LPAssignment *extpath, const double timeLimit) {
   // Create the path analysis.
   std::unique_ptr<PathAnalysis> pathAnalysis;
+
+  // Fallback to lpsolve if gurobi license is missing.
+#ifdef GUROBIINSTALLED
+  std::string Output = exec("gurobi_cl");
+  if (Output.find("Error") != std::string::npos) {
+    LpSolver = LpSolverType::LPSOLVE;
+    VERBOSE_PRINT(" -> No valid Gurobi License found!\n");
+  }
+#endif
   switch (LpSolver) {
   case LpSolverType::LPSOLVE:
+    if (!QuietMode)
+      VERBOSE_PRINT(" -> Using Solver: LPsolve\n");
     pathAnalysis.reset(
         new PathAnalysisLPSolve(extremumType, objective, constraints));
     break;
 #ifdef CPLEXINSTALLED
   case LpSolverType::CPLEX:
+    if (!QuietMode)
+      VERBOSE_PRINT(" -> Using Solver: CPLEX\n");
     pathAnalysis.reset(
         new PathAnalysisCPLEX(extremumType, objective, constraints));
     break;
 #endif
 #ifdef GUROBIINSTALLED
   case LpSolverType::GUROBI:
+    if (!QuietMode)
+      VERBOSE_PRINT(" -> Using Solver: Gurobi\n");
     pathAnalysis.reset(
         new PathAnalysisGUROBI(extremumType, objective, constraints));
     break;

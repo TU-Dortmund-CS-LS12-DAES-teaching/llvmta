@@ -486,6 +486,25 @@ long getPeakRSS() {
   return (long)rusage.ru_maxrss / 1024.0;
 }
 
+std::string exec(std::string Command) {
+  char Buffer[128];
+  std::string Result = "";
+
+  // Open pipe to file
+  FILE *Pipe = popen(Command.c_str(), "r");
+  if (!Pipe) {
+    return "popen failed!";
+  }
+  // read till end of process:
+  while (!feof(Pipe)) {
+    // use buffer to read and add to result
+    if (fgets(Buffer, 128, Pipe) != NULL)
+      Result += Buffer;
+  }
+  pclose(Pipe);
+  return Result;
+}
+
 #else
 #include <limits>
 
