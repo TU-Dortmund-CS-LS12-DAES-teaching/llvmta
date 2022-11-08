@@ -75,3 +75,39 @@ bindings/go/llvm/workdir
 .sw?
 #OS X specific files.
 .DS_store
+
+#LLLVMTA specific ignores
+.cproject
+.project
+.settings
+.vscode
+doc/
+*.vim
+*.bak
+*~
+*.aux
+*_latexmk
+*.log
+*.nav
+*.out
+*.snm
+*.pdf
+*.toc
+*.vrb
+*.swp
+*.o
+*.bbl
+*.blg
+*.fls
+*.pdfsync
+*.cmp
+*.html
+*.sopcinfo
+*.rpt
+**/tags
+# Ignore all build directories within the testcase benchmarks
+testcases/Benchmarks/**/build
+testcases/Benchmarks/**/tags_s
+testcases/regressions/
+testcases/evaluations*/
+testcases/out.log

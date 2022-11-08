@@ -19,7 +19,7 @@ deve() {
     -DLLVM_INCLUDE_BENCHMARKS=OFF \
     -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
     -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
-    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=../llvmta \
+    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=.. \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
     -GNinja \
     ../dependencies/$LLVM_VER.src
@@ -42,7 +42,7 @@ lowRes() {
     -DLLVM_INCLUDE_BENCHMARKS=OFF \
     -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
     -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
-    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=../llvmta \
+    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=.. \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
     -DLLVM_PARALLEL_LINK_JOBS=1 \
     -GNinja \
@@ -66,7 +66,7 @@ rele() {
     -DLLVM_INCLUDE_BENCHMARKS=OFF \
     -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
     -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
-    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=../llvmta \
+    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=.. \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
     -GNinja \
     ../dependencies/$LLVM_VER.src
@@ -89,7 +89,7 @@ dist() {
     -DLLVM_INCLUDE_BENCHMARKS=OFF \
     -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
     -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
-    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=../llvmta \
+    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=.. \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
     -DLLVM_PARALLEL_COMPILE_JOBS=42 \
     -DLLVM_PARALLEL_LINK_JOBS=1 \
@@ -102,7 +102,7 @@ cla() {
   rm -rf build
   rm compile_commands.json
   cd dependencies || exit
-  rm -rf llvm* clang* cmake
+  rm -rf llvm*.src clang*.src cmake
   cd ..
 }
 
@@ -124,7 +124,7 @@ getllvm() {
         #Create patch with
         #diff -ur $LLVM_VER.src  $LLVM_VER.src.patched > $LLVM_VER.llvmta.diff
         cd $LLVM_VER.src
-        patch -p1 < ../../patches/$LLVM_VER.llvmta.diff
+        patch -p1 < ../../dependencies/patches/$LLVM_VER.llvmta.diff
         cd ../..
         break
         ;;
@@ -200,7 +200,7 @@ clean)
   cl
   ;;
 cleanall)
-  cl
+  cla
   ;;
 *)
   if [ $1 ]; then
