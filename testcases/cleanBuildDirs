@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 # Find all build directories in the Benchmarks/ dir and delete them
 # This script should only be run from the top level directory

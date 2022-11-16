@@ -83,13 +83,12 @@ boost::optional<BoundItv> dispatchTimingAnalysisJoin(Deps deps) {
       stats.stopMeasurement("Timing Path Analysis");
     }
     return bound;
-  } else {
-    typedef StateExplorationDomain<MuState> MuArchDomain;
-    auto res = doMuArchTimingAnalysis<MuArchDomain>(deps);
-    auto bound = dispatchTimingPathAnalysis<MuArchDomain>(*res);
-    // Res deleted at the end of state graph construction
-    return bound;
-  }
+  } // else
+  typedef StateExplorationDomain<MuState> MuArchDomain;
+  auto res = doMuArchTimingAnalysis<MuArchDomain>(deps);
+  auto bound = dispatchTimingPathAnalysis<MuArchDomain>(*res);
+  // Res deleted at the end of state graph construction
+  return bound;
 }
 
 template <class MuState, class Deps>
@@ -107,13 +106,12 @@ boost::optional<BoundItv> dispatchCacheAnalysisJoin(Deps deps,
     auto bound = dispatchCachePathAnalysis<MuArchDomain>(*res);
     stats.stopMeasurement(prefix + "Cache Path Analysis");
     return bound;
-  } else {
-    typedef StateExplorationDomain<MuState> MuArchDomain;
-    auto res = doMuArchTimingAnalysis<MuArchDomain>(deps);
-    auto bound = dispatchCachePathAnalysis<MuArchDomain>(*res);
-    // Res deleted at the end of state graph construction
-    return bound;
-  }
+  } // else
+  typedef StateExplorationDomain<MuState> MuArchDomain;
+  auto res = doMuArchTimingAnalysis<MuArchDomain>(deps);
+  auto bound = dispatchCachePathAnalysis<MuArchDomain>(*res);
+  // Res deleted at the end of state graph construction
+  return bound;
 }
 
 } // namespace TimingAnalysisPass

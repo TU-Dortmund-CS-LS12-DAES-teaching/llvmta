@@ -78,7 +78,7 @@ dist() {
   cmake \
     -DCMAKE_C_COMPILER=/usr/lib/icecc/bin/gcc \
     -DCMAKE_CXX_COMPILER=/usr/lib/icecc/bin/g++ \
-    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DCMAKE_BUILD_TYPE=Debug \ #RelWithDebInfo \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
     -Wno-dev \
     -Wno-suggest-override \

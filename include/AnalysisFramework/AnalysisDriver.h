@@ -144,7 +144,7 @@ public:
         worklist() {}
 
   // see superclass
-  virtual AnalysisInfo *runAnalysis();
+  virtual AnalysisInfo *runAnalysis() override;
 
 private:
   /// Typedef to shorten type name
@@ -235,7 +235,7 @@ AnalysisDriverInstr<AnalysisDom>::runAnalysis() {
   while (!worklist.empty()) {
     // Get a new work item
     auto &bbCtxs = *(worklist.begin()); // Take reference to entry
-    auto currentBB = bbCtxs.first;
+    const auto *currentBB = bbCtxs.first;
     auto currentCtx = *(bbCtxs.second.begin());
     bbCtxs.second.erase(currentCtx); // Erase from the referenced set
     if (bbCtxs.second.empty()) {
@@ -252,7 +252,7 @@ AnalysisDriverInstr<AnalysisDom>::runAnalysis() {
     if (currentBB->getNumber() == 0) {
       assert(currentBB->pred_empty() &&
              "Function entry block cannot have predecessors");
-      auto currentFunc = currentBB->getParent();
+      const auto *currentFunc = currentBB->getParent();
       auto toklist = currentCtx.getTokenList();
       // Assert that the topmost token in context at beginning of function is
       // funcallee of this function
@@ -291,13 +291,13 @@ void AnalysisDriverInstr<AnalysisDom>::initialize() {
   // Initialize analysis information with bottom
   using std::make_pair;
   assert(mbb2anainfo && "Analysis Driver cannot be run multiple times");
-  for (auto currFunc : machineFunctionCollector->getAllMachineFunctions()) {
+  for (auto *currFunc : machineFunctionCollector->getAllMachineFunctions()) {
     for (auto &currBB : *currFunc) {
       mbb2anainfo->insert(
           make_pair(&currBB, PartitionedAnalysisDom(AnaDomInit::BOTTOM)));
     }
     // Function are in general unreachable at entry and exit
-    AnaInfoEntryExit tmp(PartitionedAnalysisDom(AnaDomInit::BOTTOM),
+    AnaInfoEntryExit tmp((PartitionedAnalysisDom(AnaDomInit::BOTTOM)),
                          PartitionedAnalysisDom(AnaDomInit::BOTTOM));
     // If this is the (reachable) analysis entry point, use START analysis
     // information instead
@@ -335,9 +335,9 @@ void AnalysisDriverInstr<AnalysisDom>::analyseMachineBasicBlock(
     // Directives when edge is entered
     auto edge = std::make_pair(MBB, targetMBB);
     if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(edge)) {
-      auto direclist =
+      auto *direclist =
           DirectiveHeuristicsPassInstance->getDirectiveOnEdgeEnter(edge);
-      for (auto direc : *direclist) {
+      for (auto *direc : *direclist) {
         targetCtx.update(direc);
       }
     }
@@ -346,9 +346,9 @@ void AnalysisDriverInstr<AnalysisDom>::analyseMachineBasicBlock(
     targetCtx.transfer(edge);
     // Directives when edge is left
     if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(edge)) {
-      auto direclist =
+      auto *direclist =
           DirectiveHeuristicsPassInstance->getDirectiveOnEdgeLeave(edge);
-      for (auto direc : *direclist) {
+      for (auto *direc : *direclist) {
         targetCtx.update(direc);
       }
     }
@@ -410,7 +410,7 @@ void AnalysisDriverInstr<AnalysisDom>::analyseInstruction(
       Context reducedCtx(ctx);
       reducedCtx.reduceOnCall();
       // For each potential callee do
-      for (auto callee : cg.getPotentialCallees(currentInstr)) {
+      for (const auto *callee : cg.getPotentialCallees(currentInstr)) {
         AnalysisDom toCalleeInfo(preCallInfo);
         // Use early-variant here as callee might not be fully analysed yet
         AnalysisDom calleeout(
@@ -492,7 +492,7 @@ void AnalysisDriverInstr<AnalysisDom>::handleBranchInstruction(
       }
     }
 
-    for (auto targetMBB : branchTargets) {
+    for (const auto *targetMBB : branchTargets) {
       // Duplicate
       AnalysisDom branchTakenInfo(branchOutInfo);
       // Do guard that we wanted to go to targetMBB, unless it was clear
@@ -506,9 +506,9 @@ void AnalysisDriverInstr<AnalysisDom>::handleBranchInstruction(
       // Directives when edge is entered
       auto edge = std::make_pair(branchInstr->getParent(), targetMBB);
       if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(edge)) {
-        auto direclist =
+        auto *direclist =
             DirectiveHeuristicsPassInstance->getDirectiveOnEdgeEnter(edge);
-        for (auto direc : *direclist) {
+        for (auto *direc : *direclist) {
           targetCtx.update(direc);
         }
       }
@@ -517,9 +517,9 @@ void AnalysisDriverInstr<AnalysisDom>::handleBranchInstruction(
       targetCtx.transfer(edge);
       // Directives when edge is left
       if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(edge)) {
-        auto direclist =
+        auto *direclist =
             DirectiveHeuristicsPassInstance->getDirectiveOnEdgeLeave(edge);
-        for (auto direc : *direclist) {
+        for (auto *direc : *direclist) {
           targetCtx.update(direc);
         }
       }
@@ -542,7 +542,7 @@ void AnalysisDriverInstr<AnalysisDom>::handleBranchInstruction(
   // If this is a returning instruction, apply return directives, and merge to
   // func2anainfo
   if (branchInstr->isReturn()) {
-    auto currentFunc = branchInstr->getParent()->getParent();
+    const auto *currentFunc = branchInstr->getParent()->getParent();
     AnalysisDom toJoin(newOut);
     toJoin.guard(branchInstr, &ctx, this->analysisResults,
                  BranchOutcome::taken());
@@ -567,7 +567,7 @@ void AnalysisDriverInstr<AnalysisDom>::handleBranchInstruction(
     if (changedFuncOut) {
       auto &cg = CallGraph::getGraph();
       for (auto &callsite : cg.getCallSites(currentFunc)) {
-        auto callsiteMBB = callsite->getParent();
+        const auto *callsiteMBB = callsite->getParent();
         // If callsite has not been reachable, go to next
         if (mbb2anainfo->at(callsiteMBB).isBottom()) {
           continue;
@@ -638,7 +638,7 @@ bool AnalysisDriverInstr<AnalysisDom>::analyseInstruction(
       // Set current analysis information to bottom
       newOut = PartitionedAnalysisDom(AnaDomInit::BOTTOM);
       // For each potential callee do
-      for (auto callee : cg.getPotentialCallees(currentInstr)) {
+      for (const auto *callee : cg.getPotentialCallees(currentInstr)) {
         PartitionedAnalysisDom afterCallInfo(preCallInfo);
         changed |= afterCallInfo.transferCall(
             currentInstr, this->analysisResults, callee,
@@ -705,7 +705,7 @@ bool AnalysisDriverInstr<AnalysisDom>::handleBranchInstruction(
     }
 
     if (CheckFixPoint) {
-      for (auto targetMBB : branchTargets) {
+      for (const auto *targetMBB : branchTargets) {
         // Duplicate
         PartitionedAnalysisDom branchTakenInfo(branchOutInfo);
         // Do guard that we wanted to go to targetMBB, unless it was clear
@@ -718,9 +718,9 @@ bool AnalysisDriverInstr<AnalysisDom>::handleBranchInstruction(
         // Directives when edge is entered
         auto edge = std::make_pair(branchInstr->getParent(), targetMBB);
         if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(edge)) {
-          auto direclist =
+          auto *direclist =
               DirectiveHeuristicsPassInstance->getDirectiveOnEdgeEnter(edge);
-          for (auto direc : *direclist) {
+          for (auto *direc : *direclist) {
             branchTakenInfo.updateContexts(direc);
           }
         }
@@ -729,9 +729,9 @@ bool AnalysisDriverInstr<AnalysisDom>::handleBranchInstruction(
         branchTakenInfo.transferEdge(edge);
         // Directives when edge is left
         if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(edge)) {
-          auto direclist =
+          auto *direclist =
               DirectiveHeuristicsPassInstance->getDirectiveOnEdgeLeave(edge);
-          for (auto direc : *direclist) {
+          for (auto *direc : *direclist) {
             branchTakenInfo.updateContexts(direc);
           }
         }
@@ -750,7 +750,7 @@ bool AnalysisDriverInstr<AnalysisDom>::handleBranchInstruction(
   // func2anainfo
   if (branchInstr->isReturn()) {
     if (CheckFixPoint) {
-      auto currentFunc = branchInstr->getParent()->getParent();
+      const auto *currentFunc = branchInstr->getParent()->getParent();
       PartitionedAnalysisDom toJoin(newOut);
       toJoin.guard(branchInstr, this->analysisResults, BranchOutcome::taken());
       // If any directive, then apply it
@@ -810,7 +810,7 @@ AnalysisDriverInstr<AnalysisDom>::getAnalysisResults() {
   std::unique_ptr<InstrAnainfoMap> anaInfoIn(new InstrAnainfoMap());
   std::unique_ptr<InstrAnainfoMap> anaInfoOut(new InstrAnainfoMap());
 
-  for (auto currFunc : machineFunctionCollector->getAllMachineFunctions()) {
+  for (auto *currFunc : machineFunctionCollector->getAllMachineFunctions()) {
     for (auto &currBB : *currFunc) {
       PartitionedAnalysisDom blockIn(mbb2anainfo->find(&currBB)->second);
       for (auto &currInstr : currBB) {
@@ -894,12 +894,12 @@ public:
     std::tuple<> noDep;
     AnalysisDriverInstr<CollectingContextsDomain> collectCtxsAna(
         AnalysisEntryPoint, noDep);
-    auto ccAnaInfo = collectCtxsAna.runAnalysis();
+    auto *ccAnaInfo = collectCtxsAna.runAnalysis();
     // ccAnaInfo->dump(std::cout);
     //  Get handle for the instr-context-mapping stored inside the analysis
     //  dependencies
     InstrContextMapping &callsite2contexts = std::get<0>(this->analysisResults);
-    for (auto currFunc : machineFunctionCollector->getAllMachineFunctions()) {
+    for (auto *currFunc : machineFunctionCollector->getAllMachineFunctions()) {
       for (auto &currBB : *currFunc) {
         for (auto &currInstr : currBB) {
           if (currInstr.isCall()) {
