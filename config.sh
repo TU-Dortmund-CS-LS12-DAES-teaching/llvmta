@@ -98,6 +98,31 @@ dist() {
   mv compile_commands.json ../compile_commands.json
 }
 
+ci() {
+  cd build || exit
+  cmake \
+    -DCMAKE_C_COMPILER=gcc \
+    -DCMAKE_CXX_COMPILER=g++ \
+    -DCMAKE_BUILD_TYPE=MinSizeRel \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+    -Wno-dev \
+    -Wno-suggest-override \
+    -DLLVM_CCACHE_BUILD=ON \
+    -DLLVM_USE_LINKER=lld \
+    -DLLVM_ENABLE_RTTI=ON \
+    -DLLVM_ENABLE_EH=ON \
+    -DLLVM_ENABLE_ASSERTIONS=ON \
+    -DLLVM_INCLUDE_BENCHMARKS=OFF \
+    -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
+    -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
+    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=.. \
+    -DLLVM_EXTERNAL_PROJECTS="llvmta" \
+    -DLLVM_PARALLEL_LINK_JOBS=1 \
+    -GNinja \
+    ../dependencies/$LLVM_VER.src
+  mv compile_commands.json ../compile_commands.json
+}
+
 cla() {
   rm -rf build
   rm compile_commands.json
@@ -175,6 +200,13 @@ lowResources | lowRes)
 distributed | dis)
   pre
   dist
+  ;;
+ci)
+  pre
+  ci
+  cd build
+  ninja llvmta
+  cd ..
   ;;
 clean)
   cl
