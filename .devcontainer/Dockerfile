@@ -12,7 +12,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         lldb gcc gdb cmake make ninja-build libboost-all-dev git clangd \
         htop wget fish zsh lld time parallel lp-solve liblpsolve55-dev \
         icecc icecream-sundae libcolamd2 clang-tidy gcc-multilib \
-        build-essential
+        build-essential ccache
 
 
 # Set environment variables

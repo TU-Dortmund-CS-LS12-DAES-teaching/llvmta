@@ -8,7 +8,7 @@ jobs:
   build-llvmta:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/nilhoel1/llvmta-devcontainer
+      image: ghcr.io/tu-dortmund-ds-ls12-daes-teaching/llvmta-devcontainer
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.github_token }}
