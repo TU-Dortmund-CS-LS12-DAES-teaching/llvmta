@@ -1,7 +1,9 @@
 name: CI
 on:
   push:
-    branches: [ main ]
+    branches:
+     - test_actions
+     - main
 jobs:
   build-llvmta:
     runs-on: ubuntu-latest
@@ -13,5 +15,5 @@ jobs:
     steps:
        - name: Checkout (GitHub)
         uses: actions/checkout@v2
-      - name: Build
+       - name: Build
         run: ninja --version ; ls
