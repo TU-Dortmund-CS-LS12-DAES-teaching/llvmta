@@ -27,7 +27,6 @@ jobs:
 
       - name: Build and run dev container task
         uses: devcontainers/ci@v0.2
-        #- uses: education/autograding@v1
         with:
           # Change this to point to your image name
-          imageName: ghcr.io/tu-dortmund-ds-ls12-daes-teaching/llvmta-devcontainer
+          imageName: ghcr.io/tu-dortmund-cs-ls12-daes-teaching/llvmta-devcontainer
