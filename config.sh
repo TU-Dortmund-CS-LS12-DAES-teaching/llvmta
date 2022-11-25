@@ -112,26 +112,16 @@ cl() {
 
 getllvm() {
   if [ ! -d dependencies/$LLVM_VER.src ]; then
-    while true; do
-      echo "Do you wish to install $LLVM_VER [Y/N]?"
-      read -r yn
-      case $yn in
-      [Yy]*)
-        cd dependencies || exit
-        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/$LLVM_VER.src.tar.xz
-        tar -xf $LLVM_VER.src.tar.xz
-        rm $LLVM_VER.src.tar.xz
-        #Create patch with
-        #diff -ur $LLVM_VER.src  $LLVM_VER.src.patched > $LLVM_VER.llvmta.diff
-        cd $LLVM_VER.src
-        patch -p1 < ../../dependencies/patches/$LLVM_VER.llvmta.diff
-        cd ../..
-        break
-        ;;
-      [Nn]*) break ;;
-      *) echo "Please answer yes or no." ;;
-      esac
-    done
+    echo "Installing $LLVM_VER"
+    cd dependencies || exit
+    wget https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/$LLVM_VER.src.tar.xz
+    tar -xf $LLVM_VER.src.tar.xz
+    rm $LLVM_VER.src.tar.xz
+    #Create patch with
+    #diff -ur $LLVM_VER.src  $LLVM_VER.src.patched > $LLVM_VER.llvmta.diff
+    cd $LLVM_VER.src
+    patch -p1 < ../../dependencies/patches/$LLVM_VER.llvmta.diff
+    cd ../..
   else
     echo "It seems $LLVM_VER is already checked out!"
     echo "If that is not the case please remove the folder and try again."
@@ -140,23 +130,13 @@ getllvm() {
 
 getclang() {
   if [ ! -d dependencies/$CLANG_VER.src ]; then
-    while true; do
-      echo ""
-      echo "Do you wish to install $CLANG_VER [Y/N]?"
-      read -r yn
-      case $yn in
-      [Yy]*)
-        cd dependencies || exit
-        wget https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/$CLANG_VER.src.tar.xz
-        tar -xf $CLANG_VER.src.tar.xz
-        rm $CLANG_VER.src.tar.xz
-        cd ..
-        break
-        ;;
-      [Nn]*) break ;;
-      *) echo "Please answer yes or no." ;;
-      esac
-    done
+    echo ""
+    echo "Installing $CLANG_VER."
+    cd dependencies || exit
+    wget https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.6/$CLANG_VER.src.tar.xz
+    tar -xf $CLANG_VER.src.tar.xz
+    rm $CLANG_VER.src.tar.xz
+    cd ..
   else
     echo "It seems $CLANG_VER is already checked out!"
     echo "If that is not the case please remove the folder and try again."
