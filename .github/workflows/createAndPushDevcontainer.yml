@@ -3,7 +3,7 @@ name: "create and push devcontainer"
 on:
   push:
     paths:
-    - '.devcontainer/**'
+      - ".devcontainer/**"
 
 permissions:
   checks: write
