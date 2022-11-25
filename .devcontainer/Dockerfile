@@ -14,6 +14,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         icecc icecream-sundae libcolamd2 clang-tidy gcc-multilib \
         build-essential
 
+
 # Set environment variables
 ENV PATH=$PATH:/workspaces/llvmta/build/bin
 ENV PATH=$PATH:/workspaces/llvm/build/bin
