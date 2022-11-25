@@ -1,0 +1,17 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build-llvmta:
+    runs-on: ubuntu-latest
+    container:
+    image: ghcr.io/nilhoel1/llvmta-devcontainer
+    credentials:
+      username: ${{ github.actor }}
+      password: ${{ secrets.github_token }}
+    steps:
+       - name: Checkout (GitHub)
+        uses: actions/checkout@v2
+      - name: Build
+        run: ninja --version ; ls
