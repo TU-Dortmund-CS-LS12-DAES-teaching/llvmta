@@ -16,4 +16,4 @@ jobs:
        - name: Checkout (GitHub)
          uses: actions/checkout@v2
        - name: Build
-         run: ./config rel ; cd build ; ninja llvmta
+         run: ./config.sh rel ; cd build ; ninja llvmta
