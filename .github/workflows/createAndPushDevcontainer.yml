@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   build-container:
+    name: Build Container
     runs-on: ubuntu-latest
     steps:
       - name: Checkout (GitHub)
