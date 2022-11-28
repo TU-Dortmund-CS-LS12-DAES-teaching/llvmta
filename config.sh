@@ -108,6 +108,7 @@ ci() {
     -Wno-dev \
     -Wno-suggest-override \
     -DLLVM_CCACHE_BUILD=ON \
+    -DLLVM_CCACHE_DIR=../.ccache \
     -DLLVM_USE_LINKER=lld \
     -DLLVM_ENABLE_RTTI=ON \
     -DLLVM_ENABLE_EH=ON \
@@ -121,6 +122,7 @@ ci() {
     -GNinja \
     ../dependencies/$LLVM_VER.src
   mv compile_commands.json ../compile_commands.json
+  cd ..
 }
 
 cla() {

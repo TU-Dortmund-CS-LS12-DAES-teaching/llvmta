@@ -7,17 +7,7 @@ on:
       - main
 
 jobs:
-  wait-for-container:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for Container to be build
-        uses: lewagon/wait-on-check-action@v1.2.0
-        with:
-          ref: ${{ github.ref }}
-          check-name: "Build Container"
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
-
+#Ideally should wait for the Docker container creation if also run during this phase.
   build-llvmta:
     runs-on: ubuntu-latest
     container:
@@ -39,7 +29,7 @@ jobs:
       - name: ccache cache files
         uses: actions/cache@v1.1.0
         with:
-          path: .ccache
+          path: ../../.ccache
           key: ${ { matrix.config.name } }-ccache-${ { steps.ccache_cache_timestamp.outputs.timestamp } }
           restore-keys: |
             ${ { matrix.config.name } }-ccache-
