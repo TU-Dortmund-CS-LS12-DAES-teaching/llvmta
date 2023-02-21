@@ -7,12 +7,15 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 SHELL ["/bin/bash", "-c"]
 
 # [Optional] Uncomment this section to install additional OS packages.
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+RUN apt-get update --fix-missing && export DEBIAN_FRONTEND=noninteractive \
         && apt-get -y install --no-install-recommends --fix-missing \
         lldb gcc gdb cmake make ninja-build libboost-all-dev git clangd \
         htop wget fish zsh lld time parallel lp-solve liblpsolve55-dev \
         icecc icecream-sundae libcolamd2 clang-tidy gcc-multilib \
-        build-essential
+        build-essential ccache python3-pip
+
+RUN pip3 install numpy
+
 
 # Set environment variables
 ENV PATH=$PATH:/workspaces/llvmta/build/bin
