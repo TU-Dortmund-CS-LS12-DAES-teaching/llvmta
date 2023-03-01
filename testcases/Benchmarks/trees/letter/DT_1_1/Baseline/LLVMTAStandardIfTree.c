@@ -8,9 +8,9 @@ unsigned int pred = 0;
 				return pred;
 			}
 unsigned int LLVMTAStandardIfTree_predict0( char const pX[16]){
-	if(pX[14] <= 2){
-		return 20;
+	if(pX[13] <= 9){
+		return 0;
 	} else {
-		return 4;
+		return 24;
 	}
 }

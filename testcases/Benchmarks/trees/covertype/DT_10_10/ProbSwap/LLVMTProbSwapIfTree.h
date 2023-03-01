@@ -1,0 +1,11 @@
+int main();
+unsigned int LLVMTProbSwapIfTree_predict0( short const pX[54]);
+unsigned int LLVMTProbSwapIfTree_predict1( short const pX[54]);
+unsigned int LLVMTProbSwapIfTree_predict2( short const pX[54]);
+unsigned int LLVMTProbSwapIfTree_predict3( short const pX[54]);
+unsigned int LLVMTProbSwapIfTree_predict4( short const pX[54]);
+unsigned int LLVMTProbSwapIfTree_predict5( short const pX[54]);
+unsigned int LLVMTProbSwapIfTree_predict6( short const pX[54]);
+unsigned int LLVMTProbSwapIfTree_predict7( short const pX[54]);
+unsigned int LLVMTProbSwapIfTree_predict8( short const pX[54]);
+unsigned int LLVMTProbSwapIfTree_predict9( short const pX[54]);

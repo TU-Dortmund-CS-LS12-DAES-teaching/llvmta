@@ -8,115 +8,119 @@ unsigned int pred = 0;
 				return pred;
 			}
 unsigned int LLVMTAWCETSwapTree_predict0(unsigned char const pX[36]){
-	if(pX[16] <=  79){
-		if(pX[15] <=  73){
-			if(pX[17] <=  61){
-				if(pX[7] <=  98){
-					if(pX[29] <=  62){
+	if(pX[12] <=  81){
+		if(pX[26] <=  87){
+			if(pX[28] <=  61){
+				if(pX[6] <=  84){
+					if(pX[9] <=  65){
 						return 4;
 					} else {
 						return 4;
 					}
 				} else {
-					return 1;
-				}
-			} else {
-				if(pX[12] <=  54){
-					if(pX[15] <=  62){
+					if(pX[25] <=  65){
 						return 4;
 					} else {
 						return 0;
 					}
+				}
+			} else {
+				if(pX[5] <=  61){
+					if(pX[2] <=  90){
+						return 4;
+					} else {
+						return 1;
+					}
 				} else {
-					if(pX[13] <=  83){
+					if(pX[13] <=  82){
 						return 5;
 					} else {
-						return 3;
+						return 5;
 					}
 				}
 			}
 		} else {
-			if(pX[33] <=  62){
-				if(pX[19] <=  88){
-					if(pX[17] <=  65){
+			if(pX[9] <=  51){
+				if(pX[20] <=  52){
+					if(pX[18] <=  83){
 						return 4;
 					} else {
 						return 1;
 					}
 				} else {
-					if(pX[21] <=  53){
+					if(pX[31] <=  84){
 						return 1;
 					} else {
-						return 1;
+						return 0;
 					}
 				}
 			} else {
-				if(pX[20] <=  73){
-					if(pX[35] <=  68){
+				if(pX[32] <=  71){
+					if(pX[7] <=  72){
 						return 5;
 					} else {
 						return 0;
 					}
 				} else {
-					if(pX[29] <=  96){
+					if(pX[11] <=  82){
 						return 3;
 					} else {
-						return 2;
+						return 0;
 					}
 				}
 			}
 		}
 	} else {
-		if(pX[16] <=  84){
-			if(pX[22] <=  100){
-				if(pX[10] <=  103){
-					if(pX[14] <=  110){
-						return 3;
+		if(pX[17] <=  96){
+			if(pX[30] <=  91){
+				if(pX[13] <=  93){
+					if(pX[7] <=  88){
+						return 4;
 					} else {
 						return 2;
 					}
 				} else {
-					if(pX[7] <=  77){
-						return 3;
-					} else {
-						return 2;
-					}
+					return 5;
 				}
 			} else {
-				if(pX[34] <=  109){
-					if(pX[17] <=  93){
+				if(pX[2] <=  109){
+					if(pX[10] <=  101){
 						return 3;
 					} else {
 						return 2;
 					}
 				} else {
-					if(pX[10] <=  107){
-						return 2;
+					if(pX[5] <=  95){
+						return 0;
 					} else {
 						return 2;
 					}
 				}
 			}
 		} else {
-			if(pX[23] <=  82){
-				if(pX[28] <=  87){
-					if(pX[1] <=  106){
+			if(pX[24] <=  85){
+				if(pX[14] <=  121){
+					if(pX[23] <=  84){
 						return 2;
 					} else {
-						return 3;
+						return 2;
 					}
 				} else {
-					return 2;
+					if(pX[5] <=  117){
+						return 0;
+					} else {
+						return 2;
+					}
 				}
 			} else {
-				if(pX[12] <=  75){
-					if(pX[2] <=  100){
-						return 5;
+				if(pX[23] <=  78){
+					if(pX[0] <=  91){
+						return 3;
 					} else {
 						return 2;
 					}
 				} else {
-					if(pX[32] <=  85){
+					if(pX[32] <=  86){
 						return 2;
 					} else {
 						return 2;

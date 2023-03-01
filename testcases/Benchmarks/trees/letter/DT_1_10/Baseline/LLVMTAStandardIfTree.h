@@ -1,0 +1,11 @@
+int main();
+unsigned int LLVMTAStandardIfTree_predict0( char const pX[16]);
+unsigned int LLVMTAStandardIfTree_predict1( char const pX[16]);
+unsigned int LLVMTAStandardIfTree_predict2( char const pX[16]);
+unsigned int LLVMTAStandardIfTree_predict3( char const pX[16]);
+unsigned int LLVMTAStandardIfTree_predict4( char const pX[16]);
+unsigned int LLVMTAStandardIfTree_predict5( char const pX[16]);
+unsigned int LLVMTAStandardIfTree_predict6( char const pX[16]);
+unsigned int LLVMTAStandardIfTree_predict7( char const pX[16]);
+unsigned int LLVMTAStandardIfTree_predict8( char const pX[16]);
+unsigned int LLVMTAStandardIfTree_predict9( char const pX[16]);

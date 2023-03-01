@@ -1,0 +1,11 @@
+int main();
+unsigned int LLVMTAWCETSwapTree_predict0(float const pX[48]);
+unsigned int LLVMTAWCETSwapTree_predict1(float const pX[48]);
+unsigned int LLVMTAWCETSwapTree_predict2(float const pX[48]);
+unsigned int LLVMTAWCETSwapTree_predict3(float const pX[48]);
+unsigned int LLVMTAWCETSwapTree_predict4(float const pX[48]);
+unsigned int LLVMTAWCETSwapTree_predict5(float const pX[48]);
+unsigned int LLVMTAWCETSwapTree_predict6(float const pX[48]);
+unsigned int LLVMTAWCETSwapTree_predict7(float const pX[48]);
+unsigned int LLVMTAWCETSwapTree_predict8(float const pX[48]);
+unsigned int LLVMTAWCETSwapTree_predict9(float const pX[48]);

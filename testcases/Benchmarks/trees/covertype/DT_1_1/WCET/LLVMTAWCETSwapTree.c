@@ -8,9 +8,9 @@ unsigned int pred = 0;
 				return pred;
 			}
 unsigned int LLVMTAWCETSwapTree_predict0( short const pX[54]){
-	if(pX[0] <=  3048){
+	if(pX[4] <=  10){
 		return 1;
 	} else {
-		return 0;
+		return 1;
 	}
 }

@@ -8,7 +8,7 @@ unsigned int pred = 0;
 				return pred;
 			}
 unsigned int LLVMTAOptimizedPathIfTree_128000_predict0( char const pX[784]){
-	if(pX[350] <= 131){
+	if(pX[263] > 0){
 		return 7;
 	} else {
 		return 1;

@@ -8,9 +8,9 @@ unsigned int pred = 0;
 				return pred;
 			}
 unsigned int LLVMTAOptimizedPathIfTree_128000_predict0( char const pX[16]){
-	if(pX[14] > 2){
-		return 4;
+	if(pX[13] <= 9){
+		return 0;
 	} else {
-		return 20;
+		return 24;
 	}
 }

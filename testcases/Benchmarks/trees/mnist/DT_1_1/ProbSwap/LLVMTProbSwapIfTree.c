@@ -8,9 +8,9 @@ unsigned int pred = 0;
 				return pred;
 			}
 unsigned int LLVMTProbSwapIfTree_predict0( char const pX[784]){
-if(pX[350] <=  131){
-	return 7;
-} else {
+if(pX[263] <=  0){
 	return 1;
+} else {
+	return 7;
 }
 }
