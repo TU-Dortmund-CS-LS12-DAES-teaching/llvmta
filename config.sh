@@ -91,7 +91,7 @@ dist() {
     -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
     -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=.. \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
-    -DLLVM_PARALLEL_COMPILE_JOBS=42 \
+    -DLLVM_PARALLEL_COMPILE_JOBS=128 \
     -DLLVM_PARALLEL_LINK_JOBS=1 \
     -GNinja \
     ../dependencies/$LLVM_VER.src
@@ -163,6 +163,30 @@ getclang() {
   fi
 }
 
+bootstrap_ricv() {
+  #https://github.com/sifive/riscv-llvm
+  cd dependencies
+  mkdir riscv
+  cd riscv
+  mkdir _install
+  #export PATH=$PWD/_install/bin:$PATH
+  git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
+  cd riscv-gnu-toolchain
+  ./configure --prefix=$PWD/../_install --enable-multilib
+
+  #https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61427
+  #DYLD_LIBRARY_PATH="" LIBRARY_PATH=""
+  CPLUS_INCLUDE_PATH=""  make -j $(nproc)
+
+  #An assembly file (. s) contains machine instructions in human readable form, known as assembly language. An object file contains the same instructions in machine-readable, binary form.
+
+  #enable libc for llvm
+  # compiler-rt?
+
+  # dependencies/riscv/riscv-gnu-toolchain
+  cd ../../..
+}
+
 pre() {
   getllvm
   getclang
@@ -195,6 +219,9 @@ lowResources | lowRes)
 distributed | dis)
   pre
   dist
+  ;;
+bootstrap | bs)
+  bootstrap_ricv
   ;;
 clean)
   cl
