@@ -19,6 +19,7 @@ RUN apt-get update --fix-missing && export DEBIAN_FRONTEND=noninteractive \
 
 # Set environment variables
 ENV PATH=$PATH:/workspaces/llvmta/build/bin
+ENV PATH=$PATH:/workspaces/llvmta/dependencies/riscv/_install/bin
 ENV PATH=$PATH:/workspaces/llvm/build/bin
 # ENV CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/llvm/lib/Target/ARM
 # ENV CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/llvm/lib/Target/RISCV

@@ -28,6 +28,12 @@
       "group": "build"
     },
     {
+      "label": "config bootstrap",
+      "type": "shell",
+      "command": "./config.sh bs",
+      "group": "build"
+    },
+    {
       "label": "clean",
       "type": "shell",
       "command": "./config.sh clean",
