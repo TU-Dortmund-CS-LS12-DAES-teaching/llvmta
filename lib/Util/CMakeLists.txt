@@ -9,6 +9,7 @@ Util.cpp
 UtilPathAnalysis.cpp
 Vertex.cpp
 AbstractAddress.cpp
+BinaryAdressManager.cpp
 DEPENDS LLVMAnalysis LLVMCodeGen LLVMCore LLVMSupport LLVMTarget
 )
 

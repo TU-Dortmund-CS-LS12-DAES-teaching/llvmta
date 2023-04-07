@@ -40,6 +40,8 @@
 
 #include <sstream>
 
+#include "Util/BinaryAdressManager.h" 
+
 using namespace llvm;
 
 namespace TimingAnalysisPass {
@@ -50,6 +52,7 @@ char StaticAddressProvider::ID = 0;
 
 StaticAddressProvider::StaticAddressProvider(TargetMachine &TM)
     : MachineFunctionPass(ID), TM(TM) {
+  BinaryAdressManager binAdrMan(TM);
   CodeAddress = CodeStartAddress;
   RodataAddress = 0; // Will be set after the doInitialization()
 }
