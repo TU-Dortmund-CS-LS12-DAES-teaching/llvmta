@@ -91,11 +91,39 @@ dist() {
     -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
     -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=.. \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
-    -DLLVM_PARALLEL_COMPILE_JOBS=42 \
+    -DLLVM_PARALLEL_COMPILE_JOBS=128 \
     -DLLVM_PARALLEL_LINK_JOBS=1 \
     -GNinja \
     ../dependencies/$LLVM_VER.src
   mv compile_commands.json ../compile_commands.json
+}
+
+bs_config() {
+  cd build || exit
+  cmake \
+    -DCMAKE_C_COMPILER=gcc \
+    -DCMAKE_CXX_COMPILER=g++ \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+    -DCMAKE_INSTALL_PREFIX="../dependencies/riscv/_install" \
+    -DDEFAULT_SYSROOT="../dependencies/riscv/_install/riscv64-unknown-elf" \
+    -Wno-dev \
+    -Wno-suggest-override \
+    -DLLVM_USE_LINKER=lld \
+    -DLLVM_ENABLE_RTTI=ON \
+    -DLLVM_ENABLE_EH=ON \
+    -DLLVM_ENABLE_ASSERTIONS=ON \
+    -DLLVM_INCLUDE_BENCHMARKS=OFF \
+    -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
+    -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
+    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=.. \
+    -DLLVM_EXTERNAL_PROJECTS="llvmta" \
+    -DLLVM_PARALLEL_COMPILE_JOBS=$(nproc) \
+    -DLLVM_PARALLEL_LINK_JOBS=4 \
+    -GNinja \
+    ../dependencies/$LLVM_VER.src
+  mv compile_commands.json ../compile_commands.json
+  cd ..
 }
 
 cla() {
@@ -163,6 +191,34 @@ getclang() {
   fi
 }
 
+bootstrap_ricv() {
+  if [ ! -d dependencies/riscv ]; then
+    #https://github.com/sifive/riscv-llvm
+    cd dependencies
+    mkdir riscv
+    cd riscv
+    mkdir _install
+    #export PATH=$PWD/_install/bin:$PATH
+    git clone --recursive https://github.com/riscv/riscv-gnu-toolchain
+    cd riscv-gnu-toolchain
+    ./configure --prefix=$PWD/../_install --enable-multilib
+
+    #https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61427
+    #DYLD_LIBRARY_PATH="" LIBRARY_PATH=""
+    CPLUS_INCLUDE_PATH=""  make -j $(nproc)
+
+    #An assembly file (. s) contains machine instructions in human readable form, known as assembly language. An object file contains the same instructions in machine-readable, binary form.
+
+    #enable libc for llvm
+    # compiler-rt?
+
+    # dependencies/riscv/riscv-gnu-toolchain
+    cd ../../..
+  else
+    echo "It seems risc-V has already been bootstraped!"
+  fi
+}
+
 pre() {
   getllvm
   getclang
@@ -195,6 +251,11 @@ lowResources | lowRes)
 distributed | dis)
   pre
   dist
+  ;;
+bootstrap | bs)
+  bootstrap_ricv
+  pre
+  bs_config
   ;;
 clean)
   cl
