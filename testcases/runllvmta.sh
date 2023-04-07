@@ -51,6 +51,7 @@ build_dir=""
 limit_mem=false
 entry_point=""
 isa_type="arm"
+map_bin_adr=false 
 
 ########################################
 # Option Parsing code                  #
@@ -88,6 +89,7 @@ while [ $# -gt 0 ]; do
 			"--llvmta-entry-point") entry_point=$val;;
 			"--llvmta-limit-memory") limit_mem=true;;
 			"--llvmta-isa") isa_type=$val;;
+			"--use-linktime-adress-information") map_bin_adr=true;; 
 			"--") shift; break;;
 			*) echo "Unknown Option: $opt" >&2; exit 1;;
 		esac
@@ -178,6 +180,10 @@ else
 					"-disable-ifcvt-triangle-rev" "-tail-dup-placement=false" )
 
 	llvmtaopts+=( ${wcetcompopti[@]} )
+fi
+	
+if [ "$map_bin_adr" = true ]; then  	#Jchange
+	llvmtaopts+=("-ta-map-bin-adr")
 fi
 
 entryPoints="${TESTCASE_DIR}/EntryPoints.txt"
