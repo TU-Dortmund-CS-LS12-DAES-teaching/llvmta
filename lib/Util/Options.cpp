@@ -43,6 +43,12 @@ cl::OptionCategory ArrayCat("5. Array-aware Cache Analysis");
 cl::OptionCategory
     CoRunnerSensitiveCat("6. Multi-Core Corunner-sensitive Analysis");
 
+cl::opt<bool> 
+    AdressMapping("ta-map-bin-adr", cl::init(false),
+              cl::desc("compile linked binary and use its adress information"),
+              cl::cat(LLVMTACat));
+
+
 cl::opt<bool>
     QuietMode("ta-quiet", cl::init(false),
               cl::desc("Quiet mode: do not report on progress and do not dump "
