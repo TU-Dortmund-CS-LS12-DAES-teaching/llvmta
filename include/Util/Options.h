@@ -246,6 +246,12 @@ enum class ArrivalCurveIlpObjectiveType { VARIANT1, VARIANT2, COMBINED };
 extern llvm::cl::opt<bool> QuietMode;
 
 /**
+ * Quiet mode: No output on console and no file output, except for the
+ * necessary.
+ */
+extern llvm::cl::opt<bool> AdressMapping; 
+
+/**
  * Dumps the state graph in .vcg instead of .dot
  */
 extern llvm::cl::opt<bool> DumpVcgGraph;
