@@ -81,7 +81,7 @@ public:
   }
 
   // see superclass
-  Tree *clone() const override {
+  Tree *clone() const {
     Node *res = new LabeledTreeNode();
     for (auto it = lab2tree.begin(); it != lab2tree.end(); ++it) {
       res->addChild(it->first, it->second->clone());
@@ -90,7 +90,7 @@ public:
   }
 
   // see superclass
-  bool equals(const Tree *t) const override {
+  bool equals(const Tree *t) const {
     if (const Node *node = dynamic_cast<const Node *>(t)) {
       // For each own label, same subtree in node?
       for (auto it = lab2tree.begin(); it != lab2tree.end(); ++it) {
@@ -113,7 +113,7 @@ public:
   }
 
   // see superclass
-  Tree *walk(std::function<Tree *(Tree *)> action) override {
+  Tree *walk(std::function<Tree *(Tree *)> action) {
     for (auto &child : lab2tree) {
       auto const tr = child.second;
       auto const res = tr->walk(action);
@@ -137,7 +137,7 @@ public:
   }
 
   // see superclass
-  std::string print(unsigned ident) const override {
+  std::string print(unsigned ident) const {
     std::stringstream ss;
     for (unsigned i = 0; i < ident; ++i) {
       ss << "  ";

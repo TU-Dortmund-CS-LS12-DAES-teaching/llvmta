@@ -50,7 +50,7 @@ public:
    */
   ~MachineFunctionCollector();
 
-  bool runOnMachineFunction(MachineFunction &F) override;
+  bool runOnMachineFunction(MachineFunction &F);
 
   MachineFunction *getFunctionByName(std::string Name);
 

@@ -110,25 +110,25 @@ public:
    * Basically count down the latency of the instruction currently being
    * executed.
    */
-  virtual StateSet cycle(std::tuple<InstrContextMapping &> &dep) const override;
+  virtual StateSet cycle(std::tuple<InstrContextMapping &> &dep) const;
   /**
    * See superclass first.
    * MI is final when it was executed the previous cycle and its latency reached
    * 0 by entering this state.
    */
-  virtual bool isFinal(ExecutionElement &pl) override;
+  virtual bool isFinal(ExecutionElement &pl);
 
   /// \see superclass
-  bool operator==(const FixedLatencyState &ds) const override;
+  bool operator==(const FixedLatencyState &ds) const;
 
   /// \see superclass
-  virtual bool isJoinable(const FixedLatencyState &ds) const override;
+  virtual bool isJoinable(const FixedLatencyState &ds) const;
 
   /// \see superclass
-  virtual void join(const FixedLatencyState &ds) override;
+  virtual void join(const FixedLatencyState &ds);
 
   /// \see superclass
-  virtual size_t hashcode() const override;
+  virtual size_t hashcode() const;
 
   // Output operation
   friend std::ostream &operator<<(std::ostream &stream,
