@@ -94,11 +94,11 @@ private:
 class PartitionTokenNone : public PartitionToken {
 public:
   static PartitionTokenNone *getInstance();
-  PartitionTokenType getType() const;
-  std::string print() const;
-  std::string serialize() const;
-  virtual bool equals(const PartitionToken &pt) const;
-  virtual bool less(const PartitionToken &pt) const;
+  PartitionTokenType getType() const override;
+  std::string print() const override;
+  std::string serialize() const override;
+  virtual bool equals(const PartitionToken &pt) const override;
+  virtual bool less(const PartitionToken &pt) const override;
 
 private:
   PartitionTokenNone();
@@ -114,11 +114,11 @@ private:
 class PartitionTokenIf : public PartitionToken {
 public:
   PartitionTokenIf(std::string branchInstrID, bool assumeTaken);
-  PartitionTokenType getType() const;
-  std::string print() const;
-  std::string serialize() const;
-  virtual bool equals(const PartitionToken &pt) const;
-  virtual bool less(const PartitionToken &pt) const;
+  PartitionTokenType getType() const override;
+  std::string print() const override;
+  std::string serialize() const override;
+  virtual bool equals(const PartitionToken &pt) const override;
+  virtual bool less(const PartitionToken &pt) const override;
 
 private:
   std::string branchInstrID;
@@ -135,11 +135,11 @@ class PartitionTokenLoopPeel : public PartitionToken {
 public:
   PartitionTokenLoopPeel(const llvm::MachineLoop *l, std::set<MBBedge> be,
                          unsigned t);
-  PartitionTokenType getType() const;
-  std::string print() const;
-  std::string serialize() const;
-  virtual bool equals(const PartitionToken &pt) const;
-  virtual bool less(const PartitionToken &pt) const;
+  PartitionTokenType getType() const override;
+  std::string print() const override;
+  std::string serialize() const override;
+  virtual bool equals(const PartitionToken &pt) const override;
+  virtual bool less(const PartitionToken &pt) const override;
   unsigned backedgeTakenCount() const;
   bool hasBackedge(MBBedge edge) const;
   std::set<MBBedge> getBackedges() const;
@@ -161,11 +161,11 @@ class PartitionTokenLoopIter : public PartitionToken {
 public:
   PartitionTokenLoopIter(const llvm::MachineLoop *l, std::set<MBBedge> be,
                          unsigned t);
-  PartitionTokenType getType() const;
-  std::string print() const;
-  std::string serialize() const;
-  virtual bool equals(const PartitionToken &pt) const;
-  virtual bool less(const PartitionToken &pt) const;
+  PartitionTokenType getType() const override;
+  std::string print() const override;
+  std::string serialize() const override;
+  virtual bool equals(const PartitionToken &pt) const override;
+  virtual bool less(const PartitionToken &pt) const override;
   unsigned backedgeLeastTakenCount() const;
   bool hasBackedge(MBBedge edge) const;
   std::set<MBBedge> getBackedges() const;
@@ -185,11 +185,11 @@ private:
 class PartitionTokenCallSite : public PartitionToken {
 public:
   PartitionTokenCallSite(const MachineInstr *location);
-  PartitionTokenType getType() const;
-  std::string print() const;
-  std::string serialize() const;
-  virtual bool equals(const PartitionToken &pt) const;
-  virtual bool less(const PartitionToken &pt) const;
+  PartitionTokenType getType() const override;
+  std::string print() const override;
+  std::string serialize() const override;
+  virtual bool equals(const PartitionToken &pt) const override;
+  virtual bool less(const PartitionToken &pt) const override;
   const MachineInstr *getCallSite() const;
 
 private:
@@ -204,11 +204,11 @@ private:
 class PartitionTokenFunCallee : public PartitionToken {
 public:
   PartitionTokenFunCallee(const llvm::MachineFunction *func);
-  PartitionTokenType getType() const;
-  std::string print() const;
-  std::string serialize() const;
-  virtual bool equals(const PartitionToken &pt) const;
-  virtual bool less(const PartitionToken &pt) const;
+  PartitionTokenType getType() const override;
+  std::string print() const override;
+  std::string serialize() const override;
+  virtual bool equals(const PartitionToken &pt) const override;
+  virtual bool less(const PartitionToken &pt) const override;
   const llvm::MachineFunction *getCallee() const { return function; }
 
 private:

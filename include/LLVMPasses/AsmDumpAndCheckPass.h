@@ -51,10 +51,10 @@ public:
   AsmDumpAndCheckPass(TargetMachine &TM);
 
   bool runOnMachineBasicBlock(MachineBasicBlock &MBB);
-  bool runOnMachineFunction(MachineFunction &F);
-  bool doFinalization(Module &);
+  bool runOnMachineFunction(MachineFunction &F) override;
+  bool doFinalization(Module &) override;
 
-  virtual llvm::StringRef getPassName() const {
+  virtual llvm::StringRef getPassName() const override {
     return "ARM Timing Analysis Result Dump Pass";
   }
 

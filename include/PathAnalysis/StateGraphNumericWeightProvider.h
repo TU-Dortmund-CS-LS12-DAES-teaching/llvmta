@@ -51,8 +51,8 @@ public:
           extractor,
       const std::string wName)
       //		@User You can also use non-closure lambdas: [] (const
-      //NumericType& a, const NumericType&b) -> const NumericType& {return
-      //std::max(a,b);} )
+      // NumericType& a, const NumericType&b) -> const NumericType& {return
+      // std::max(a,b);} )
       : StateGraphEdgeWeightProvider<MuState, NumericType>(stgr),
         extractor(extractor), weightName(wName) {}
 
@@ -287,7 +287,7 @@ protected:
   typedef typename MuState::LocalMetrics LocalMetrics;
 
   virtual int advanceWeight(const int &weight, const LocalMetrics &curr,
-                            const LocalMetrics &succ) {
+                            const LocalMetrics &succ) override {
     // TODO this is hardcoded for the DRAM refresh case, make it more generic
     auto sdrammetrics =
         dynamic_cast<SimpleSDRAMCyclingMemory::LocalMetrics *>(bgMemMetr(succ));

@@ -78,6 +78,7 @@ public:
   }
 
   // see in Superclass
+  // Linking fails if these functions are marked as override
   virtual void
   handleCallingConvention(const AnalysisImplementation &preCallElement){};
   // see in Superclass
