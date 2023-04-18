@@ -29,6 +29,7 @@
 
 #include "llvm/Support/Debug.h"
 
+#include "AnalysisFramework/AnalysisResults.h"
 #include "Memory/AbstractCache.h"
 #include "Memory/Classification.h"
 #include "Memory/MemoryTopologyInterface.h"
@@ -173,14 +174,15 @@ public:
    * Returns an id.
    */
   virtual boost::optional<unsigned> accessInstr(unsigned addr,
-                                                unsigned numWords);
+                                                unsigned numWords) override;
 
   /**
    * Accesses data at the given address.
    * Returns an id or none if the access cannot be processed.
    */
-  virtual boost::optional<unsigned>
-  accessData(AbstractAddress addr, AccessType load_store, unsigned numWords);
+  virtual boost::optional<unsigned> accessData(AbstractAddress addr,
+                                               AccessType load_store,
+                                               unsigned numWords) override;
 
   /**
    * Cycles the topology once.
@@ -190,62 +192,64 @@ public:
    * stalling fetch misses. It is passed to the underlying topology.
    */
   virtual std::list<SeparateCachesMemoryTopology>
-  cycle(bool potentialDataMissesPending) const;
+  cycle(bool potentialDataMissesPending) const override;
 
   /**
    * Ask the underlying memory topology to stall during this cycle.
    */
-  virtual bool shouldPipelineStall() const;
+  virtual bool shouldPipelineStall() const override;
 
   /**
    * Checks whether an instruction access finished.
    */
-  virtual bool finishedInstrAccess(unsigned accessId);
+  virtual bool finishedInstrAccess(unsigned accessId) override;
 
   /**
    * Checks whether a data access finished.
    */
-  virtual bool finishedDataAccess(unsigned accessId);
+  virtual bool finishedDataAccess(unsigned accessId) override;
 
   /// See superclass
-  virtual void enterScope(const PersistenceScope &scope);
-  virtual void leaveScope(const PersistenceScope &scope);
+  virtual void enterScope(const PersistenceScope &scope) override;
+  virtual void leaveScope(const PersistenceScope &scope) override;
 
-  virtual bool hasUnfinishedAccesses() const;
+  virtual bool hasUnfinishedAccesses() const override;
 
   /**
    * Checks whether this topology is the same as the given one.
    */
-  virtual bool operator==(const SeparateCachesMemoryTopology &scmt) const;
+  virtual bool
+  operator==(const SeparateCachesMemoryTopology &scmt) const override;
 
   /**
    * Hashes the topology.
    */
-  virtual size_t hashcode() const;
+  virtual size_t hashcode() const override;
 
   /**
    * Is the memory topology waiting to be joined with similar topologies?
    */
-  virtual bool isWaitingForJoin() const;
+  virtual bool isWaitingForJoin() const override;
 
-  virtual bool isJoinable(const SeparateCachesMemoryTopology &scmt) const;
+  virtual bool
+  isJoinable(const SeparateCachesMemoryTopology &scmt) const override;
 
-  virtual void join(const SeparateCachesMemoryTopology &scmt);
+  virtual void join(const SeparateCachesMemoryTopology &scmt) override;
 
   /**
    * Is the memory topology currently performing an instruction access?
    */
-  virtual bool isBusyAccessingInstr() const;
+  virtual bool isBusyAccessingInstr() const override;
 
   /**
    * Is the memory topology currently performing a data access?
    */
-  virtual bool isBusyAccessingData() const;
+  virtual bool isBusyAccessingData() const override;
 
   /**
    * Fast-forwarding of the memory topology.
    */
-  virtual std::list<SeparateCachesMemoryTopology> fastForward() const;
+  virtual std::list<SeparateCachesMemoryTopology> fastForward() const override;
 
   /**
    * Outputs the data content of this topology.
