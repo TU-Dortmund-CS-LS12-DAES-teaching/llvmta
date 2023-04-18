@@ -74,14 +74,14 @@ public:
    * Place instructions in address space.
    */
   bool runOnMachineBasicBlock(MachineBasicBlock &MBB);
-  bool runOnMachineFunction(MachineFunction &F);
+  bool runOnMachineFunction(MachineFunction &F) override;
 
   /**
    * Place data structures in address space.
    */
-  virtual bool doInitialization(Module &M);
+  virtual bool doInitialization(Module &M) override;
 
-  virtual llvm::StringRef getPassName() const {
+  virtual llvm::StringRef getPassName() const  override{
     return "Provides addresses to instructions that are needed by timing "
            "analysis";
   }
