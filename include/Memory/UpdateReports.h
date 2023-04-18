@@ -118,7 +118,7 @@ public:
   WritebackReport(bool _wbPossible, bool dfs)
       : wbPossible(_wbPossible), dirtifyingStore(dfs) {}
 
-  virtual void join(const JoinableUpdateReport *_other) {
+  virtual void join(const JoinableUpdateReport *_other) override {
     if (!_other)
       return;
 

@@ -60,7 +60,7 @@ private:
 public:
   SimpleSDRAMCyclingMemory();
 
-  virtual SimpleSDRAMCyclingMemory *clone() const;
+  virtual SimpleSDRAMCyclingMemory *clone() const override;
 
   virtual ~SimpleSDRAMCyclingMemory(){};
 
@@ -104,7 +104,7 @@ public:
     /**
      * Checks for equality between local metrics.
      */
-    virtual bool equals(const Base::LocalMetrics &anotherInstance) {
+    virtual bool equals(const Base::LocalMetrics &anotherInstance) override {
       const LocalMetrics &other =
           dynamic_cast<const LocalMetrics &>(anotherInstance);
       return fastForwardedAccessCycles == other.fastForwardedAccessCycles &&
@@ -112,12 +112,14 @@ public:
     }
   };
 
-  virtual LocalMetrics *getLocalMetrics() { return new LocalMetrics(*this); }
+  virtual LocalMetrics *getLocalMetrics() override {
+    return new LocalMetrics(*this);
+  }
 
   /**
    * Resets the local metrics to their initial values.
    */
-  virtual void resetLocalMetrics() {
+  virtual void resetLocalMetrics() override {
     justRefreshed = boost::none;
     fastForwardedAccessCycles = 0u;
   }
@@ -125,43 +127,44 @@ public:
   /**
    * Check if the memory is currently busy.
    */
-  virtual bool isBusy() const;
+  virtual bool isBusy() const override;
 
   /**
    * Perform one clock cycle in the memory implementation.
    */
-  virtual std::list<AbstractCyclingMemory *> cycle() const;
+  virtual std::list<AbstractCyclingMemory *> cycle() const override;
 
   /**
    * If we have worked on a refresh during the last cycle and we want to stall
    * on refresh, return true. Otherwise false.
    */
-  virtual bool shouldPipelineStall() const;
+  virtual bool shouldPipelineStall() const override;
 
   /**
    * Since used in MicroArchitecturalStates, we need to know whether the memory
    * parts are the same.
    */
-  virtual bool equals(const AbstractCyclingMemory &am2) const;
+  virtual bool equals(const AbstractCyclingMemory &am2) const override;
 
   /**
    * Same as for the equality operator, this may be used by "higher" classes.
    */
-  virtual size_t hashcode() const;
+  virtual size_t hashcode() const override;
 
-  virtual bool isJoinable(const AbstractCyclingMemory &am2) const;
+  virtual bool isJoinable(const AbstractCyclingMemory &am2) const override;
 
-  virtual void join(const AbstractCyclingMemory &am2);
+  virtual void join(const AbstractCyclingMemory &am2) override;
 
-  virtual void print(std::ostream &stream) const;
+  virtual void print(std::ostream &stream) const override;
 
   /**
    * Implement how to announce a new access to the memory.
    */
   virtual std::list<AbstractCyclingMemory *>
-  announceAccess(AbstractAddress addr, AccessType t, unsigned numWords) const;
+  announceAccess(AbstractAddress addr, AccessType t,
+                 unsigned numWords) const override;
 
-  virtual std::list<AbstractCyclingMemory *> fastForward() const;
+  virtual std::list<AbstractCyclingMemory *> fastForward() const override;
 
 private:
   enum class DRAMPhase { IDLE, REFRESH, ACCESS };

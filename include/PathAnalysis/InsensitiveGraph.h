@@ -56,17 +56,18 @@ public:
    */
   InsensitiveGraph(const MuAnaInfo &mai) : mai(mai), graph() {}
 
-  void buildGraph();
+  void buildGraph() override;
 
-  virtual void freeMuStates() { states.clear(); }
+  virtual void freeMuStates() override { states.clear(); }
 
-  typename State::StateSet getStatesForId(unsigned id) {
+  typename State::StateSet getStatesForId(unsigned id) override {
     return states.at(id).getStates();
   }
 
-  const Graph &getGraph() const { return graph; }
+  const Graph &getGraph() const override { return graph; }
 
-  std::vector<unsigned> getInStates(const MachineBasicBlock *mbb) const {
+  std::vector<unsigned>
+  getInStates(const MachineBasicBlock *mbb) const override {
     std::vector<unsigned> result;
     if (inVertexPerMBB.count(mbb) > 0) {
       result.push_back(inVertexPerMBB.at(mbb));
@@ -74,7 +75,8 @@ public:
     return result;
   }
 
-  std::vector<unsigned> getOutStates(const MachineBasicBlock *mbb) const {
+  std::vector<unsigned>
+  getOutStates(const MachineBasicBlock *mbb) const override {
     std::vector<unsigned> result;
     if (outVertexPerMBB.count(mbb) > 0) {
       result.push_back(outVertexPerMBB.at(mbb));
@@ -82,7 +84,7 @@ public:
     return result;
   }
 
-  std::vector<unsigned> getCallStates(const MachineInstr *mi) const {
+  std::vector<unsigned> getCallStates(const MachineInstr *mi) const override {
     assert(mi->isCall() && "Call States only at calls");
     std::vector<unsigned> res;
     if (callVertices.count(mi) > 0) {
@@ -91,7 +93,7 @@ public:
     return res;
   }
 
-  std::vector<unsigned> getReturnStates(const MachineInstr *mi) const {
+  std::vector<unsigned> getReturnStates(const MachineInstr *mi) const override {
     assert(mi->isCall() && "Return States only at calls");
     std::vector<unsigned> res;
     if (returnVertices.count(mi) > 0) {
@@ -101,9 +103,9 @@ public:
   }
 
   void dump(std::ostream &mystream,
-            const std::map<std::string, double> *optTimesTaken) const;
+            const std::map<std::string, double> *optTimesTaken) const override;
 
-  void deleteMuArchInfo();
+  void deleteMuArchInfo() override;
 
 private:
   void buildInterBasicBlockEdges();
@@ -487,8 +489,8 @@ void InsensitiveGraph<MicroArchDom>::dump(
     for (MachineFunction *currFunc :
          machineFunctionCollector->getAllMachineFunctions()) {
       std::string funcName = currFunc->getName().str();
-      mystream << "graph : {\n	title : \"" << funcName
-               << "\"\n	label : \"" << funcName << "\"\n";
+      mystream << "graph : {\n	title : \"" << funcName << "\"\n	label : \""
+               << funcName << "\"\n";
       for (auto &currMBB : *currFunc) {
         std::string mbbName = currMBB.getFullName();
         mystream << "graph : {\n	title : \"" << mbbName

@@ -55,13 +55,13 @@ protected:
 
   virtual WeightType advanceWeight(const WeightType &weight,
                                    const LocalMetrics &curr,
-                                   const LocalMetrics &succ);
+                                   const LocalMetrics &succ) override;
 };
 template <class MuState>
 typename StateGraphWritebackProvider<MuState>::WeightType
-StateGraphWritebackProvider<MuState>::advanceWeight(const WeightType &weight,
-                                                    const LocalMetrics &curr,
-                                                    const LocalMetrics &succ) {
+StateGraphWritebackProvider<MuState>::advanceWeight(
+    const WeightType &weight, const LocalMetrics &curr,
+    const LocalMetrics &succ) {
   return weight + this->extractWeight(succ);
 }
 

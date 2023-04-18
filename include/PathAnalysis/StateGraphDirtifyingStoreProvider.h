@@ -31,6 +31,7 @@
 #include "Memory/PersistenceScopeInfo.h"
 #include "PathAnalysis/StateGraphEdgeWeightProvider.h"
 #include "Util/Util.h"
+#include "Util/UtilPathAnalysis.h"
 
 #include <set>
 
@@ -69,11 +70,13 @@ public:
   virtual ~StateGraphDirtifyingStoreProvider() {}
 
   /// See Superclass
-  virtual bool isEdgeJoinable(unsigned p, unsigned t, unsigned nt) const;
+  virtual bool isEdgeJoinable(unsigned p, unsigned t,
+                              unsigned nt) const override;
   /// See Superclass
-  virtual void addExternalEdge(std::string extfun, unsigned s, unsigned e);
+  virtual void addExternalEdge(std::string extfun, unsigned s,
+                               unsigned e) override;
   /// See Superclass
-  virtual std::string getWeightDescr(unsigned a, unsigned b) const;
+  virtual std::string getWeightDescr(unsigned a, unsigned b) const override;
 
   std::map<PersistenceScope, std::map<AbstractAddress, VarCoeffVector>>
   getPerScopePersistenceEdges() const;
@@ -88,17 +91,19 @@ public:
 protected:
   typedef typename MuState::LocalMetrics LocalMetrics;
 
-  virtual WeightType extractWeight(const LocalMetrics &metrics);
+  virtual WeightType extractWeight(const LocalMetrics &metrics) override;
 
-  virtual void joinWeight(WeightType &weight1, const WeightType &weight2);
+  virtual void joinWeight(WeightType &weight1,
+                          const WeightType &weight2) override;
 
-  virtual void concatWeight(WeightType &weight1, const WeightType &weight2);
+  virtual void concatWeight(WeightType &weight1,
+                            const WeightType &weight2) override;
 
-  virtual WeightType getNeutralWeight();
+  virtual WeightType getNeutralWeight() override;
 
   virtual WeightType advanceWeight(const WeightType &weight,
                                    const LocalMetrics &curr,
-                                   const LocalMetrics &succ);
+                                   const LocalMetrics &succ) override;
 
 private:
   /**
