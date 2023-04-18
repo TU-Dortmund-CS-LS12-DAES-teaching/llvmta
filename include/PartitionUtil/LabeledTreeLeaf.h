@@ -56,7 +56,7 @@ public:
   }
 
   // see superclass
-  Tree *clone() const {
+  Tree *clone() const override {
     Tree *res = new LabeledTreeLeaf(this->value);
     return res;
   }
@@ -77,7 +77,7 @@ public:
   void setValue(LeafType v) { value = LeafType(v); }
 
   // see superclass
-  bool equals(const Tree *t) const {
+  bool equals(const Tree *t) const override {
     if (const Leaf *leaf = dynamic_cast<const Leaf *>(t)) {
       return this->value.lessequal(leaf->value) &&
              leaf->value.lessequal(this->value);
@@ -86,7 +86,7 @@ public:
   }
 
   // see superclass
-  Tree *walk(std::function<Tree *(Tree *)> action) {
+  Tree *walk(std::function<Tree *(Tree *)> action) override {
     // Apply action to this tree, maybe this will be replaced (new subtree is
     // return value)
     Tree *res = action(this);
@@ -98,10 +98,10 @@ public:
     return res;
   }
 
-  bool isLeaf() const { return true; }
+  bool isLeaf() const override { return true; }
 
   // see superclass
-  std::string print(unsigned ident) const {
+  std::string print(unsigned ident) const override {
     std::stringstream ss;
     for (unsigned i = 0; i < ident; ++i) {
       ss << "  ";

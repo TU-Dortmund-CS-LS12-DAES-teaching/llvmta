@@ -27,6 +27,7 @@
 #ifndef STATEGRAPHWRITEBACKPROVIDER_H
 #define STATEGRAPHWRITEBACKPROVIDER_H
 
+#include "PathAnalysis/StateGraphNumericWeightProvider.h"
 namespace TimingAnalysisPass {
 template <class MuState>
 class StateGraphWritebackProvider
