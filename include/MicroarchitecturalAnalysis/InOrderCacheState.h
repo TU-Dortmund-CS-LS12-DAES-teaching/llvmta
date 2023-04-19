@@ -132,14 +132,14 @@ public:
    * instruction is known to definitely execute. Thus speculative accesses are
    * done with the last non-sepculative access.
    */
-  virtual StateSet
-  cycle(std::tuple<InstrContextMapping &, AddressInformation &> &dep) const;
+  virtual StateSet cycle(std::tuple<InstrContextMapping &, AddressInformation &>
+                             &dep) const override;
 
   /**
    * See superclass first.
    * Checks whether a ProgramLocation left the pipeline after the last cycle.
    */
-  virtual bool isFinal(ExecutionElement &pl) {
+  virtual bool isFinal(ExecutionElement &pl) override {
     bool finalFlag = false;
     if (StaticAddrProvider->goesExternal(pl.first)) {
       finalFlag =
@@ -156,7 +156,7 @@ public:
   }
 
   /// \see superclass
-  bool operator==(const InOrderCacheState &cs) const {
+  bool operator==(const InOrderCacheState &cs) const override {
     if (finishedInstruction != cs.finishedInstruction ||
         (finishedInstruction &&
          finishedInstruction.get() != cs.finishedInstruction.get())) {
@@ -169,7 +169,7 @@ public:
   }
 
   /// \see superclass
-  virtual size_t hashcode() const {
+  virtual size_t hashcode() const override {
     size_t val = SuperClass::hashcode();
     if (finishedInstruction) {
       hash_combine(val, finishedInstruction.get());
@@ -184,7 +184,7 @@ public:
   }
 
   /// \see superclass
-  virtual bool isJoinable(const InOrderCacheState &cs) const {
+  virtual bool isJoinable(const InOrderCacheState &cs) const override {
     if (finishedInstruction != cs.finishedInstruction ||
         (finishedInstruction &&
          finishedInstruction.get() != cs.finishedInstruction.get())) {
@@ -196,7 +196,7 @@ public:
   }
 
   /// \see superclass
-  virtual void join(const InOrderCacheState &cs) {
+  virtual void join(const InOrderCacheState &cs) override {
     assert(isJoinable(cs) && "Cannot join non-joinable states.");
     SuperClass::join(cs);
     this->cachestate->join(*cs.cachestate);

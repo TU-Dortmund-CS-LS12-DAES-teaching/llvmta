@@ -50,15 +50,16 @@ public:
 
   virtual ~PathAnalysisGUROBI();
 
-  virtual bool calculateExtremalPath();
-  virtual void getExtremalPath(std::map<std::string, double> &valuation);
+  virtual bool calculateExtremalPath() override;
+  virtual void
+  getExtremalPath(std::map<std::string, double> &valuation) override;
 
-  virtual void dump(std::ostream &mystream);
+  virtual void dump(std::ostream &mystream) override;
 
-  virtual bool isInfinite();
-  virtual bool hasSolution();
-  virtual BoundItv getSolution();
-  virtual bool isSolutionBound();
+  virtual bool isInfinite() override;
+  virtual bool hasSolution() override;
+  virtual BoundItv getSolution() override;
+  virtual bool isSolutionBound() override;
 
 private:
   /**

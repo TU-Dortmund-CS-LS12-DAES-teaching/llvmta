@@ -115,7 +115,8 @@ public:
    * semantics of MicroArchState to a instruction-level behaviour on a CFG-like
    * structure.
    */
-  void transfer(const MachineInstr *MI, Context *currentCtx, StateDep &anaInfo);
+  void transfer(const MachineInstr *MI, Context *currentCtx,
+                StateDep &anaInfo) override;
   /**
    * This is a helper function for transfer. It wraps the cycle-based
    * microarchitectural semantics of MicroArchState to a instruction-level
@@ -133,7 +134,7 @@ public:
    * coincide with the given branch outcome at the given branch.
    */
   void guard(const MachineInstr *MI, Context *currentCtx, StateDep &anaInfo,
-             BranchOutcome bo);
+             BranchOutcome bo) override;
 
   /**
    * See superclass first.
@@ -144,30 +145,31 @@ public:
   StateExplorationDom<MicroArchState>
   transferCall(const MachineInstr *callInstr, Context *ctx, StateDep &anaInfo,
                const MachineFunction *callee,
-               StateExplorationDom<MicroArchState> &calleeOut);
+               StateExplorationDom<MicroArchState> &calleeOut) override;
   /**
    * See superclass first.
    * On entering a bsaic block, the basic-block related timings are reseted -
    * independent of mbb.
    */
-  void enterBasicBlock(const MachineBasicBlock *mbb);
+  void enterBasicBlock(const MachineBasicBlock *mbb) override;
   /**
    * See superclass first.
    * Joins sets of states. This is typically set union.
    */
-  void join(const StateExplorationDom<MicroArchState> &element);
+  void join(const StateExplorationDom<MicroArchState> &element) override;
   /**
    * See superclass first.
    * Checks for set inclusion.
    */
-  bool lessequal(const StateExplorationDom<MicroArchState> &element) const;
+  bool
+  lessequal(const StateExplorationDom<MicroArchState> &element) const override;
   // see superclass
-  std::string print() const;
+  std::string print() const override;
 
   typename MicroArchState::StateSet getStates() const;
 
   // See superclass
-  bool isBottom() const { return states.size() == 0; }
+  bool isBottom() const override { return states.size() == 0; }
 
 private:
   /**

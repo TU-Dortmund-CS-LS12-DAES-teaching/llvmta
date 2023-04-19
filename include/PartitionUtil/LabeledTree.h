@@ -29,6 +29,7 @@
 #include <functional>
 #include <list>
 #include <set>
+#include <string>
 
 namespace TimingAnalysisPass {
 

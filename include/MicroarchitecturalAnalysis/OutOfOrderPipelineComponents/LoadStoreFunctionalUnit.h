@@ -41,28 +41,28 @@ public:
 
   ~LoadStoreFunctionalUnit() {}
 
-  FunctionalUnit *clone() const;
+  FunctionalUnit *clone() const override;
 
-  size_t hashcode() const;
+  size_t hashcode() const override;
 
-  bool equals(const FunctionalUnit &fu) const;
+  bool equals(const FunctionalUnit &fu) const override;
 
-  void output(std::ostream &stream) const;
+  void output(std::ostream &stream) const override;
 
   void reassignMemory(MemoryTopology *memt);
 
-  bool canExecuteInstruction(const MachineInstr *mi) const;
+  bool canExecuteInstruction(const MachineInstr *mi) const override;
 
-  bool isFree() const;
+  bool isFree() const override;
 
-  void executeInstruction(unsigned robTag);
+  void executeInstruction(unsigned robTag) override;
 
   std::list<FunctionalUnit *>
-  cycle(std::tuple<InstrContextMapping &, AddressInformation &> &dep);
+  cycle(std::tuple<InstrContextMapping &, AddressInformation &> &dep) override;
 
-  void flush();
+  void flush() override;
 
-  std::set<unsigned> getExecutingRobTags() const;
+  std::set<unsigned> getExecutingRobTags() const override;
 
 private:
   LoadStoreFunctionalUnit(const LoadStoreFunctionalUnit &lsfu);
@@ -198,7 +198,8 @@ std::list<FunctionalUnit *> LoadStoreFunctionalUnit<MemoryTopology>::cycle(
   if (executingInstruction) {
     ExecutionElement execElem =
         rob->getExecutionElementForRobTag(executingInstruction.get());
-    auto currInstr = StaticAddrProvider->getMachineInstrByAddr(execElem.first);
+    const auto *currInstr =
+        StaticAddrProvider->getMachineInstrByAddr(execElem.first);
 
     auto &addrInfo = std::get<1>(dep);
     unsigned numDataAccesses = addrInfo.getNumOfDataAccesses(currInstr);

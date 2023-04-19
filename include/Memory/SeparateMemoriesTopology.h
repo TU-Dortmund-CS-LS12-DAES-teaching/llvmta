@@ -28,6 +28,7 @@
 
 #include "llvm/Support/Debug.h"
 
+#include "Memory/AbstractCyclingMemory.h"
 #include "Memory/MemoryTopologyInterface.h"
 #include <list>
 
@@ -102,15 +103,16 @@ public:
    * accessed.
    */
   virtual boost::optional<unsigned> accessInstr(unsigned addr,
-                                                unsigned numWords);
+                                                unsigned numWords) override;
 
   /**
    * Tells the memory topology to access an instruction.
    * Returns the id for that instruction or none, if something is already
    * accessed.
    */
-  virtual boost::optional<unsigned>
-  accessData(AbstractAddress addr, AccessType load_store, unsigned numWords);
+  virtual boost::optional<unsigned> accessData(AbstractAddress addr,
+                                               AccessType load_store,
+                                               unsigned numWords) override;
 
   /**
    * Cycle method for the memory topology.
@@ -123,45 +125,45 @@ public:
    * Returns a list of resulting memory topology states.
    */
   virtual std::list<SeparateMemoriesTopology>
-  cycle(bool potentialDataMissesPending) const;
+  cycle(bool potentialDataMissesPending) const override;
 
   /// Not supported
-  virtual bool shouldPipelineStall() const;
+  virtual bool shouldPipelineStall() const override;
 
   /**
    * Returns whether a given ID (instruction access) has been finished.
    */
-  virtual bool finishedInstrAccess(unsigned accessId);
+  virtual bool finishedInstrAccess(unsigned accessId) override;
 
   /**
    * Returns whether a given ID (data access) has been finished.
    */
-  virtual bool finishedDataAccess(unsigned accessId);
+  virtual bool finishedDataAccess(unsigned accessId) override;
 
-  virtual bool hasUnfinishedAccesses() const;
+  virtual bool hasUnfinishedAccesses() const override;
 
-  virtual bool operator==(const SeparateMemoriesTopology &smt2) const;
+  virtual bool operator==(const SeparateMemoriesTopology &smt2) const override;
 
-  virtual size_t hashcode() const;
+  virtual size_t hashcode() const override;
 
-  virtual bool isJoinable(const SeparateMemoriesTopology &smt2) const;
+  virtual bool isJoinable(const SeparateMemoriesTopology &smt2) const override;
 
-  virtual void join(const SeparateMemoriesTopology &smt2);
+  virtual void join(const SeparateMemoriesTopology &smt2) override;
 
   /**
    * Is the memory topology currently performing an instruction access?
    */
-  virtual bool isBusyAccessingInstr() const;
+  virtual bool isBusyAccessingInstr() const override;
 
   /**
    * Is the memory topology currently performing a data access?
    */
-  virtual bool isBusyAccessingData() const;
+  virtual bool isBusyAccessingData() const override;
 
   /**
    * Fast-forwarding of the memory topology.
    */
-  virtual std::list<SeparateMemoriesTopology> fastForward() const;
+  virtual std::list<SeparateMemoriesTopology> fastForward() const override;
 
   template <AbstractCyclingMemory *(*makeInstrMemf)(),
             AbstractCyclingMemory *(*makeDataMemf)()>

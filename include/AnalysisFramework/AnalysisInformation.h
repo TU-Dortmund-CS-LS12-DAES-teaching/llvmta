@@ -165,30 +165,31 @@ public:
     // unique_ptr are deleted automatically
   }
 
-  virtual bool hasAnaInfoBefore(const MachineInstr *MI) const {
+  virtual bool hasAnaInfoBefore(const MachineInstr *MI) const override {
     // Either we precomputed everything, or only partially
     return AnaInfoPol == AnaInfoPolicy::PRECOMPALL || anaInfoIn->count(MI) > 0;
   }
 
-  virtual const AnaDom &getAnaInfoBefore(const MachineInstr *MI) const {
+  virtual const AnaDom &
+  getAnaInfoBefore(const MachineInstr *MI) const override {
     assert(anaInfoIn->count(MI) > 0 &&
            "We could not find information for the given g");
     return anaInfoIn->find(MI)->second;
   }
 
-  virtual bool hasAnaInfoAfter(const MachineInstr *MI) const {
+  virtual bool hasAnaInfoAfter(const MachineInstr *MI) const override {
     // Either we precomputed everything, or only partially
     return AnaInfoPol == AnaInfoPolicy::PRECOMPALL || anaInfoOut->count(MI) > 0;
   }
 
-  virtual const AnaDom &getAnaInfoAfter(const MachineInstr *MI) const {
+  virtual const AnaDom &getAnaInfoAfter(const MachineInstr *MI) const override {
     assert(anaInfoOut->count(MI) > 0 &&
            "We could not find information for the given g");
     return anaInfoOut->find(MI)->second;
   }
 
   virtual const AnaDom getAnaInfoAfterGuarded(const MachineInstr *MI,
-                                              BranchOutcome bo) const {
+                                              BranchOutcome bo) const override {
     assert((MI->isConditionalBranch() || isJumpTableBranch(MI) ||
             MI->isReturn()) &&
            "Cannot have guarded analysis info for non-cond. branch");
@@ -200,7 +201,7 @@ public:
     return anaInfoAfter;
   }
 
-  virtual AnaDeps getAnaDepsInfo() const { return depAnalysisResults; }
+  virtual AnaDeps getAnaDepsInfo() const override { return depAnalysisResults; }
 
 private:
   /**

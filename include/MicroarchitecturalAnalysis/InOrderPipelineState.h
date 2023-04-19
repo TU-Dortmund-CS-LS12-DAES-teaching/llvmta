@@ -156,28 +156,30 @@ public:
    * See superclass first.
    * Produces all possible successor states.
    */
-  virtual StateSet
-  cycle(std::tuple<InstrContextMapping &, AddressInformation &> &dep) const;
+  virtual StateSet cycle(std::tuple<InstrContextMapping &, AddressInformation &>
+                             &dep) const override;
 
   /**
    * See superclass first.
    * Checks whether a ProgramLocation left the pipeline after the last cycle.
    */
-  virtual bool isFinal(ExecutionElement &pl);
+  virtual bool isFinal(ExecutionElement &pl) override;
 
-  virtual bool isWaitingForJoin() const { return memory.isWaitingForJoin(); }
-
-  /// \see superclass
-  bool operator==(const InOrderPipelineState &ds) const;
-
-  /// \see superclass
-  virtual size_t hashcode() const;
+  virtual bool isWaitingForJoin() const override {
+    return memory.isWaitingForJoin();
+  }
 
   /// \see superclass
-  virtual bool isJoinable(const InOrderPipelineState &ds) const;
+  bool operator==(const InOrderPipelineState &ds) const override;
 
   /// \see superclass
-  virtual void join(const InOrderPipelineState &ds);
+  virtual size_t hashcode() const override;
+
+  /// \see superclass
+  virtual bool isJoinable(const InOrderPipelineState &ds) const override;
+
+  /// \see superclass
+  virtual void join(const InOrderPipelineState &ds) override;
 
   // Output operation
   template <class Mem>

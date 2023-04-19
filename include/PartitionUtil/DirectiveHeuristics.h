@@ -95,7 +95,7 @@ public:
    *
    * @param AU
    */
-  void getAnalysisUsage(llvm::AnalysisUsage &AU) const;
+  void getAnalysisUsage(llvm::AnalysisUsage &AU) const override;
 
   /**
    * @brief
@@ -109,7 +109,7 @@ public:
    * @return true
    * @return false
    */
-  bool runOnMachineFunction(MachineFunction &MF);
+  bool runOnMachineFunction(MachineFunction &MF) override;
   /**
    * @brief
    * Derive partitioning directives on the instruction level, for each basic
@@ -122,7 +122,7 @@ public:
    */
   bool runOnMachineBasicBlock(MachineBasicBlock &MBB);
 
-  llvm::StringRef getPassName() const {
+  llvm::StringRef getPassName() const override {
     return "Annotate the control-flow-graph with Trace Partitioning Directives";
   }
 
