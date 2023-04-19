@@ -68,7 +68,7 @@ BinaryInstructionIterator::BinaryInstructionIterator(std::ifstream &file){
 
 }
 
-bool BinaryInstructionIterator::getNext(uint64_t *instruction){
+bool BinaryInstructionIterator::getNext(derivedInstr *instruction){
     return false;
 }
 
@@ -110,13 +110,10 @@ bool BinaryAdressManager::initialize(){
     return false;
 }
 
-bool BinaryAdressManager::isBranch(uint64_t instruction){
+bool BinaryAdressManager::isBranch(derivedInstr instruction){
     return false;
 }
-uint64_t BinaryAdressManager::getAddr(uint64_t instruction){
-    return false;
-}
-uint64_t BinaryAdressManager::getBranchTarget(uint64_t instruction){
+uint64_t BinaryAdressManager::getBranchTarget(derivedInstr instruction){
     return false;
 }
 
@@ -124,7 +121,7 @@ uint64_t BinaryAdressManager::getBranchTarget(uint64_t instruction){
 void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
     //TODO maybe need to provide binItr pointer instead
     //TODO does llvm reconise a BB even when a jump enters not at the entry of the block?
-    uint64_t instr;
+    derivedInstr instr;
     uint64_t entry;
     uint64_t exit;
     uint64_t branchTarget;
@@ -132,9 +129,9 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
     bool newBlock=false;
     /*set entry for first block*/
     if(binItr->getNext(&instr)){
-        entry=this->getAddr(instr);
+        entry=instr.addr;
         if(this->isBranch(instr)){
-            exit=this->getAddr(instr);
+            exit=instr.addr;
             branchTarget=this->getBranchTarget(instr);
             newBlock=true;
         }
@@ -149,14 +146,14 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
         /*if pref block was read completly get continueTarget and commit block*/
         /*then set entry for new block*/
         if(newBlock){
-            continueTarget=this->getAddr(instr);
+            continueTarget=instr.addr;
             this->binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,branchTarget,continueTarget)));
 
-            entry = this->getAddr(instr);
+            entry = instr.addr;
         }
         /*complete block if terminator found*/
         if(this->isBranch(instr)){
-            exit=this->getAddr(instr);
+            exit=instr.addr;
             branchTarget=this->getBranchTarget(instr);
             newBlock=true;
         }
@@ -164,7 +161,7 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
     }
 
     /*when reaching eof commit last block without targets*/
-    exit=this->getAddr(instr);
+    exit=instr.addr;
     binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,NAN,NAN)));
 }
 

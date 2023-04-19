@@ -36,6 +36,14 @@ using namespace llvm;
 namespace TimingAnalysisPass {
 
 /*utility structs*/
+
+struct derivedInstr{
+    bool isLabel;
+    uint64_t addr;
+    std::string funct;
+    std::vector<std::string> operands;
+};
+
 /*internal utility class to hold basicblock adresses*/
 /*while deriving block structure from binary*/
 class BinaryBasicBlock{
@@ -60,7 +68,7 @@ class BinaryInstructionIterator{
 public:
     BinaryInstructionIterator(std::ifstream &file);
   
-    virtual bool getNext(uint64_t *instruction);
+    virtual bool getNext(derivedInstr *instruction);
 };
 
 /*main utility to derive adress information from binary executable*/
@@ -76,11 +84,9 @@ public:
 private:
     
     /*platform specific functions implemented by subclass*/
-    virtual bool isBranch(uint64_t instruction);
+    virtual bool isBranch(derivedInstr instruction);
 
-    virtual uint64_t getAddr(uint64_t instruction);
-
-    virtual uint64_t getBranchTarget(uint64_t instruction);
+    virtual uint64_t getBranchTarget(derivedInstr instruction);
 
 protected:
     /*general functions*/

@@ -38,44 +38,55 @@ RiscvBinaryInstructionIterator::RiscvBinaryInstructionIterator(std::ifstream &fi
     this->file=&file;
 }
 
-bool RiscvBinaryInstructionIterator::getNext(uint64_t *instruction){
-    //std::cout << "\nreading instruction\n";
-    //read 16bit parcel
+bool RiscvBinaryInstructionIterator::getNext(derivedInstr *instruction){
     char * buff=new char [64];
-    uint64_t result=0;
+    derivedInstr result;
     
-    std::regex label_expr ("[0-9a-f]+ [/<][^>]+[/>][/:]");
     
     /* match instructions: addr:.hexval[16-32bit]..<tab>instr_type<tab>.operands
     "[ ]+([0-9a-f]+)[/:](?: [a-f0-9]{2}){2,4}  [ ]*[\\t](\\w+)[\\t].+"
         catch instr addr: ([0-9a-f]+)
         catch instr type: (\\w+)
     */
-    std::regex instr_expr ("[ ]+([0-9a-f]+)[/:](?: [a-f0-9]{2}){2,4}  [ ]*[\\t](\\w+)[\\t].+");
-    std::smatch matches;
+    std::regex instr_expr ("[ ]+([0-9a-f]+)[/:](?: [a-f0-9]{2}){2,4}  [ ]*[\\t](\\w+)[\\t]{0,1}(.+)*");
+    std::regex operand_expr ("[ ]{0,1}([^<, ]+)+(?: <[^>]+>){0,1}");
+    std::regex label_expr ("[0-9a-f]+ [/<][^>]+[/>][/:]"); 
+    std::smatch instr_match;
     
     int it=0;
     while(!file->eof() && !file->fail() && it++<10){
+        
         this->file->getline(buff,64);
         std::string line (buff);
-        if(std::regex_match(line,label_expr)){
-            //TODO label list
-            return true;
-        }
-        if(std::regex_match(line,matches,instr_expr)){
-            result=1;//TODO extract instruction
-            std::cout << "matches: \n";
-            for(std::string str : matches){
-                std::cout << str << "\n";
+        
+        //check if label 
+        result.isLabel=std::regex_match(line,label_expr);
+
+        if(std::regex_match(line,instr_match,instr_expr)){
+            result.addr=std::stoul(instr_match[1].str(),nullptr,64);
+            result.funct=instr_match[2].str();
+
+            //iterate operand string to extract operand list
+            std::string oplst=instr_match[3].str();
+            std::sregex_iterator regIt (oplst.begin(),oplst.end(),operand_expr);
+            std::sregex_iterator end;
+            while(!(end==regIt)){
+                std::smatch op_match=*regIt;
+                result.operands.push_back(op_match[1].str());
+                regIt++;
             }
-            
-             
+
+            /*std::cout << "matches: \n";
+            for(std::string str : instr_match){
+                std::cout << str << "\n";
+            }*/
             return true;
         }
         
-        std::cout <<"no match, dropped:";
-        std::cout <<buff;
-        std::cout <<"\n";
+        if(!result.isLabel){
+            std::cout <<"no match, dropped:"<<buff<<"\n";
+        }
+  
 
     }
     return false;
@@ -122,15 +133,12 @@ bool RiscvBinaryAdressManager::initialize(){
     return true;
 }
 
-bool RiscvBinaryAdressManager::isBranch(uint64_t instruction) {
+bool RiscvBinaryAdressManager::isBranch(derivedInstr instruction) {
     return true;
 }
   
-uint64_t RiscvBinaryAdressManager::getAddr(uint64_t instruction){
-    return 0;
-}
 
-uint64_t RiscvBinaryAdressManager::getBranchTarget(uint64_t instruction){
+uint64_t RiscvBinaryAdressManager::getBranchTarget(derivedInstr instruction){
     return 0;
 }
 

@@ -25,6 +25,7 @@
 
 #include "Util/Util.h"
 #include "Util/BinaryAdressManager.h"
+#include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/Target/TargetMachine.h"
 
 namespace TimingAnalysisPass {
@@ -34,7 +35,7 @@ class RiscvBinaryInstructionIterator : public BinaryInstructionIterator{
 public:
     RiscvBinaryInstructionIterator(std::ifstream &file);
     
-    bool getNext(uint64_t *instruction) override;
+    bool getNext(derivedInstr *instruction) override;
 };
 
 /**/
@@ -47,11 +48,9 @@ public:
     bool initialize() override;
 
 private:
-    bool isBranch(uint64_t instruction) override;
+    bool isBranch(derivedInstr instruction) override;
 
-    uint64_t getAddr(uint64_t instruction) override;
-
-    uint64_t getBranchTarget(uint64_t instruction) override;
+    uint64_t getBranchTarget(derivedInstr instruction) override;
 
 protected:
     //void buildBlocks(BinaryInstructionIterator *binItr);
