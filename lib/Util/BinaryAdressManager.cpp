@@ -24,7 +24,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Util/BinaryAdressManager.h"
-#include "LLVMPasses/StaticAddressProvider.h"
+//#include "LLVMPasses/StaticAddressProvider.h"
 #include "RISCV.h"
 #include "Util/Options.h"
 #include "llvm/Target/TargetMachine.h"
@@ -32,6 +32,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <fstream>
 #include <ostream>
 #include <unistd.h>
 
@@ -63,6 +64,13 @@ uint64_t BinaryBasicBlock::getContinueTarget(){
 
 
 
+BinaryInstructionIterator::BinaryInstructionIterator(std::ifstream &file){
+
+}
+
+bool BinaryInstructionIterator::getNext(uint64_t *instruction){
+    return false;
+}
 
 
 
@@ -78,6 +86,8 @@ BinaryAdressManager::BinaryAdressManager(TargetMachine &TM) {
         std::cout << "building RISCV_32 linked binary...\n";
         system("/workspaces/llvmta/testcases/util_scripts/BuildLinkedBinary.sh");
     }
+
+
     std::ifstream myFile;
     myFile.open("dummyBinaryfile.txt",std::ifstream::in);
     std::cout << "opended binary\n";
@@ -92,16 +102,24 @@ BinaryAdressManager::BinaryAdressManager(TargetMachine &TM) {
     std::cout << " -dir\n";
     system("ls");
     std::cout << "\n";std::cout << "\n";
-    
-    std::ifstream ifs;
-    ifs.open ("dummyBinaryfile.txt", std::ifstream::in);
-    char c = ifs.get();
-    while (ifs.good()) {
-        std::cout << c;
-        c = ifs.get();
-    }
 
+    
 }
+
+bool BinaryAdressManager::initialize(){
+    return false;
+}
+
+bool BinaryAdressManager::isBranch(uint64_t instruction){
+    return false;
+}
+uint64_t BinaryAdressManager::getAddr(uint64_t instruction){
+    return false;
+}
+uint64_t BinaryAdressManager::getBranchTarget(uint64_t instruction){
+    return false;
+}
+
 
 void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
     //TODO maybe need to provide binItr pointer instead
@@ -114,15 +132,15 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
     bool newBlock=false;
     /*set entry for first block*/
     if(binItr->getNext(&instr)){
-        entry=getAddr(instr);
-        if(isBranch(instr)){
-            exit=getAddr(instr);
-            branchTarget=getBranchTarget(instr);
+        entry=this->getAddr(instr);
+        if(this->isBranch(instr)){
+            exit=this->getAddr(instr);
+            branchTarget=this->getBranchTarget(instr);
             newBlock=true;
         }
 
     }else{
-        std::cerr << "Err: empty BinaryInstructionIterator provided. Check if binary was build successfull";
+        std::cerr << "Err: empty BinaryInstructionIterator provided. Check if binary was build successfull\n";
         std::exit(EXIT_FAILURE);
     }
     
@@ -131,22 +149,22 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
         /*if pref block was read completly get continueTarget and commit block*/
         /*then set entry for new block*/
         if(newBlock){
-            continueTarget=getAddr(instr);
-            binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,branchTarget,continueTarget)));
+            continueTarget=this->getAddr(instr);
+            this->binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,branchTarget,continueTarget)));
 
-            entry = getAddr(instr);
+            entry = this->getAddr(instr);
         }
         /*complete block if terminator found*/
-        if(isBranch(instr)){
-            exit=getAddr(instr);
-            branchTarget=getBranchTarget(instr);
+        if(this->isBranch(instr)){
+            exit=this->getAddr(instr);
+            branchTarget=this->getBranchTarget(instr);
             newBlock=true;
         }
 
     }
 
     /*when reaching eof commit last block without targets*/
-    exit=getAddr(instr);
+    exit=this->getAddr(instr);
     binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,NAN,NAN)));
 }
 

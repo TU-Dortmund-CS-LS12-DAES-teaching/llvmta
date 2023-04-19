@@ -40,7 +40,8 @@
 
 #include <sstream>
 
-#include "Util/BinaryAdressManager.h" 
+#include "Util/RiscvBinaryAdressManager.h"
+
 
 using namespace llvm;
 
@@ -52,7 +53,8 @@ char StaticAddressProvider::ID = 0;
 
 StaticAddressProvider::StaticAddressProvider(TargetMachine &TM)
     : MachineFunctionPass(ID), TM(TM) {
-  BinaryAdressManager binAdrMan(TM);
+ BinaryAdressManager *binMan=new RiscvBinaryAdressManager(TM);
+ binMan->initialize();
   CodeAddress = CodeStartAddress;
   RodataAddress = 0; // Will be set after the doInitialization()
 }
@@ -79,6 +81,8 @@ bool StaticAddressProvider::runOnMachineFunction(MachineFunction &F) {
   return Changed;
 }
 
+
+int myI=0;
 bool StaticAddressProvider::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
   unsigned SkipAddresses = 0; // Skip that many words in address space, e.g. for
                               // the jump table allocation
@@ -91,6 +95,20 @@ bool StaticAddressProvider::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
     assert(!I.isBundle() && "We found a bundled instruction!");
 
     bool AssignAddress = false;
+
+
+    if (AdressMapping && myI++<20){ 
+      //for(MachineOperand &O : I.operands() )
+      std::cout<<"opcode: ";
+      std::cout << I.getOpcode();
+      std::cout << "\n";
+      std::cout<<"pseudo: ";
+      std::cout << I.isPseudo();
+      std::cout << "\n";
+      I.print(llvm::outs());
+      os:llvm::outs()<<"\n";
+    }
+
 
     // Remember the position of the instruction within the basic block
     Ins2posinbb.insert(std::make_pair(&I, PosInMbb));

@@ -30,11 +30,11 @@
 namespace TimingAnalysisPass {
 
 class RiscvBinaryInstructionIterator : public BinaryInstructionIterator{
-    std::ifstream file;
+    std::ifstream *file;
 public:
-    RiscvBinaryInstructionIterator(std::ifstream file);
+    RiscvBinaryInstructionIterator(std::ifstream &file);
     
-    bool getNext(uint64_t *instruction);
+    bool getNext(uint64_t *instruction) override;
 };
 
 /**/
@@ -44,9 +44,17 @@ public:
     /* constructor */
     RiscvBinaryAdressManager(TargetMachine &TM);
 
-    bool isBranch(uint64_t);
-    
-    void buildBlocks();
+    bool initialize() override;
+
+private:
+    bool isBranch(uint64_t instruction) override;
+
+    uint64_t getAddr(uint64_t instruction) override;
+
+    uint64_t getBranchTarget(uint64_t instruction) override;
+
+protected:
+    //void buildBlocks(BinaryInstructionIterator *binItr);
     
 };
 

@@ -56,11 +56,11 @@ public:
 
 /*file iterator abstracting plattform-specific instruction sizes*/
 class BinaryInstructionIterator{
-    std::ifstream file;
+    std::ifstream *file;
 public:
-    BinaryInstructionIterator(std::ifstream file);
+    BinaryInstructionIterator(std::ifstream &file);
   
-    bool getNext(uint64_t *instruction);
+    virtual bool getNext(uint64_t *instruction);
 };
 
 /*main utility to derive adress information from binary executable*/
@@ -70,17 +70,19 @@ public:
     /* constructor */
     BinaryAdressManager(TargetMachine &TM);
 
+    virtual bool initialize();
+
 
 private:
     
     /*platform specific functions implemented by subclass*/
-    virtual bool isBranch(uint64_t);
-    
+    virtual bool isBranch(uint64_t instruction);
+
     virtual uint64_t getAddr(uint64_t instruction);
 
     virtual uint64_t getBranchTarget(uint64_t instruction);
 
-    
+protected:
     /*general functions*/
     void buildBlocks(BinaryInstructionIterator *binItr);
     
