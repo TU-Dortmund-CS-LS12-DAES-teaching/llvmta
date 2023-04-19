@@ -132,14 +132,14 @@ public:
    * instruction is known to definitely execute. Thus speculative accesses are
    * done with the last non-sepculative access.
    */
-  virtual StateSet
-  cycle(std::tuple<InstrContextMapping &, AddressInformation &> &dep) const;
+  virtual StateSet cycle(std::tuple<InstrContextMapping &, AddressInformation &>
+                             &dep) const override;
 
   /**
    * See superclass first.
    * Checks whether a ProgramLocation left the pipeline after the last cycle.
    */
-  virtual bool isFinal(ExecutionElement &pl) {
+  virtual bool isFinal(ExecutionElement &pl) override {
     bool finalFlag = false;
     if (StaticAddrProvider->goesExternal(pl.first)) {
       finalFlag =
@@ -156,7 +156,7 @@ public:
   }
 
   /// \see superclass
-  bool operator==(const OutOfOrderCacheState &cs) const {
+  bool operator==(const OutOfOrderCacheState &cs) const override {
     if (finishedInstruction != cs.finishedInstruction ||
         (finishedInstruction &&
          finishedInstruction.get() != cs.finishedInstruction.get())) {
@@ -169,7 +169,7 @@ public:
   }
 
   /// \see superclass
-  virtual size_t hashcode() const {
+  virtual size_t hashcode() const override {
     size_t val = SuperClass::hashcode();
     if (finishedInstruction) {
       hash_combine(val, finishedInstruction.get());
@@ -184,7 +184,7 @@ public:
   }
 
   /// \see superclass
-  virtual bool isJoinable(const OutOfOrderCacheState &cs) const {
+  virtual bool isJoinable(const OutOfOrderCacheState &cs) const override {
     if (finishedInstruction != cs.finishedInstruction ||
         (finishedInstruction &&
          finishedInstruction.get() != cs.finishedInstruction.get())) {
@@ -196,7 +196,7 @@ public:
   }
 
   /// \see superclass
-  virtual void join(const OutOfOrderCacheState &cs) {
+  virtual void join(const OutOfOrderCacheState &cs) override {
     assert(isJoinable(cs) && "Cannot join non-joinable states.");
     SuperClass::join(cs);
     this->cachestate->join(*cs.cachestate);
@@ -327,50 +327,48 @@ OutOfOrderCacheState<makeCache, dataCache>::cycle(
         "driverSED", for (auto &succ
                           : tmpres) { std::cerr << succ; });
     return tmpres;
-  } else {
-    StateSet res;
-    for (const auto &stateref : tmpres) {
-      OutOfOrderCacheState state(stateref);
-      if (StaticAddrProvider->hasMachineInstrByAddr(state.pc.getPc().first)) {
-        auto nextInstr =
-            StaticAddrProvider->getMachineInstrByAddr(state.pc.getPc().first);
-        auto edge =
-            std::make_pair(currInstr->getParent(), nextInstr->getParent());
-        // Do persistence scope entering
-        if (edge.first != edge.second) {
-          DEBUG_WITH_TYPE("persistence",
-                          errs()
-                              << "We see edge (BB" << edge.first->getNumber()
-                              << ", BB" << edge.second->getNumber() << ")\n");
-          if (PersistenceScopeInfo::getInfo().entersScope(edge)) {
-            for (auto scope :
-                 PersistenceScopeInfo::getInfo().getEnteringScopes(edge)) {
-              DEBUG_WITH_TYPE("persistence",
-                              errs() << "We are going to enter a scope: "
-                                     << scope.getId() << "\n");
-              state.cachestate->enterScope(scope);
-            }
+  }
+  StateSet res;
+  for (const auto &stateref : tmpres) {
+    OutOfOrderCacheState state(stateref);
+    if (StaticAddrProvider->hasMachineInstrByAddr(state.pc.getPc().first)) {
+      auto nextInstr =
+          StaticAddrProvider->getMachineInstrByAddr(state.pc.getPc().first);
+      auto edge =
+          std::make_pair(currInstr->getParent(), nextInstr->getParent());
+      // Do persistence scope entering
+      if (edge.first != edge.second) {
+        DEBUG_WITH_TYPE("persistence",
+                        errs() << "We see edge (BB" << edge.first->getNumber()
+                               << ", BB" << edge.second->getNumber() << ")\n");
+        if (PersistenceScopeInfo::getInfo().entersScope(edge)) {
+          for (auto scope :
+               PersistenceScopeInfo::getInfo().getEnteringScopes(edge)) {
+            DEBUG_WITH_TYPE("persistence",
+                            errs() << "We are going to enter a scope: "
+                                   << scope.getId() << "\n");
+            state.cachestate->enterScope(scope);
           }
-          // Do persistence scope leaving
-          if (PersistenceScopeInfo::getInfo().leavesScope(edge)) {
-            for (auto scope :
-                 PersistenceScopeInfo::getInfo().getLeavingScopes(edge)) {
-              DEBUG_WITH_TYPE("persistence",
-                              errs() << "We are going to leave a scope: "
-                                     << scope.getId() << "\n");
-              state.cachestate->leaveScope(scope);
-            }
+        }
+        // Do persistence scope leaving
+        if (PersistenceScopeInfo::getInfo().leavesScope(edge)) {
+          for (auto scope :
+               PersistenceScopeInfo::getInfo().getLeavingScopes(edge)) {
+            DEBUG_WITH_TYPE("persistence",
+                            errs() << "We are going to leave a scope: "
+                                   << scope.getId() << "\n");
+            state.cachestate->leaveScope(scope);
           }
         }
       }
-      res.insert(state);
     }
-
-    DEBUG_WITH_TYPE(
-        "driverSED", for (auto &succ
-                          : res) { std::cerr << succ; });
-    return res;
+    res.insert(state);
   }
+
+  DEBUG_WITH_TYPE(
+      "driverSED", for (auto &succ
+                        : res) { std::cerr << succ; });
+  return res;
 }
 
 template <dom::cache::AbstractCache *(*makeCachef)(bool), bool dataCachef>
