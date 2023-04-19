@@ -196,8 +196,9 @@ public:
   std::string print() const {
     if (partitionedAnalysisInfo == nullptr) {
       return "bot";
+    } else {
+      return partitionedAnalysisInfo->print();
     }
-    return partitionedAnalysisInfo->print();
   }
 
 private:
@@ -264,7 +265,7 @@ void PartitioningDomain<AnalysisDom, Granularity>::updateContexts(
           currPath.pop_back();
           switch (token->getType()) {
           case PartitionTokenType::LOOPPEEL: {
-            auto *tokenPeel =
+            auto tokenPeel =
                 dynamic_cast<PartitionTokenLoopPeel *>(token.get());
             if (tokenPeel->backedgeTakenCount() == 0) {
               this->addContext(currCtx, anaElement);
@@ -275,7 +276,7 @@ void PartitioningDomain<AnalysisDom, Granularity>::updateContexts(
             break;
           }
           case PartitionTokenType::LOOPITER: {
-            auto *tokenIter =
+            auto tokenIter =
                 dynamic_cast<PartitionTokenLoopIter *>(token.get());
             if (tokenIter->backedgeLeastTakenCount() == 0) {
               this->addContext(currCtx, anaElement);
@@ -484,7 +485,7 @@ void PartitioningDomain<AnalysisDom, Granularity>::transferEdge(
     for (auto lab : labels) {
       switch (lab->getType()) {
       case PartitionTokenType::LOOPPEEL: {
-        auto *labPeel = dynamic_cast<PartitionTokenLoopPeel *>(lab);
+        auto labPeel = dynamic_cast<PartitionTokenLoopPeel *>(lab);
         if (labPeel->hasBackedge(edge)) {
           auto leaf =
               dynamic_cast<ContextTreeLeaf *>(resultnode->getChild(labPeel));
@@ -506,7 +507,7 @@ void PartitioningDomain<AnalysisDom, Granularity>::transferEdge(
         break;
       }
       case PartitionTokenType::LOOPITER: {
-        auto *labIter = dynamic_cast<PartitionTokenLoopIter *>(lab);
+        auto labIter = dynamic_cast<PartitionTokenLoopIter *>(lab);
         if (labIter->hasBackedge(edge)) {
           auto leaf =
               dynamic_cast<ContextTreeLeaf *>(resultnode->getChild(labIter));
@@ -590,7 +591,7 @@ bool PartitioningDomain<AnalysisDom, Granularity>::addContext(
       auto res = new ContextTreeNode();
       res->addChild(PartitionTokenNone::getInstance(),
                     currentTreePosition->clone());
-      auto *label = labels.front();
+      auto label = labels.front();
       labels.pop_front();
       auto subtree = ContextTree::makeLabeledTree(labels, ana);
       res->addChild(label, subtree);
@@ -626,17 +627,18 @@ bool PartitioningDomain<AnalysisDom, Granularity>::addContext(
                  noneLeaf->getValue().lessequal(oldnoneleaf));
       }
       break;
-    }
-    // Push it to the subtree with same topmost label, or add new one
-    auto *topmost = labels.front();
-    labels.pop_front();
-    auto subtree = internalNode->getChildWithEqualLabel(topmost);
-    if (subtree == nullptr) {
-      internalNode->addChild(topmost,
-                             ContextTree::makeLabeledTree(labels, ana));
-      break;
-
-      currentTreePosition = subtree;
+    } else {
+      // Push it to the subtree with same topmost label, or add new one
+      auto topmost = labels.front();
+      labels.pop_front();
+      auto subtree = internalNode->getChildWithEqualLabel(topmost);
+      if (subtree == nullptr) {
+        internalNode->addChild(topmost,
+                               ContextTree::makeLabeledTree(labels, ana));
+        break;
+      } else {
+        currentTreePosition = subtree;
+      }
     }
   }
   return true;
@@ -680,7 +682,7 @@ AnalysisDom PartitioningDomain<AnalysisDom, Granularity>::findAnalysisInfo(
       assert(noneleaf != nullptr && "None child of tree is not a leaf");
       return noneleaf->getValueCopy();
     }
-    auto *topmost = tokenList.front();
+    auto topmost = tokenList.front();
     tokenList.pop_front();
     currentTreePosition = node->getChildWithEqualLabel(topmost);
     // No subtree found for this context, something is wrong
@@ -716,7 +718,7 @@ AnalysisDom PartitioningDomain<AnalysisDom, Granularity>::findAnalysisInfoEarly(
       assert(noneleaf != nullptr && "None child of tree is not a leaf");
       return noneleaf->getValueCopy();
     }
-    auto *topmost = tokenList.front();
+    auto topmost = tokenList.front();
     tokenList.pop_front();
     currentTreePosition = node->getChildWithEqualLabel(topmost);
     // No subtree found for this context (as we are just building up contexts
