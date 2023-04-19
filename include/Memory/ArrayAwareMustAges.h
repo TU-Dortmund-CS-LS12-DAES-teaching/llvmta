@@ -26,6 +26,8 @@
 #ifndef ARRAY_AWARE_MUST_AGES_H
 #define ARRAY_AWARE_MUST_AGES_H
 
+#include "Memory/CacheTraits.h"
+#include "Util/Options.h"
 #include "Util/Util.h"
 
 namespace TimingAnalysisPass {
@@ -99,20 +101,22 @@ protected:
   std::multiset<const GlobalVariable *> ArrayAccesses;
 
 public:
-  virtual bool isAssociativity() const { return age == T->ASSOCIATIVITY; }
-  virtual WayType getAge() const {
+  virtual bool isAssociativity() const override {
+    return age == T->ASSOCIATIVITY;
+  }
+  virtual WayType getAge() const override {
     assert(!this->isAssociativity());
     return (WayType)age;
   }
 
-  virtual void ageBy(const GlobalVariable *var) {
+  virtual void ageBy(const GlobalVariable *var) override {
     assert(var);
     if (ArrayAccesses.count(var) < getPerSetSize<T>(var)) {
       ArrayAccesses.insert(var);
       this->ageBy(1);
     }
   }
-  virtual void ageBy(unsigned amount) {
+  virtual void ageBy(unsigned amount) override {
     assert(!this->isAssociativity());
     if (age >= T->ASSOCIATIVITY - amount) {
       this->ArrayAccesses.clear();
@@ -123,21 +127,21 @@ public:
     age += amount;
   }
 
-  virtual void join(const MustAge<T> &other) = 0;
+  virtual void join(const MustAge<T> &other) override = 0;
 
-  virtual void dump(std::ostream &stream) const {
+  virtual void dump(std::ostream &stream) const override {
     stream << "(" << (unsigned)this->age << ", ";
     printMultiSet(stream, ArrayAccesses);
     stream << ")";
   }
-  virtual bool operator==(const MustAge<T> &other_) const {
+  virtual bool operator==(const MustAge<T> &other_) const override {
     assert(!this->isAssociativity() && !other_.isAssociativity());
     if (const Self *other = dynamic_cast<const Self *>(&other_)) {
       return age == other->getAge() && ArrayAccesses == other->ArrayAccesses;
     }
     return false;
   }
-  virtual bool operator<(const MustAge<T> &other_) const {
+  virtual bool operator<(const MustAge<T> &other_) const override {
     assert(!this->isAssociativity() && !other_.isAssociativity());
     if (const Self *other = dynamic_cast<const Self *>(&other_)) {
       return age < other->age ||
@@ -155,11 +159,11 @@ class MustAgeConflictSetIntersect : public MustAgeConflictSet<T> {
   typedef MustAgeConflictSetIntersect<T> Self;
 
 public:
-  virtual std::unique_ptr<MustAge<T>> clone() {
+  virtual std::unique_ptr<MustAge<T>> clone() override {
     auto ptr = std::make_unique<Self, Self &>(*this);
     return ptr;
   }
-  virtual void join(const MustAge<T> &other_) {
+  virtual void join(const MustAge<T> &other_) override {
     auto other = dynamic_cast<const MustAgeConflictSetIntersect<T> &>(other_);
 
     assert(!this->isAssociativity() && !other.isAssociativity());
@@ -183,11 +187,11 @@ class MustAgeConflictSetUnion : public MustAgeConflictSet<T> {
   typedef MustAgeConflictSetUnion<T> Self;
 
 public:
-  virtual std::unique_ptr<MustAge<T>> clone() {
+  virtual std::unique_ptr<MustAge<T>> clone() override {
     auto ptr = std::make_unique<Self, Self &>(*this);
     return ptr;
   }
-  virtual void join(const MustAge<T> &other_) {
+  virtual void join(const MustAge<T> &other_) override {
     /* Join Procedure:
      * - Bring both entries to a common conflict set by taking
      *   the union and aging appropriately.
@@ -272,7 +276,7 @@ template <CacheTraits *T> class MustAgeConflictPowerset : public MustAge<T> {
                           set.end(), diff.begin());
 
       PosType adjustedBound = entry.second;
-      for (auto var : diff) {
+      for (const auto *var : diff) {
         unsigned perSetSize = getPerSetSize<T>(var);
         if (adjustedBound >= T->ASSOCIATIVITY - perSetSize) {
           adjustedBound = T->ASSOCIATIVITY;
@@ -289,13 +293,13 @@ template <CacheTraits *T> class MustAgeConflictPowerset : public MustAge<T> {
 
 public:
   MustAgeConflictPowerset() { perCSBound[ConflictSet()] = 0; }
-  virtual std::unique_ptr<MustAge<T>> clone() {
+  virtual std::unique_ptr<MustAge<T>> clone() override {
     auto ptr = std::make_unique<Self, Self &>(*this);
     return ptr;
   }
 
-  virtual bool isAssociativity() const {
-    for (const auto entry : perCSBound) {
+  virtual bool isAssociativity() const override {
+    for (const auto &entry : perCSBound) {
       assert(entry.second <= T->ASSOCIATIVITY);
       if (entry.second != T->ASSOCIATIVITY) {
         return false;
@@ -304,7 +308,7 @@ public:
     return true;
   }
 
-  virtual typename CacheTraits::WayType getAge() const {
+  virtual typename CacheTraits::WayType getAge() const override {
     PosType age = T->ASSOCIATIVITY;
     for (const auto &entry : perCSBound) {
       age = std::min(age, entry.second);
@@ -312,7 +316,7 @@ public:
     assert(age != T->ASSOCIATIVITY);
     return (WayType)age;
   }
-  virtual void ageBy(const GlobalVariable *arr) {
+  virtual void ageBy(const GlobalVariable *arr) override {
     for (auto &entry : perCSBound) {
       if (entry.first.count(arr) == 0 && entry.second < T->ASSOCIATIVITY) {
         const unsigned oldBound = entry.second;
@@ -334,7 +338,7 @@ public:
       }
     }
   }
-  virtual void ageBy(unsigned amount) {
+  virtual void ageBy(unsigned amount) override {
     assert(!isAssociativity());
     for (auto &bound : perCSBound) {
       if (bound.second >= T->ASSOCIATIVITY - amount) {
@@ -344,7 +348,7 @@ public:
       }
     }
   }
-  virtual void join(const MustAge<T> &other_) {
+  virtual void join(const MustAge<T> &other_) override {
     auto other = dynamic_cast<const Self &>(other_);
 
     auto xIt = this->perCSBound.begin();
@@ -374,7 +378,7 @@ public:
     this->perCSBound = std::move(newBounds);
     assert(this->perCSBound.size() > 0);
   }
-  virtual void dump(std::ostream &stream) const {
+  virtual void dump(std::ostream &stream) const override {
     stream << "[";
     bool emitComma = false;
     for (const auto &entry : perCSBound) {
@@ -387,7 +391,7 @@ public:
     }
     stream << "]";
   }
-  virtual bool operator==(const MustAge<T> &other_) const {
+  virtual bool operator==(const MustAge<T> &other_) const override {
     assert(!this->isAssociativity() && !other_.isAssociativity());
     if (const Self *other = dynamic_cast<const Self *>(&other_)) {
       /* TODO do we want to expand to the maximum here? */
@@ -395,7 +399,7 @@ public:
     }
     assert(0 && "== called on objects of different type");
   }
-  virtual bool operator<(const MustAge<T> &other_) const {
+  virtual bool operator<(const MustAge<T> &other_) const override {
     assert(!this->isAssociativity() && !other_.isAssociativity());
     if (const Self *other = dynamic_cast<const Self *>(&other_)) {
       /* TODO do we want to expand to the maximum here? */

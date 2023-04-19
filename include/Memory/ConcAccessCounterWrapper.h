@@ -75,7 +75,7 @@ protected:
 public:
   ConcAccessCounterWrapper();
 
-  virtual ConcAccessCounterWrapper *clone() const;
+  virtual ConcAccessCounterWrapper *clone() const override;
 
   virtual ~ConcAccessCounterWrapper();
 
@@ -105,8 +105,8 @@ public:
     /**
      * Checks for equality between local metrics.
      */
-    virtual bool
-    equals(const AbstractCyclingMemory::LocalMetrics &anotherInstance) {
+    virtual bool equals(
+        const AbstractCyclingMemory::LocalMetrics &anotherInstance) override {
       auto castedInstance = dynamic_cast<const LocalMetrics &>(anotherInstance);
       return LocalMetricsBase::equals(castedInstance) &&
              concAccesses == castedInstance.concAccesses;
@@ -117,12 +117,14 @@ public:
    * Restores the local metrics of this instance according
    * to the values specified in the container passed in.
    */
-  virtual LocalMetrics *getLocalMetrics() { return new LocalMetrics(*this); }
+  virtual LocalMetrics *getLocalMetrics() override {
+    return new LocalMetrics(*this);
+  }
 
   /**
    * Resets the local metrics to their initial values.
    */
-  virtual void resetLocalMetrics() {
+  virtual void resetLocalMetrics() override {
     Base::resetLocalMetrics();
     concAccesses = 0u;
   }
@@ -131,25 +133,25 @@ public:
    * Since used in MicroArchitecturalStates, we need to know whether the memory
    * parts are the same.
    */
-  virtual bool equals(const AbstractCyclingMemory &acm2) const;
+  virtual bool equals(const AbstractCyclingMemory &acm2) const override;
 
   /**
    * Same as for the equality operator, this may be used by "higher" classes.
    */
-  virtual size_t hashcode() const;
+  virtual size_t hashcode() const override;
 
-  virtual bool isJoinable(const AbstractCyclingMemory &acm2) const;
+  virtual bool isJoinable(const AbstractCyclingMemory &acm2) const override;
 
-  virtual void join(const AbstractCyclingMemory &acm2);
+  virtual void join(const AbstractCyclingMemory &acm2) override;
 
-  virtual void print(std::ostream &stream) const;
+  virtual void print(std::ostream &stream) const override;
 
 protected:
   /**
    * This hook increments the internal blocking counter.
    * It is intended to be overridden by child classes.
    */
-  virtual void incrementAddedBlocking();
+  virtual void incrementAddedBlocking() override;
 
 private:
   /**
