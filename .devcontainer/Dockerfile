@@ -12,10 +12,10 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         lldb gcc gdb cmake make ninja-build libboost-all-dev git clangd \
         htop wget fish zsh lld time parallel lp-solve liblpsolve55-dev \
         icecc icecream-sundae libcolamd2 clang-tidy gcc-multilib \
-         build-essential clang-format doxygen
+         build-essential clang-format doxygen clang
 
 # Set environment variables
-ENV PATH=$PATH:/workspaces/llvmta/build/bin
+ENV PATH=$PATH:/workspaces/llvmta_build/build/bin
 ENV PATH=$PATH:/workspaces/llvm/build/bin
 # ENV CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/llvm/lib/Target/ARM
 # ENV CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/llvm/lib/Target/RISCV

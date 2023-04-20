@@ -28,6 +28,12 @@
       "group": "build"
     },
     {
+      "label": "config clang",
+      "type": "shell",
+      "command": "./config.sh clang",
+      "group": "build"
+    },
+    {
       "label": "clean",
       "type": "shell",
       "command": "./config.sh clean",
