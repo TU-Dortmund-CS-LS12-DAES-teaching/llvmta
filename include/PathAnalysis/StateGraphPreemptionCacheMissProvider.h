@@ -28,7 +28,9 @@
 
 #include "Memory/AbstractCache.h"
 #include "PathAnalysis/StateGraphEdgeWeightProvider.h"
+#include "PathAnalysis/StateGraphNumericWeightProvider.h"
 #include "Util/Util.h"
+#include "Util/UtilPathAnalysis.h"
 
 namespace TimingAnalysisPass {
 
@@ -80,7 +82,7 @@ protected:
 
   virtual WeightType advanceWeight(const WeightType &weight,
                                    const LocalMetrics &curr,
-                                   const LocalMetrics &succ);
+                                   const LocalMetrics &succ) override;
 
 private:
   /**

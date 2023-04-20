@@ -139,39 +139,39 @@ public:
   virtual ~AbstractCacheImpl() {}
 
   AbstractCacheImpl(bool assumeAnEmptyCache = false);
-  virtual AbstractCacheImpl *clone() const;
-  virtual Classification classify(const AbstractAddress &itv) const;
+  virtual AbstractCacheImpl *clone() const override;
+  virtual Classification classify(const AbstractAddress &itv) const override;
 
   virtual UpdateReport *
   update(const AbstractAddress &addr, AccessType load_store,
          bool wantReport = false,
-         const Classification assumption = dom::cache::CL_UNKNOWN);
+         const Classification assumption = dom::cache::CL_UNKNOWN) override;
   virtual UpdateReport *
   update(const AbstractAddress &addr, AccessType load_store, SetWiseAnaDeps *AD,
          bool wantReport = false,
          const Classification assumption = dom::cache::CL_UNKNOWN);
 
-  virtual void join(const AbstractCache &y);
-  virtual bool lessequal(const AbstractCache &y) const;
-  virtual void enterScope(const PersistenceScope &scope);
-  virtual void leaveScope(const PersistenceScope &scope);
+  virtual void join(const AbstractCache &y) override;
+  virtual bool lessequal(const AbstractCache &y) const override;
+  virtual void enterScope(const PersistenceScope &scope) override;
+  virtual void leaveScope(const PersistenceScope &scope) override;
   virtual std::set<PersistenceScope>
-  getPersistentScopes(const AbstractAddress addr) const;
-  virtual bool equals(const AbstractCache &y) const;
-  virtual std::ostream &dump(std::ostream &os) const;
+  getPersistentScopes(const AbstractAddress addr) const override;
+  virtual bool equals(const AbstractCache &y) const override;
+  virtual std::ostream &dump(std::ostream &os) const override;
 
   /**
    * Returns the address aligned to cache linesize
    */
-  virtual Address alignToCacheline(const Address addr) const;
+  virtual Address alignToCacheline(const Address addr) const override;
   /**
    * Returns the hit latency of this cache
    */
-  virtual unsigned getHitLatency() const;
+  virtual unsigned getHitLatency() const override;
   /**
    * Return the write-policy of the underlying cache
    */
-  virtual WritePolicy getWritePolicy() const;
+  virtual WritePolicy getWritePolicy() const override;
   /**
    * Returns the vector of individual cache sets
    */
@@ -566,42 +566,42 @@ public:
 
   TrackLastAccess(bool assumeAnEmptyCache = false);
 
-  virtual TrackLastAccess *clone() const;
-  virtual Classification classify(const AbstractAddress &itv) const;
+  virtual TrackLastAccess *clone() const override;
+  virtual Classification classify(const AbstractAddress &itv) const override;
 
   virtual UpdateReport *
   update(const AbstractAddress &addr, AccessType load_store,
          bool wantReport = false,
-         const Classification assumption = dom::cache::CL_UNKNOWN);
+         const Classification assumption = dom::cache::CL_UNKNOWN) override;
   virtual UpdateReport *
   update(const AbstractAddress &addr, AccessType load_store, SetWiseAnaDeps *AD,
          bool wantReport = false,
          const Classification assumption = dom::cache::CL_UNKNOWN);
 
-  virtual void enterScope(const PersistenceScope &scope){};
-  virtual void leaveScope(const PersistenceScope &scope){};
+  virtual void enterScope(const PersistenceScope &scope) override{};
+  virtual void leaveScope(const PersistenceScope &scope) override{};
   virtual std::set<PersistenceScope>
-  getPersistentScopes(const AbstractAddress addr) const {
+  getPersistentScopes(const AbstractAddress addr) const override {
     return std::set<PersistenceScope>();
   }
 
-  virtual void join(const AbstractCache &y);
-  virtual bool lessequal(const AbstractCache &y) const;
-  virtual bool equals(const AbstractCache &y) const;
-  virtual std::ostream &dump(std::ostream &os) const;
+  virtual void join(const AbstractCache &y) override;
+  virtual bool lessequal(const AbstractCache &y) const override;
+  virtual bool equals(const AbstractCache &y) const override;
+  virtual std::ostream &dump(std::ostream &os) const override;
 
   /**
    * Returns the address aligned to cache linesize
    */
-  virtual Address alignToCacheline(const Address addr) const;
+  virtual Address alignToCacheline(const Address addr) const override;
   /**
    * Returns the hit latency of this cache
    */
-  virtual unsigned getHitLatency() const;
+  virtual unsigned getHitLatency() const override;
   /**
    * Return the write-policy of the underlying cache
    */
-  virtual WritePolicy getWritePolicy() const;
+  virtual WritePolicy getWritePolicy() const override;
 
   boost::optional<Address> getLastAccess() const { return lastAccessedAddress; }
 
@@ -710,9 +710,8 @@ bool TrackLastAccess<T>::lessequal(const AbstractCache &ay) const {
   const Self &y = dynamic_cast<const Self &>(ay);
   if (y.lastAccessedAddress) {
     return lastAccessedAddress == y.lastAccessedAddress;
-  } else {
-    return true;
   }
+  return true;
 }
 
 /**

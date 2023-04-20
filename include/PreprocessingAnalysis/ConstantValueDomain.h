@@ -85,13 +85,14 @@ public:
 
   using AnalysisDomain<ConstantValueDomain, MachineInstr,
                        std::tuple<>>::transfer;
-  void transfer(const MachineInstr *MI, std::tuple<> &anaInfo);
-  void handleCallingConvention(const ConstantValueDomain &preCallElement);
-  void join(const ConstantValueDomain &element);
-  bool lessequal(const ConstantValueDomain &element) const;
-  std::string print() const;
+  void transfer(const MachineInstr *MI, std::tuple<> &anaInfo) override;
+  void
+  handleCallingConvention(const ConstantValueDomain &preCallElement) override;
+  void join(const ConstantValueDomain &element) override;
+  bool lessequal(const ConstantValueDomain &element) const override;
+  std::string print() const override;
 
-  bool isBottom() const;
+  bool isBottom() const override;
   bool isTop(unsigned regnr) const;
   int getValueFor(unsigned regnr) const;
 
@@ -141,8 +142,7 @@ private:
   constexpr static unsigned numOfRegisters =
       ISA == Triple::ArchType::riscv32 ? 32 : 16;
   /// Stack pointer
-  unsigned stackPointerRegister =
-      ISA == Triple::ArchType::riscv32 ? 2 : 13;
+  unsigned stackPointerRegister = ISA == Triple::ArchType::riscv32 ? 2 : 13;
   /// General-Purpose Register Class
   constexpr static const TargetRegisterClass &GPRegClass =
       ISA == Triple::ArchType::riscv32 ? RISCV::GPRRegClass : ARM::GPRRegClass;

@@ -108,16 +108,16 @@ public:
    * See superclass first.
    * Produces all possible successor states.
    */
-  virtual StateSet
-  cycle(std::tuple<InstrContextMapping &, AddressInformation &> &dep) const;
+  virtual StateSet cycle(std::tuple<InstrContextMapping &, AddressInformation &>
+                             &dep) const override;
 
   /**
    * See superclass first.
    * Checks whether a ProgramLocation left the pipeline after the last cycle.
    */
-  virtual bool isFinal(ExecutionElement &pl);
+  virtual bool isFinal(ExecutionElement &pl) override;
 
-  virtual bool isWaitingForJoin() const {
+  virtual bool isWaitingForJoin() const override {
     return memory.isWaitingForJoin() || this->commonDataBus.isSet();
   }
 
@@ -146,16 +146,16 @@ public:
   getSpeculativeScopeEntrances();
 
   /// \see superclass
-  bool operator==(const OutOfOrderPipelineState &ds) const;
+  bool operator==(const OutOfOrderPipelineState &ds) const override;
 
   /// \see superclass
-  virtual size_t hashcode() const;
+  virtual size_t hashcode() const override;
 
   /// \see superclass
-  virtual bool isJoinable(const OutOfOrderPipelineState &ds) const;
+  virtual bool isJoinable(const OutOfOrderPipelineState &ds) const override;
 
   /// \see superclass
-  virtual void join(const OutOfOrderPipelineState &ds);
+  virtual void join(const OutOfOrderPipelineState &ds) override;
 
   // Output operation
   template <class MT>

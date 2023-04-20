@@ -82,19 +82,20 @@ public:
     debugDumpNo++;
   }
 
-  void buildGraph();
+  void buildGraph() override;
 
-  virtual void freeMuStates() { id2state.clear(); }
+  virtual void freeMuStates() override { id2state.clear(); }
 
-  typename State::StateSet getStatesForId(unsigned id) {
+  typename State::StateSet getStatesForId(unsigned id) override {
     typename State::StateSet res;
     res.insert(id2state.at(id));
     return res;
   }
 
-  const Graph &getGraph() const { return graph; }
+  const Graph &getGraph() const override { return graph; }
 
-  std::vector<unsigned> getInStates(const MachineBasicBlock *mbb) const {
+  std::vector<unsigned>
+  getInStates(const MachineBasicBlock *mbb) const override {
     std::vector<unsigned> result;
     for (auto &ctx2ids : inStatesPerMBBPerContext.at(mbb)) {
       result.insert(result.end(), ctx2ids.second.begin(), ctx2ids.second.end());
@@ -102,7 +103,8 @@ public:
     return result;
   }
 
-  std::vector<unsigned> getOutStates(const MachineBasicBlock *mbb) const {
+  std::vector<unsigned>
+  getOutStates(const MachineBasicBlock *mbb) const override {
     std::vector<unsigned> result;
     for (auto &ctx2ids : outStatesPerMBBPerContext.at(mbb)) {
       result.insert(result.end(), ctx2ids.second.begin(), ctx2ids.second.end());
@@ -110,7 +112,7 @@ public:
     return result;
   }
 
-  std::vector<unsigned> getCallStates(const MachineInstr *mi) const {
+  std::vector<unsigned> getCallStates(const MachineInstr *mi) const override {
     assert(mi->isCall() && "Call States only at calls");
     if (callStates.count(mi) > 0) {
       return callStates.at(mi);
@@ -119,7 +121,7 @@ public:
     return res;
   }
 
-  std::vector<unsigned> getReturnStates(const MachineInstr *mi) const {
+  std::vector<unsigned> getReturnStates(const MachineInstr *mi) const override {
     assert(mi->isCall() && "Return States only at calls");
     std::vector<unsigned> res;
     if (returnStates.count(mi) > 0) {
@@ -130,14 +132,14 @@ public:
     return res;
   }
 
-  const Context *getContextOfState(unsigned stateid) const {
+  const Context *getContextOfState(unsigned stateid) const override {
     return &id2context.at(stateid);
   }
 
   void dump(std::ostream &mystream,
-            const std::map<std::string, double> *optTimesTaken) const;
+            const std::map<std::string, double> *optTimesTaken) const override;
 
-  void deleteMuArchInfo();
+  void deleteMuArchInfo() override;
 
 private:
   /**
@@ -1842,8 +1844,8 @@ void StateSensitiveGraph<MicroArchDom>::dump(
     for (MachineFunction *currFunc :
          machineFunctionCollector->getAllMachineFunctions()) {
       std::string funcName = currFunc->getName().str();
-      mystream << "graph : {\n	title : \"" << funcName << "\"\n	label : \""
-               << funcName << "\"\n";
+      mystream << "graph : {\n	title : \"" << funcName
+               << "\"\n	label : \"" << funcName << "\"\n";
       for (auto &currMBB : *currFunc) {
         std::string mbbName = currMBB.getFullName();
         mystream << "graph : {\n	title : \"" << mbbName

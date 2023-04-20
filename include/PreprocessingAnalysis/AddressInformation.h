@@ -201,17 +201,18 @@ public:
    * This is again realised by specialisation.
    */
   AbstractAddress getDataAccessAddress(const MachineInstr *MI, Context *currCtx,
-                                       unsigned pos = 0) const {
+                                       unsigned pos = 0) const override {
     static_assert(!std::is_class<AnalysisDom>::value,
                   "There is no generic getDataAccessAddress that is valid for "
                   "any domain. "
                   "Use specialization for your AnalysisDom to use it as "
                   "AddressInformation.");
-    return AbstractAddress((unsigned) 0);
+    return AbstractAddress((unsigned)0);
   }
 
 protected:
-  std::unordered_set<Context> getAddressContexts(const MachineInstr *MI) const {
+  std::unordered_set<Context>
+  getAddressContexts(const MachineInstr *MI) const override {
     std::unordered_set<Context> myset;
     if (!addressAnaInfo.getAnaInfoBefore(MI).isBottom()) {
       for (auto ctx2ana :

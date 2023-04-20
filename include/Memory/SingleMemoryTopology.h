@@ -90,15 +90,16 @@ public:
    * accessed.
    */
   virtual boost::optional<unsigned> accessInstr(unsigned addr,
-                                                unsigned numWords);
+                                                unsigned numWords) override;
 
   /**
    * Tells the memory topology to access an instruction.
    * Returns the id for that instruction or none, if something is already
    * accessed.
    */
-  virtual boost::optional<unsigned>
-  accessData(AbstractAddress addr, AccessType load_store, unsigned numWords);
+  virtual boost::optional<unsigned> accessData(AbstractAddress addr,
+                                               AccessType load_store,
+                                               unsigned numWords) override;
 
   /**
    * Cycle method for the memory topology.
@@ -111,54 +112,54 @@ public:
    * Returns a list of resulting memory topology states.
    */
   virtual std::list<SingleMemoryTopology>
-  cycle(bool potentialDataMissesPending) const;
+  cycle(bool potentialDataMissesPending) const override;
 
   /**
    * Ask underlying background memory if the pipeline should stall.
    */
-  virtual bool shouldPipelineStall() const;
+  virtual bool shouldPipelineStall() const override;
 
   /**
    * Returns whether a given ID (instruction access) has been finished.
    * If so, reset instruction access finished.
    */
-  virtual bool finishedInstrAccess(unsigned accessId);
+  virtual bool finishedInstrAccess(unsigned accessId) override;
 
   /**
    * Returns whether a given ID (data access) has been finished.
    * If so, reset data access finished.
    */
-  virtual bool finishedDataAccess(unsigned accessId);
+  virtual bool finishedDataAccess(unsigned accessId) override;
 
-  virtual bool hasUnfinishedAccesses() const;
+  virtual bool hasUnfinishedAccesses() const override;
 
-  virtual bool operator==(const SingleMemoryTopology &ncmt2) const;
+  virtual bool operator==(const SingleMemoryTopology &ncmt2) const override;
 
-  virtual size_t hashcode() const;
+  virtual size_t hashcode() const override;
 
   /**
    * Is the memory topology waiting to be joined with similar topologies?
    */
-  virtual bool isWaitingForJoin() const;
+  virtual bool isWaitingForJoin() const override;
 
-  virtual bool isJoinable(const SingleMemoryTopology &ncmt) const;
+  virtual bool isJoinable(const SingleMemoryTopology &ncmt) const override;
 
-  virtual void join(const SingleMemoryTopology &ncmt);
+  virtual void join(const SingleMemoryTopology &ncmt) override;
 
   /**
    * Is the memory topology currently performing an instruction access?
    */
-  virtual bool isBusyAccessingInstr() const;
+  virtual bool isBusyAccessingInstr() const override;
 
   /**
    * Is the memory topology currently performing a data access?
    */
-  virtual bool isBusyAccessingData() const;
+  virtual bool isBusyAccessingData() const override;
 
   /**
    * Fast-forwarding of the memory topology.
    */
-  virtual std::list<SingleMemoryTopology> fastForward() const;
+  virtual std::list<SingleMemoryTopology> fastForward() const override;
 
   template <AbstractCyclingMemory *(*makeBgMemf)()>
   friend std::ostream &operator<<(std::ostream &stream,

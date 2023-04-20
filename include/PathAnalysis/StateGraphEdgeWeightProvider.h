@@ -59,12 +59,12 @@ public:
    * Add an edge s->e while intra-basic-block weights are constructed.
    * Take the joined weight for all states at e, weight for s should be zero.
    */
-  virtual void addEdge(unsigned s, unsigned e);
+  virtual void addEdge(unsigned s, unsigned e) override;
   /**
    * Advance all incoming edges of curr towards each state of succs.
    * This involves updating the weights. Finally delete the curr state.
    */
-  virtual void advanceEdges(unsigned curr, std::list<unsigned> succs);
+  virtual void advanceEdges(unsigned curr, std::list<unsigned> succs) override;
   /**
    * This variant does the same as advanceEdges.
    * However, it first stores the results to some temporary
@@ -72,23 +72,24 @@ public:
    * to edge2weight if no weight provider detected any
    * failed successors in this first step.
    */
-  virtual std::set<unsigned> advanceEdgesPrepare(unsigned curr,
-                                                 std::list<unsigned> succs);
+  virtual std::set<unsigned>
+  advanceEdgesPrepare(unsigned curr, std::list<unsigned> succs) override;
   /**
    * This can be used to commit the changes prepared
    * in the previous method.
    */
-  virtual void advanceEdgesCommit();
+  virtual void advanceEdgesCommit() override;
   /**
    * This can be used to roll back the changes prepared
    * in advanceEdgesPrepare.
    */
-  virtual void advanceEdgesRollBack();
+  virtual void advanceEdgesRollBack() override;
   /**
    * Check whether edges p->t and p->nt are compatible, i.e. joinable without
    * precision loss.
    */
-  virtual bool isEdgeJoinable(unsigned p, unsigned t, unsigned nt) const = 0;
+  virtual bool isEdgeJoinable(unsigned p, unsigned t,
+                              unsigned nt) const override = 0;
   /**
    * If joinable is set:
    * Move the edge targets of edge p->t from t to nt.
@@ -97,24 +98,26 @@ public:
    * Add an edge between t and nt with neutral weight. Do not remove t.
    */
   virtual void updateEdgeTarget(unsigned p, unsigned t, unsigned nt,
-                                bool joinable);
+                                bool joinable) override;
   /**
    * Concatenate edges, i.e. for all predecessor p of predold do:
    * weight of (p->fresh) = sum of weight of (p->predold) and weight of
    * (predold->old). The old weights p->predold and predold->old can be removed.
    */
-  virtual void concatEdges(unsigned predold, unsigned old, unsigned fresh);
+  virtual void concatEdges(unsigned predold, unsigned old,
+                           unsigned fresh) override;
   /**
    * Add an edge s->e modelling the effects of external function extfun.
    */
-  virtual void addExternalEdge(std::string extfun, unsigned s, unsigned e) = 0;
+  virtual void addExternalEdge(std::string extfun, unsigned s,
+                               unsigned e) override = 0;
   /**
    * Give a string representation of the weights we are collecting via this
    * callback. Note @implementer: It might happen that (a,b) is not in the
    * edge2weight map due to an optimization. Please assume the neutral weight in
    * this case
    */
-  virtual std::string getWeightDescr(unsigned a, unsigned b) const = 0;
+  virtual std::string getWeightDescr(unsigned a, unsigned b) const override = 0;
 
 protected:
   typedef typename MuState::LocalMetrics LocalMetrics;

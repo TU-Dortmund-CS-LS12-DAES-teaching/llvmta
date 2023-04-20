@@ -65,11 +65,11 @@ public:
 
   using AnalysisDomain<CollectingContextsDomain, MachineInstr,
                        std::tuple<>>::transfer;
-  void transfer(const MachineInstr *MI, std::tuple<> &anaInfo);
-  void join(const CollectingContextsDomain &element);
-  bool lessequal(const CollectingContextsDomain &element) const;
-  std::string print() const;
-  bool isBottom() const;
+  void transfer(const MachineInstr *MI, std::tuple<> &anaInfo) override;
+  void join(const CollectingContextsDomain &element) override;
+  bool lessequal(const CollectingContextsDomain &element) const override;
+  std::string print() const override;
+  bool isBottom() const override;
 
 private:
   // This is a bot - top lattice, only two elements.

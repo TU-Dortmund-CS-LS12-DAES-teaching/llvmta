@@ -434,6 +434,8 @@ bool LoopBoundInfoPass::getSCEVBoundFromCVDomain(
       case scCouldNotCompute:
         assert(false && "Not implemnted Yet");
         break;
+      case scSequentialUMinExpr:
+        break;
       }
     }
     Value = FinalVal;

@@ -56,7 +56,16 @@ public:
     }
     ++refcount;
   }
-  SharedStorage(const SharedStorage &ss) { ++refcount; }
+  SharedStorage(const SharedStorage &ss) {
+    if (this != &ss)
+      ++refcount;
+  }
+  // copy assignment operator
+  SharedStorage &operator=(const SharedStorage &ss) {
+    if (this != &ss)
+      ++refcount;
+    return *this;
+  }
   ~SharedStorage() {
     --refcount;
     if (refcount == 0) {

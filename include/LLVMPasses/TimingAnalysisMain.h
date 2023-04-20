@@ -67,7 +67,7 @@ public:
   /**
    * This is a dummy function.
    */
-  bool runOnMachineFunction(MachineFunction &F);
+  bool runOnMachineFunction(MachineFunction &F) override;
 
   /**
    * @brief
@@ -79,9 +79,9 @@ public:
    * @return true
    * @return false
    */
-  virtual bool doFinalization(Module &M);
+  virtual bool doFinalization(Module &M) override;
 
-  virtual llvm::StringRef getPassName() const {
+  virtual llvm::StringRef getPassName() const override {
     return "TA: Main phase of Timing Analysis, e.g. Value and "
            "Microarchitectural Analyses";
   }

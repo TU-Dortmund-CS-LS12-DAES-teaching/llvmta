@@ -450,7 +450,7 @@ StaticAddressProvider::getGlobalVarAddress(const GlobalVariable *Glvar) {
 }
 
 unsigned StaticAddressProvider::getArraySize(const GlobalVariable *Glvar) {
-  Type *Type = Glvar->getType()->getElementType();
+  Type *Type = Glvar->getType()->getPointerElementType();
   assert(Type->isSized());
   unsigned Size = DataLayoutInstance->getTypeAllocSize(Type);
   /* if our size is not divisible by four we have to acccess the

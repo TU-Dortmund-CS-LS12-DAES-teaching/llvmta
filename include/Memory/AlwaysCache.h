@@ -23,7 +23,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef ALWAYSHITCACHE_H
+#ifndef ALWAYSHITCACHE_H_
 #define ALWAYSHITCACHE_H_
 
 #include <ostream>
@@ -62,37 +62,37 @@ public:
     assert(replpol == CacheReplPolicyType::ALHIT ||
            replpol == CacheReplPolicyType::ALMISS);
   }
-  virtual AlwaysCache *clone() const { return new AlwaysCache(*this); }
-  virtual Classification classify(const AbstractAddress &addr) const;
+  virtual AlwaysCache *clone() const override { return new AlwaysCache(*this); }
+  virtual Classification classify(const AbstractAddress &addr) const override;
   virtual UpdateReport *
   update(const AbstractAddress &addr, AccessType load_store,
          bool wantReport = false,
-         const Classification assumption = dom::cache::CL_UNKNOWN) {
+         const Classification assumption = dom::cache::CL_UNKNOWN) override {
     return wantReport ? new UpdateReport : nullptr;
   }
-  virtual void join(const AbstractCache &y) {}
-  virtual bool lessequal(const AbstractCache &y) const { return true; }
-  virtual void enterScope(const PersistenceScope &scope) {}
-  virtual void leaveScope(const PersistenceScope &scope) {}
+  virtual void join(const AbstractCache &y) override {}
+  virtual bool lessequal(const AbstractCache &y) const override { return true; }
+  virtual void enterScope(const PersistenceScope &scope) override {}
+  virtual void leaveScope(const PersistenceScope &scope) override {}
   virtual std::set<PersistenceScope>
-  getPersistentScopes(const AbstractAddress addr) const {
+  getPersistentScopes(const AbstractAddress addr) const override {
     return std::set<PersistenceScope>();
   }
-  virtual bool equals(const AbstractCache &y) const { return true; }
-  virtual std::ostream &dump(std::ostream &os) const;
+  virtual bool equals(const AbstractCache &y) const override { return true; }
+  virtual std::ostream &dump(std::ostream &os) const override;
 
   /**
    * Returns the address aligned to cache linesize
    */
-  virtual Address alignToCacheline(const Address addr) const;
+  virtual Address alignToCacheline(const Address addr) const override;
   /**
    * Returns the hit latency of this cache
    */
-  virtual unsigned getHitLatency() const;
+  virtual unsigned getHitLatency() const override;
   /**
    * Return the write-policy of the underlying cache
    */
-  virtual WritePolicy getWritePolicy() const;
+  virtual WritePolicy getWritePolicy() const override;
 };
 
 template <CacheTraits *T>
