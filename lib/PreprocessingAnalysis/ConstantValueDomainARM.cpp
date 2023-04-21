@@ -88,7 +88,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
     if (MI->getOperand(baseregopidx).isCPI()) {
       assert(MI->getOperand(immopidx).getImm() == 0);
       unsigned cpi = MI->getOperand(baseregopidx).getIndex();
-      auto MF = MI->getParent()->getParent();
+      const auto *MF = MI->getParent()->getParent();
       unsigned cpeaddr = StaticAddrProvider->getConstPoolEntryAddr(MF, cpi);
       return AbstractAddress(cpeaddr);
     }
@@ -100,7 +100,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
             (MI->getOperand(MI->mayLoad() ? 1 : 0).getReg() == baseregnr)) &&
            "Base regs differ");
     if (isTop(baseregnr)) {
-      if (auto glvar = getSymbolFor(baseregnr)) {
+      if (const auto *glvar = getSymbolFor(baseregnr)) {
         return AbstractAddress(glvar);
       }
       return extractGlobalDatastructure(MI);
@@ -141,7 +141,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
     if (MI->getOperand(baseregopidx).isCPI()) {
       assert(MI->getOperand(immopidx).getImm() == 0);
       unsigned cpi = MI->getOperand(baseregopidx).getIndex();
-      auto MF = MI->getParent()->getParent();
+      const auto *MF = MI->getParent()->getParent();
       unsigned cpeaddr = StaticAddrProvider->getConstPoolEntryAddr(MF, cpi);
       return AbstractAddress(cpeaddr);
     }
@@ -153,7 +153,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
             (MI->getOperand(MI->mayLoad() ? 1 : 0).getReg() == baseregnr)) &&
            "Base regs differ");
     if (isTop(baseregnr)) {
-      if (auto glvar = getSymbolFor(baseregnr)) {
+      if (const auto *glvar = getSymbolFor(baseregnr)) {
         return AbstractAddress(glvar);
       }
       return extractGlobalDatastructure(MI);
@@ -195,7 +195,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
     added of subtracted*/
 
     if (isTop(baseregnr)) {
-      if (auto glvar = getSymbolFor(baseregnr)) {
+      if (const auto *glvar = getSymbolFor(baseregnr)) {
         return AbstractAddress(glvar);
       }
       return extractGlobalDatastructure(MI);
@@ -234,7 +234,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
 
     if (isTop(baseregnr) || isTop(offsetregnr)) {
       // We tracked down the symbol during analysis
-      if (auto glvar = getSymbolFor(baseregnr)) {
+      if (const auto *glvar = getSymbolFor(baseregnr)) {
         return AbstractAddress(glvar);
       }
       // If not, let us try the mem-operand solution
@@ -335,7 +335,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
 
     if (isTop(baseregnr)) {
       // We tracked down the symbol during analysis
-      if (auto glvar = getSymbolFor(baseregnr)) {
+      if (const auto *glvar = getSymbolFor(baseregnr)) {
         return AbstractAddress(glvar);
       }
       return extractGlobalDatastructure(MI);
@@ -355,7 +355,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
     } else { // +/- reg
       if (isTop(offsetregnr)) {
         // We tracked down the symbol during analysis
-        if (auto glvar = getSymbolFor(baseregnr)) {
+        if (const auto *glvar = getSymbolFor(baseregnr)) {
           return AbstractAddress(glvar);
         }
         // If not, let us try the mem-operand solution
@@ -393,7 +393,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
     // We load something from our constantpool
     if (MI->getOperand(baseregopidx).isCPI()) {
       unsigned cpi = MI->getOperand(baseregopidx).getIndex();
-      auto MF = MI->getParent()->getParent();
+      const auto *MF = MI->getParent()->getParent();
       unsigned cpeaddr = StaticAddrProvider->getConstPoolEntryAddr(MF, cpi);
       return AbstractAddress(cpeaddr);
     }
@@ -406,7 +406,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
     auto baseregnr = MI->getOperand(baseregopidx).getReg();
     if (isTop(baseregnr)) {
       // We tracked down the symbol during analysis
-      if (auto glvar = getSymbolFor(baseregnr)) {
+      if (const auto *glvar = getSymbolFor(baseregnr)) {
         return AbstractAddress(glvar);
       }
       return extractGlobalDatastructure(MI);
@@ -436,6 +436,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
   case ARM::VSTMDIA_UPD:
     ldstmdouble = 2;
     // fall-through
+    BOOST_FALLTHROUGH;
   case ARM::VLDMSIA:
   case ARM::VLDMSIA_UPD:
   case ARM::LDMIA:
@@ -448,6 +449,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
     }
     ldstmsubmode = ARM_AM::ia;
     // fall-through
+    BOOST_FALLTHROUGH;
   case ARM::LDMIB:
   case ARM::STMIB:
   case ARM::LDMIB_UPD:
@@ -459,6 +461,7 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
       ldstmsubmode = ARM_AM::ib;
     }
     // fall-through
+    BOOST_FALLTHROUGH;
   case ARM::LDMDA:
   case ARM::STMDA:
   case ARM::LDMDA_UPD:
@@ -470,12 +473,14 @@ ConstantValueDomain<Triple::ArchType::arm>::getDataAccessAddress(
       ldstmsubmode = ARM_AM::da;
     }
     // fall-through
+    BOOST_FALLTHROUGH;
   case ARM::VLDMDDB_UPD:
   case ARM::VSTMDDB_UPD:
     if (ldstmdouble == 0) {
       ldstmdouble = 2;
     }
     // fall-through
+    BOOST_FALLTHROUGH;
   case ARM::LDMDB:
   case ARM::STMDB:
   case ARM::LDMDB_UPD:
@@ -546,7 +551,7 @@ void ConstantValueDomain<Triple::ArchType::arm>::transfer(
     return;
   }
   // Non-bottom update
-  auto MRI = TimingAnalysisMain::getTargetMachine().getMCRegisterInfo();
+  const auto *MRI = TimingAnalysisMain::getTargetMachine().getMCRegisterInfo();
 
   // Remember current analysis info
   ConstantValueDomain predecessorInfo(*this);
@@ -559,7 +564,7 @@ void ConstantValueDomain<Triple::ArchType::arm>::transfer(
       // Start of function, parameter map should be clear
       assert(fnparam2symbol.empty() &&
              "Expected the param to symbol mapping to be empty");
-      auto func = MI->getParent()->getParent();
+      const auto *func = MI->getParent()->getParent();
       auto &reginfo = func->getRegInfo();
       // Collect live in gpr registers
       std::set<unsigned> liveinregs;
@@ -581,7 +586,7 @@ void ConstantValueDomain<Triple::ArchType::arm>::transfer(
               op1.isReg() && op1.getReg() == 0 && op2.isMetadata()) {
             assert(op2.getMetadata()->getNumOperands() == 4 &&
                    "Internal assumption about llvm metadata violated");
-            auto metadata = op2.getMetadata()->getOperand(1).get();
+            auto *metadata = op2.getMetadata()->getOperand(1).get();
             // Extract name of function parameter
             if (const MDString *argname = dyn_cast<MDString>(metadata)) {
               auto argstr = argname->getString().str();
@@ -616,7 +621,7 @@ void ConstantValueDomain<Triple::ArchType::arm>::transfer(
     reg2symbol.erase(destnr);
     if (MI->getOperand(1).isCPI()) // We have a load from constant pool
     {
-      auto MF = MI->getParent()->getParent();
+      const auto *MF = MI->getParent()->getParent();
       auto cpi = MI->getOperand(1).getIndex();
       unsigned cpeaddress = StaticAddrProvider->getConstPoolEntryAddr(MF, cpi);
       reg2const[destnr] = cpeaddress;
@@ -799,17 +804,19 @@ void ConstantValueDomain<Triple::ArchType::arm>::transfer(
     reg2symbol.erase(destnr);
     if (MI->getOperand(1).isCPI()) // We have a load from constant pool
     {
-      auto MF = MI->getParent()->getParent();
+      const auto *MF = MI->getParent()->getParent();
       auto cpi = MI->getOperand(1).getIndex();
       unsigned cpaddress = StaticAddrProvider->getConstPoolEntryAddr(MF, cpi);
       if (StaticAddrProvider->hasValueAtAddress(cpaddress)) {
         reg2const[destnr] = StaticAddrProvider->getValueAtAddress(cpaddress);
       }
-      if (auto glvar = StaticAddrProvider->getSymbolAtAddress(cpaddress)) {
+      if (const auto *glvar =
+              StaticAddrProvider->getSymbolAtAddress(cpaddress)) {
         reg2symbol[destnr] = glvar;
       }
       break;
-    } else if (MI->getOperand(1).isReg()) {
+    }
+    if (MI->getOperand(1).isReg()) {
       AbstractAddress addr = getDataAccessAddress(MI, 0);
       if (addr.isPrecise()) {
         unsigned concreteAddr = addr.getAsInterval().lower();
@@ -841,7 +848,8 @@ void ConstantValueDomain<Triple::ArchType::arm>::transfer(
 
       // We know value to store
       int *valptr = reg2const.count(srcnr) > 0 ? &reg2const.at(srcnr) : nullptr;
-      auto sym = reg2symbol.count(srcnr) > 0 ? reg2symbol.at(srcnr) : nullptr;
+      const auto *sym =
+          reg2symbol.count(srcnr) > 0 ? reg2symbol.at(srcnr) : nullptr;
       performStoreValue(MI, concreteAddr, valptr, sym);
     } else {
       // Unknown address
@@ -863,7 +871,8 @@ void ConstantValueDomain<Triple::ArchType::arm>::transfer(
         // Store known value
         int *valptr =
             reg2const.count(srcnr) > 0 ? &reg2const.at(srcnr) : nullptr;
-        auto sym = reg2symbol.count(srcnr) > 0 ? reg2symbol.at(srcnr) : nullptr;
+        const auto *sym =
+            reg2symbol.count(srcnr) > 0 ? reg2symbol.at(srcnr) : nullptr;
         performStoreValue(MI, concreteAddr, valptr, sym);
       } else {
         performStoreUnknownAddress(addr);
@@ -1016,8 +1025,8 @@ void ConstantValueDomain<Triple::ArchType::arm>::transfer(
     // modify here...
     break;
   }
-    /*		case ARM::MOVsi: // Move register to register with immediate shift
-       (bit[11..7] shift_imm, bit[6..5] shift, bit[4] 0, bit[3..0] Rm case
+    /*		case ARM::MOVsi: // Move register to register with immediate
+       shift (bit[11..7] shift_imm, bit[6..5] shift, bit[4] 0, bit[3..0] Rm case
        ARM::MOVsr: // Move register to register with register shift (bit[11.8]
        Rs, bit[7] 0, bit[6..5] shift, bit[4] 1, bit[3..0] Rm
 

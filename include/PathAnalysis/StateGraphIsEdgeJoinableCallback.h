@@ -35,6 +35,8 @@ public:
    * precision loss.
    */
   virtual bool isEdgeJoinable(unsigned p, unsigned t, unsigned nt) const = 0;
+
+  virtual ~StateGraphIsEdgeJoinableCallback() = default;
 };
 
 } // namespace TimingAnalysisPass

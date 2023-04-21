@@ -51,6 +51,7 @@ class AnalysisDomain
     : public ContextAwareAnalysisDomain<AnalysisImplementation, Granularity,
                                         AnalysisDependencies> {
 public:
+  virtual ~AnalysisDomain(){};
   /**
    * Makes an in-place update of analysis information.
    * The AnalysisDomain information is changed according to the execution of the

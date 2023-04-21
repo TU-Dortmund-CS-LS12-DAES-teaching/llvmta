@@ -58,6 +58,9 @@ namespace TimingAnalysisPass {
  */
 class AddressInformation {
 public:
+
+  virtual ~AddressInformation() = default;
+
   /**
    * Return the address of the instruction that is statically known exactly.
    */

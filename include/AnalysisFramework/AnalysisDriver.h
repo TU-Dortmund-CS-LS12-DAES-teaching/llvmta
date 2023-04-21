@@ -96,6 +96,8 @@ public:
   AnalysisDriver(std::string entrypoint, AnaDeps anaDeps)
       : entrypoint(entrypoint), analysisResults(anaDeps) {}
 
+  virtual ~AnalysisDriver() = default;
+
   /**
    * Perform the analysis of type AnalysisDom on function given by entrypoint on
    * granularity Granularity and provide analysis information at the end.
