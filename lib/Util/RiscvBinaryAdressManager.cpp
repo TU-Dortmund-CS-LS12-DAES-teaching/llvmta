@@ -40,7 +40,7 @@ RiscvBinaryInstructionIterator::RiscvBinaryInstructionIterator(std::ifstream &fi
 
 bool RiscvBinaryInstructionIterator::getNext(derivedInstr *instruction){
     char * buff=new char [64];
-    derivedInstr result;
+    //derivedInstr result;
     
     
     /* match instructions: addr:.hexval[16-32bit]..<tab>instr_type<tab>.operands
@@ -60,11 +60,11 @@ bool RiscvBinaryInstructionIterator::getNext(derivedInstr *instruction){
         std::string line (buff);
         
         //check if label 
-        result.isLabel=std::regex_match(line,label_expr);
+        instruction->isLabel=std::regex_match(line,label_expr);
 
         if(std::regex_match(line,instr_match,instr_expr)){
-            result.addr=std::stoul(instr_match[1].str(),nullptr,64);
-            result.funct=instr_match[2].str();
+            instruction->addr=std::stoul(instr_match[1].str(),nullptr,64);
+            instruction->funct=instr_match[2].str();
 
             //iterate operand string to extract operand list
             std::string oplst=instr_match[3].str();
@@ -72,7 +72,7 @@ bool RiscvBinaryInstructionIterator::getNext(derivedInstr *instruction){
             std::sregex_iterator end;
             while(!(end==regIt)){
                 std::smatch op_match=*regIt;
-                result.operands.push_back(op_match[1].str());
+                instruction->operands.push_back(op_match[1].str());
                 regIt++;
             }
 
@@ -80,10 +80,16 @@ bool RiscvBinaryInstructionIterator::getNext(derivedInstr *instruction){
             for(std::string str : instr_match){
                 std::cout << str << "\n";
             }*/
+
+            /*std::cout << instruction->addr<<", "<<instruction->funct<<", "<<instruction->isLabel;
+            for(std::string op : instruction->operands){
+                std::cout << " op:"<<op;
+            }std::cout<<"\n";*/
+
             return true;
         }
         
-        if(!result.isLabel){
+        if(!instruction->isLabel){
             std::cout <<"no match, dropped:"<<buff<<"\n";
         }
   
@@ -134,7 +140,14 @@ bool RiscvBinaryAdressManager::initialize(){
 }
 
 bool RiscvBinaryAdressManager::isBranch(derivedInstr instruction) {
-    return true;
+    //all and only, branch instructions start with a b; jump instructions start with a j
+    std::regex terminators_expr("b.*|j.*|ret");
+    std::smatch term_match;
+    /*std::cout << "entered isBranch :"<<instruction.funct<<"\n";
+    if(std::regex_match(instruction.funct,term_match,terminators_expr)){
+        std::cout<<"found terminator at: "<<instruction.addr<<"\n";
+        }*/
+    return std::regex_match(instruction.funct,term_match,terminators_expr);
 }
   
 

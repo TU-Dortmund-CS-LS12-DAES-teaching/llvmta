@@ -27,6 +27,8 @@
 //#include "LLVMPasses/StaticAddressProvider.h"
 #include "RISCV.h"
 #include "Util/Options.h"
+#include "llvm/IR/InstIterator.h"
+#include "llvm/IR/Instruction.h"
 #include "llvm/Target/TargetMachine.h"
 #include <cmath>
 #include <cstddef>
@@ -35,15 +37,18 @@
 #include <fstream>
 #include <ostream>
 #include <unistd.h>
+#include <vector>
 
 namespace TimingAnalysisPass {
 
 
-BinaryBasicBlock::BinaryBasicBlock(uint64_t entry,uint64_t exit,uint64_t branchTarget,uint64_t continueTarget){
+BinaryBasicBlock::BinaryBasicBlock(uint64_t entry,uint64_t exit,uint64_t branchTarget,
+        uint64_t continueTarget, std::vector<derivedInstr> instruction_list){
     this->entry=entry;
     this->exit=exit;
     this->branchTarget=branchTarget;
     this->continueTarget=continueTarget;
+    this->instruction_list=instruction_list;
 }
 
 uint64_t BinaryBasicBlock::getEntry(){
@@ -60,6 +65,10 @@ uint64_t BinaryBasicBlock::getBranchTarget(){
 
 uint64_t BinaryBasicBlock::getContinueTarget(){
     return this->continueTarget;
+}
+
+std::vector<derivedInstr> BinaryBasicBlock::instructions(){
+    return this->instruction_list;
 }
 
 
@@ -121,18 +130,20 @@ uint64_t BinaryAdressManager::getBranchTarget(derivedInstr instruction){
 void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
     //TODO maybe need to provide binItr pointer instead
     //TODO does llvm reconise a BB even when a jump enters not at the entry of the block?
-    derivedInstr instr;
+    std::vector<derivedInstr> instruction_list;
     uint64_t entry;
     uint64_t exit;
     uint64_t branchTarget;
     uint64_t continueTarget;
     bool newBlock=false;
     /*set entry for first block*/
-    if(binItr->getNext(&instr)){
-        entry=instr.addr;
-        if(this->isBranch(instr)){
-            exit=instr.addr;
-            branchTarget=this->getBranchTarget(instr);
+    derivedInstr first;
+    if(binItr->getNext(&first)){
+        instruction_list.push_back(first);
+        entry=first.addr;
+        if(this->isBranch(first)){
+            exit=first.addr;
+            branchTarget=this->getBranchTarget(first);
             newBlock=true;
         }
 
@@ -142,12 +153,13 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
     }
     
     /*iterate instructions*/
+    derivedInstr instr;
     while(binItr->getNext(&instr)){
         /*if pref block was read completly get continueTarget and commit block*/
         /*then set entry for new block*/
         if(newBlock){
             continueTarget=instr.addr;
-            this->binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,branchTarget,continueTarget)));
+            this->binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,branchTarget,continueTarget,instruction_list)));
 
             entry = instr.addr;
         }
@@ -157,12 +169,16 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
             branchTarget=this->getBranchTarget(instr);
             newBlock=true;
         }
-
+        instruction_list.push_back(instr);
+        derivedInstr tmp;
+        instr = tmp;
     }
 
     /*when reaching eof commit last block without targets*/
     exit=instr.addr;
-    binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,NAN,NAN)));
+    binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,NAN,NAN,instruction_list)));
+
+    std::cout << "BuildBlocks: found "<<binBlocks.size()<<" basic blocks\n";
 }
 
 } // namespace TimingAnalysisPass

@@ -52,14 +52,17 @@ class BinaryBasicBlock{
     uint64_t exit;
     uint64_t branchTarget;
     uint64_t continueTarget; 
+    std::vector<derivedInstr> instruction_list;
 public:
     /*constructor*/
-    BinaryBasicBlock(uint64_t entry,uint64_t exit,uint64_t branchTarget,uint64_t continueTarget);
+    BinaryBasicBlock(uint64_t entry,uint64_t exit,uint64_t branchTarget,
+        uint64_t continueTarget, std::vector<derivedInstr> instruction_list);
     /*attribute accessors*/
     uint64_t getEntry();
     uint64_t getExit();
     uint64_t getBranchTarget();
     uint64_t getContinueTarget();
+    std::vector<derivedInstr> instructions();
 };
 
 /*file iterator abstracting plattform-specific instruction sizes*/

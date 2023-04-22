@@ -83,11 +83,13 @@ bool StaticAddressProvider::runOnMachineFunction(MachineFunction &F) {
 
 
 int myI=0;
+int bbcount=0;
 bool StaticAddressProvider::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
   unsigned SkipAddresses = 0; // Skip that many words in address space, e.g. for
                               // the jump table allocation
 
   int PosInMbb = 0;
+  std::cout << "llvmbb: "<<++bbcount<<"\n";
 
   auto Arch = TM.getTargetTriple().getArch();
 
@@ -108,6 +110,7 @@ bool StaticAddressProvider::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
       I.print(llvm::outs());
       os:llvm::outs()<<"\n";
     }
+    
 
 
     // Remember the position of the instruction within the basic block
