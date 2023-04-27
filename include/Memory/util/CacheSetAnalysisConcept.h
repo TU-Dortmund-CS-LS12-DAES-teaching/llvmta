@@ -58,7 +58,7 @@ private:
   X x;
   const X cx;
   AccessType acct;
-  static const AbstractAddress addr;
+  const AbstractAddress addr;
   AnaDeps *Deps;
   const dom::cache::Classification cCl;
   dom::cache::UpdateReport *report;

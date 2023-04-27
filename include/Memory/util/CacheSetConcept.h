@@ -53,7 +53,7 @@ struct CacheSet : boost::DefaultConstructible<X>,
 
 private:
   dom::cache::Classification cl;
-  static const AbstractAddress addr;
+  const AbstractAddress addr;
   AnaDeps *Deps;
   X x;
   AccessType act;
