@@ -24,6 +24,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "Memory/util/CacheUtils.h"
+#include "Util/Util.h"
 
 namespace TimingAnalysisPass {
 
@@ -34,11 +35,13 @@ unsigned getCachelineMemoryLatency(CacheType type) {
          "This function cannot be used without caches");
 
   unsigned numWords;
+  assert((type == CacheType::UNIFIED || type == CacheType::INSTRUCTION ||
+         type == CacheType::DATA ) && "Unknown cache type");
   switch (type) {
   case CacheType::UNIFIED:
     assert(Ilinesize == Dlinesize);
     /* fallthrough */
-  case CacheType::INSTRUCTION:
+  BOOST_FALLTHROUGH; case CacheType::INSTRUCTION:
     assert(Ilinesize % 4 == 0);
     numWords = Ilinesize / 4;
     break;
@@ -46,8 +49,6 @@ unsigned getCachelineMemoryLatency(CacheType type) {
     assert(Dlinesize % 4 == 0);
     numWords = Dlinesize / 4;
     break;
-  default:
-    assert(0 && "UNREACHABLE");
   }
   return Latency + PerWordLatency * numWords;
 }

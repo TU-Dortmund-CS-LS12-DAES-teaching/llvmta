@@ -63,9 +63,9 @@ private:
 
   std::map<std::string, Measurement> measurements;
 
-  long long memoryUsage = 0;
+  //long long memoryUsage = 0;
 
-  struct timeval startTime, endTime;
+  //struct timeval startTime, endTime;
 };
 
 } // namespace TimingAnalysisPass

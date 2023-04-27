@@ -40,6 +40,7 @@ namespace TimingAnalysisPass {
 
 template <class DerivedMemoryTopology> class MemoryTopologyInterface {
 public:
+  virtual ~MemoryTopologyInterface() = default;
   /**
    * Defines an access.
    * Contains an id, an Interval, the AccessType (Load/Store) and the width in

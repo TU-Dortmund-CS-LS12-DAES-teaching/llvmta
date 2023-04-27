@@ -25,7 +25,9 @@
 
 #include "PathAnalysis/FlowConstraintProvider.h"
 
+#include "PathAnalysis/GetEdges.h"
 #include "PathAnalysis/LoopBoundInfo.h"
+#include <cassert>
 
 namespace TimingAnalysisPass {
 
@@ -714,6 +716,12 @@ FlowConstraintProvider::initializeGetInnerEdgesImpl(
     typename GetEdges::method method) {
   if (isGeneralMode()) {
     assert(getEdges && "Did you forget to initialize the GetEdges-object?");
+    assert((method == GetEdges::method::all ||
+            method == GetEdges::method::insideProgramRuns ||
+            method == GetEdges::method::betweenInOutReachableSimple ||
+            method == GetEdges::method::betweenInOutReachableSimplePlus ||
+            method == GetEdges::method::betweenInOutReachableDetailed) &&
+           "Unsupported get-edges-method!");
     switch (method) {
     case GetEdges::method::all: {
       auto function = [this](const std::set<GraphEdge> &inEdges,
@@ -756,9 +764,6 @@ FlowConstraintProvider::initializeGetInnerEdgesImpl(
       };
       return std::make_tuple(function, true, true);
     } break;
-    default:
-      assert(false && "Unsupported get-edges-method!");
-      break;
     }
   } else {
 

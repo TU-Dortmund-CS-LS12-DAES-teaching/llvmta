@@ -67,8 +67,11 @@ ReOrderBuffer::ReOrderBuffer() : robTail(0), robHead(0), rst(nullptr) {
 }
 
 ReOrderBuffer::ReOrderBuffer(const ReOrderBuffer &robu)
-    : rob(robu.rob), robTail(robu.robTail), robHead(robu.robHead),
-      rst(nullptr) {}
+    : rob{}, robTail(robu.robTail), robHead(robu.robHead),
+      rst(nullptr) {
+    // Copy the contents of robu.rob to this->rob
+    std::copy(robu.rob, robu.rob + ROB_SIZE, rob);
+}
 
 bool ReOrderBuffer::operator==(const ReOrderBuffer &rob) const {
   for (unsigned i = 0; i < ROB_SIZE; i++) {

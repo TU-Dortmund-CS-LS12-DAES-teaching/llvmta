@@ -52,6 +52,7 @@
 
 #include "llvm/Support/Format.h"
 
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <list>
@@ -175,6 +176,9 @@ cpp_int optDoubleToInt(boost::optional<double> num, bool roundUp);
 template <class MuArchDomain, class PAI>
 boost::optional<BoundItv>
 dispatchTimingPathAnalysis(const PAI &microArchAnaInfo) {
+  assert((PathAnalysisType::SIMPLEILP == PathAnaType ||
+          PathAnalysisType::GRAPHILP == PathAnaType) &&
+         "The chosen path analysis type is not supported.");
   switch (PathAnaType) {
   case PathAnalysisType::SIMPLEILP: {
     InsensitiveGraph<MuArchDomain> sg(microArchAnaInfo);
@@ -186,9 +190,6 @@ dispatchTimingPathAnalysis(const PAI &microArchAnaInfo) {
     StateSensitiveGraph<MuArchDomain> arrivalCurveSg(microArchAnaInfo);
     return dispatchTimingPathAnalysisWeightProvider(&sg, &arrivalCurveSg);
   }
-  default:
-    errs() << "The chosen path analysis type is not supported.\n";
-    return boost::none;
   }
 }
 
@@ -562,12 +563,12 @@ boost::optional<BoundItv> dispatchTimingPathAnalysisWeightProvider(
     return boost::none;
   }
   // Calculate a per-benchmark sound penalty, i.e. a max slope in the i-r-curve
-  else if (CalculateSlopeInterferenceCurve.getBits()) {
+  if (CalculateSlopeInterferenceCurve.getBits()) {
     dispatchSoundSlopeComputation(tpa);
     return boost::none;
   }
   // Calculate the compositional base bound
-  else if (CompositionalBaseBound.getBits()) {
+  if (CompositionalBaseBound.getBits()) {
     dispatchCompositionalBaseBound(tpa);
     return boost::none;
   }
@@ -674,6 +675,9 @@ template <class MuArchDomain, class PAI>
 boost::optional<BoundItv> dispatchCachePathAnalysis(const PAI &cacheAnaInfo) {
   // Select the type of path analysis
   MuStateGraph<typename MuArchDomain::State> *sg = nullptr;
+  assert((PathAnalysisType::SIMPLEILP == PathAnaType ||
+          PathAnalysisType::GRAPHILP == PathAnaType) &&
+         "The chosen path analysis type is not supported.");
   switch (PathAnaType) {
   case PathAnalysisType::SIMPLEILP: {
     sg = new InsensitiveGraph<MuArchDomain>(cacheAnaInfo);
@@ -683,9 +687,6 @@ boost::optional<BoundItv> dispatchCachePathAnalysis(const PAI &cacheAnaInfo) {
     sg = new StateSensitiveGraph<MuArchDomain>(cacheAnaInfo);
     break;
   }
-  default:
-    errs() << "The chosen path analysis type is not supported.\n";
-    return boost::none;
   }
   assert(sg != nullptr && "Could not create state graph.");
 
@@ -765,6 +766,9 @@ boost::optional<BoundItv> dispatchCRPDPathAnalysis(const PAI &muAnaInfo,
 
   // Select the type of path analysis
   MuStateGraph<MuState> *sg = nullptr;
+  assert((PathAnalysisType::SIMPLEILP == PathAnaType ||
+          PathAnalysisType::GRAPHILP == PathAnaType) &&
+         "The chosen path analysis type is not supported.");
   switch (PathAnaType) {
   case PathAnalysisType::SIMPLEILP: {
     sg = new InsensitiveGraph<MuArchDomain>(muAnaInfo);
@@ -774,9 +778,6 @@ boost::optional<BoundItv> dispatchCRPDPathAnalysis(const PAI &muAnaInfo,
     sg = new StateSensitiveGraph<MuArchDomain>(muAnaInfo);
     break;
   }
-  default:
-    errs() << "The chosen path analysis type is not supported.\n";
-    return boost::none;
   }
   assert(sg != nullptr && "Could not create state graph.");
 
@@ -1195,6 +1196,9 @@ boost::optional<BoundItv> doCoRunnerSensitivePathAnalysis(
 
   // upper bound on the number of cycles an access might take on the bus
   cpp_int UBbusCyclesPerAccess;
+  assert((BackgroundMemoryType == BgMemType::SRAM ||
+          BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+         "Unsupported background memory type");
   switch (BackgroundMemoryType) {
   case BgMemType::SRAM: {
     UBbusCyclesPerAccess =
@@ -1205,10 +1209,6 @@ boost::optional<BoundItv> doCoRunnerSensitivePathAnalysis(
   case BgMemType::SIMPLEDRAM: {
     assert(0 && "SDRAM is not yet supported in combination with "
                 "the iterative analysis approach");
-    break;
-  }
-  default: {
-    assert(0 && "Unsupported background memory type");
     break;
   }
   }
@@ -1224,6 +1224,11 @@ boost::optional<BoundItv> doCoRunnerSensitivePathAnalysis(
     if (CoRunnerSensitiveNoArrivalCurveValues) {
       maxAccessCyclesPerInner = [&](cpp_int time) { return time; };
     } else {
+      assert((SelectedArrivalCurveCalculationMethod ==
+                  ArrivalCurveCalculationMethod::PROGRAM_GRANULARITY ||
+              SelectedArrivalCurveCalculationMethod ==
+                  ArrivalCurveCalculationMethod::ILPBASED) &&
+             "Unsupported arrival curve calculation method.");
       switch (SelectedArrivalCurveCalculationMethod) {
       case ArrivalCurveCalculationMethod::PROGRAM_GRANULARITY: {
         // in some cases with a relative period, we know that
@@ -1672,9 +1677,6 @@ boost::optional<BoundItv> doCoRunnerSensitivePathAnalysis(
         };
         break;
       }
-      default:
-        assert(false && "Unsupported arrival curve calculation method.");
-        break;
       }
     }
 
@@ -1793,11 +1795,10 @@ boost::optional<BoundItv> doCoRunnerSensitivePathAnalysis(
     if (ConcAccCycBounds.length() != 0) {
       if (staticAccessCycleBounds.size() >= NumConcurrentCores) {
         return true;
-      } else {
-        assert(staticAccessCycleBounds.size() == 0 &&
-               "Number of elements must by a multiple of NumConcurrentCores.");
-        return false;
       }
+      assert(staticAccessCycleBounds.size() == 0 &&
+             "Number of elements must by a multiple of NumConcurrentCores.");
+      return false;
     }
 
     // write out if the own WCET bound changed
@@ -2417,9 +2418,8 @@ boost::optional<BoundItv> doCoRunnerSensitivePathAnalysis(
   if (wcetBound != infinity) {
     return BoundItv{static_cast<double>(wcetBound),
                     static_cast<double>(wcetBound)};
-  } else {
-    return boost::none;
   }
+  return boost::none;
 }
 
 } // namespace TimingAnalysisPass

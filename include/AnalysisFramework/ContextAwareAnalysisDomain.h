@@ -66,6 +66,8 @@ public:
     return std::string(prefix) + "NONAME";
   }
 
+  virtual ~ContextAwareAnalysisDomain() = default;
+
   /**
    * Each analysis can decide whether analysis information before
    * the given instruction should be precomputed.
