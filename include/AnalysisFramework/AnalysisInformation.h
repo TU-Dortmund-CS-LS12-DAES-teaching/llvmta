@@ -91,7 +91,7 @@ public:
     mystream << "##########################\n"
              << "## Analysis Information ##\n"
              << "##########################\n";
-    for (auto currFunc : machineFunctionCollector->getAllMachineFunctions()) {
+    for (auto *currFunc : machineFunctionCollector->getAllMachineFunctions()) {
       mystream << "#### Function: " << currFunc->getName().str() << "\n";
       for (auto currBB = currFunc->begin(); currBB != currFunc->end();
            ++currBB) {
@@ -250,13 +250,13 @@ class AnalysisInformationMemOpt<AnaDom, MachineInstr>
 	public:
 	// Make AnaDeps visible again
 	typedef typename AnaDom::AnaDeps AnaDeps;
-	
+
 	/**
 	 * Constructor with computed analysis information provided
 	 */
 	AnalysisInformationMemOpt(std::unique_ptr<std::map<const MachineBasicBlock*, AnaDom>> bbinfo,
 											std::unique_ptr<std::map<const MachineFunction*, InfoInOut<AnaDom>>> funcinfo,
-											AnaDeps& anaInfo) 
+											AnaDeps& anaInfo)
 		: anaInfoBBIn(std::move(bbinfo)), anaInfoFunc(std::move(funcinfo)), depAnalysisResults(anaInfo)
 	{ }
 
@@ -280,7 +280,7 @@ class AnalysisInformationMemOpt<AnaDom, MachineInstr>
 		assert (0 && "Could not find instruction in its basic block");
 		return res;
 	}
-	
+
 	virtual const AnaDom getAnaInfoAfter(const MachineInstr* MI) const
 	{
 		auto currBB = MI->getParent();
@@ -299,7 +299,7 @@ class AnalysisInformationMemOpt<AnaDom, MachineInstr>
 		assert (0 && "Could not find instruction in its basic block");
 		return res;
 	}
-	
+
 	virtual const AnaDom getAnaInfoAfterGuarded(const MachineInstr* MI, BranchOutcome bo) const
 	{
 		assert ((MI->isConditionalBranch() || isJumpTableBranch(MI) || MI->isReturn())
@@ -371,7 +371,7 @@ void AnalysisInformationMemOpt<AnaDom, MachineInstr>::analyseInstruction(
 	if (directiveHeuristicsPass->hasDirectiveBeforeInstr(currentInstr)) {
 		ad.updateContexts(directiveHeuristicsPass->getDirectiveBeforeInstr(currentInstr));
 	}
-	
+
 	// We don't have a call
 	if (!currentInstr->isCall()) {
 		// Abstract transfer function
@@ -379,13 +379,13 @@ void AnalysisInformationMemOpt<AnaDom, MachineInstr>::analyseInstruction(
 	} else {
 		// Call handling (also if call is unreachable)
 		auto& cg = CallGraph::getGraph();
-		
+
 		AnaDom preCallInfo(ad);
 		// Unreachable calls
 		if (preCallInfo.isBottom())
 		{
 			ad = AnaDom(AnaDomInit::BOTTOM);
-		} 
+		}
 		else if (cg.callsExternal(currentInstr))
 		{
 			AnaDom notneeded(AnaDomInit::BOTTOM); // Discarded anyway
@@ -403,7 +403,7 @@ void AnalysisInformationMemOpt<AnaDom, MachineInstr>::analyseInstruction(
 			// For each potential callee do
 			for (auto callee : cg.getPotentialCallees(currentInstr)) {
 				AnaDom afterCallInfo(preCallInfo);
-				bool changed = afterCallInfo.transferCall(currentInstr, this->depAnalysisResults, callee, 
+				bool changed = afterCallInfo.transferCall(currentInstr, this->depAnalysisResults, callee,
 											anaInfoFunc->find(callee)->second.out, anaInfoFunc->find(callee)->second.in);
 				assert (!changed && "Nothing should change during analysis information lookup");
 				ad.join(afterCallInfo);

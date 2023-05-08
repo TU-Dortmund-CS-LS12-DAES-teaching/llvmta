@@ -64,7 +64,7 @@ FixedLatencyState::cycle(std::tuple<InstrContextMapping &> &dep) const {
     // Completes in succ cycle, make write-back effects visible (e.g. the
     // changed pc due to branching)
     if (succ.remainingExecutionTime == 0) {
-      auto completingInstr = StaticAddrProvider->getMachineInstrByAddr(
+      const auto *completingInstr = StaticAddrProvider->getMachineInstrByAddr(
           succ.inflightInstruction.get().first);
       if (completingInstr->isBranch() || completingInstr->isCall() ||
           completingInstr->isReturn()) {

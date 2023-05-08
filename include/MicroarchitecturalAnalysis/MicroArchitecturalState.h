@@ -337,7 +337,7 @@ template <class DerivedState, class Dependencies>
 typename MicroArchitecturalState<DerivedState, Dependencies>::StateSet
 MicroArchitecturalState<DerivedState, Dependencies>::handleBranching(
     const ExecutionElement &ee, InstrContextMapping &ins2ctx) {
-  auto branchInstr = StaticAddrProvider->getMachineInstrByAddr(ee.first);
+  const auto *branchInstr = StaticAddrProvider->getMachineInstrByAddr(ee.first);
   assert((branchInstr->isBranch() || branchInstr->isCall() ||
           branchInstr->isReturn()) &&
          "No control-flow changing instruction");
@@ -346,7 +346,8 @@ MicroArchitecturalState<DerivedState, Dependencies>::handleBranching(
 
   if (branchInstr->isBranch()) {
     return handleBranch(ee);
-  } else if (branchInstr->isCall()) {
+  }
+  if (branchInstr->isCall()) {
     handleCall(ee);
   } else if (branchInstr->isReturn()) {
     return handleReturn(ee, ins2ctx);
@@ -364,7 +365,7 @@ MicroArchitecturalState<DerivedState, Dependencies>::handleBranch(
     const ExecutionElement &ee) {
   StateSet alternativeStates;
 
-  auto branchInstr = StaticAddrProvider->getMachineInstrByAddr(ee.first);
+  const auto *branchInstr = StaticAddrProvider->getMachineInstrByAddr(ee.first);
   assert(branchInstr->isBranch() && "No branch instruction found");
 
   // Make a copy
@@ -405,7 +406,7 @@ MicroArchitecturalState<DerivedState, Dependencies>::handleBranch(
 
     assert(getBranchTargetOperand(branchInstr).isMBB() &&
            "First operand of a branch should be MBB");
-    auto targetMBB = getBranchTargetOperand(branchInstr).getMBB();
+    auto *targetMBB = getBranchTargetOperand(branchInstr).getMBB();
     this->condBranchAssumptions.push_back(
         std::make_pair(ee, BranchOutcome::taken(targetMBB)));
     this->handlePCUpdate(ee, targetMBB);
@@ -415,7 +416,7 @@ MicroArchitecturalState<DerivedState, Dependencies>::handleBranch(
     // Unconditional branch, set unreachable
     assert(getBranchTargetOperand(branchInstr).isMBB() &&
            "First operand of a branch should be MBB");
-    auto targetMBB = getBranchTargetOperand(branchInstr).getMBB();
+    auto *targetMBB = getBranchTargetOperand(branchInstr).getMBB();
     this->handlePCUpdate(ee, targetMBB);
   }
 
@@ -425,7 +426,8 @@ MicroArchitecturalState<DerivedState, Dependencies>::handleBranch(
 template <class DerivedState, class Dependencies>
 void MicroArchitecturalState<DerivedState, Dependencies>::handlePCUpdate(
     const ExecutionElement &source, const MachineBasicBlock *targetMBB) {
-  auto branchInstr = StaticAddrProvider->getMachineInstrByAddr(source.first);
+  const auto *branchInstr =
+      StaticAddrProvider->getMachineInstrByAddr(source.first);
   assert(branchInstr->isBranch() && "No branch instruction found");
   // For the taken case (represented by this) adjust the pc to the jump target
   std::list<MBBedge> edges;
@@ -439,7 +441,7 @@ void MicroArchitecturalState<DerivedState, Dependencies>::handlePCUpdate(
     edges.push_back(std::make_pair(targetMBB, *targetMBB->succ_begin()));
     targetMBB = *targetMBB->succ_begin();
   }
-  auto targetInstr = getFirstInstrInBB(targetMBB);
+  const auto *targetInstr = getFirstInstrInBB(targetMBB);
 
   // Target context updates
   unsigned targetPCaddr = StaticAddrProvider->getAddr(targetInstr);
@@ -450,14 +452,14 @@ void MicroArchitecturalState<DerivedState, Dependencies>::handlePCUpdate(
   }
   for (auto edgeit = edges.begin(); edgeit != edges.end(); ++edgeit) {
     if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(*edgeit)) {
-      for (auto direc :
+      for (auto *direc :
            *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeEnter(*edgeit)) {
         targetPCctx.update(direc);
       }
     }
     targetPCctx.transfer(*edgeit);
     if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(*edgeit)) {
-      for (auto direc :
+      for (auto *direc :
            *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeLeave(*edgeit)) {
         targetPCctx.update(direc);
       }
@@ -473,7 +475,7 @@ void MicroArchitecturalState<DerivedState, Dependencies>::handlePCUpdate(
 template <class DerivedState, class Dependencies>
 void MicroArchitecturalState<DerivedState, Dependencies>::handleCall(
     const ExecutionElement &ee) {
-  auto branchInstr = StaticAddrProvider->getMachineInstrByAddr(ee.first);
+  const auto *branchInstr = StaticAddrProvider->getMachineInstrByAddr(ee.first);
   assert(branchInstr->isCall() && "No call instruction found");
 
   CallGraph &cg = CallGraph::getGraph();
@@ -485,7 +487,7 @@ void MicroArchitecturalState<DerivedState, Dependencies>::handleCall(
     // Collect some stuff
     auto callTarget = branchInstr->getOperand(0);
     std::string functionName = cg.getCalleeNameFromOperand(callTarget);
-    auto callee = machineFunctionCollector->getFunctionByName(functionName);
+    auto *callee = machineFunctionCollector->getFunctionByName(functionName);
     std::list<MBBedge> initialedgelist;
     const MachineInstr *calleeFirstInstr =
         getFirstInstrInFunction(callee, initialedgelist);
@@ -504,14 +506,14 @@ void MicroArchitecturalState<DerivedState, Dependencies>::handleCall(
     // Potentially saw a context edge if the first BB in callee was empty
     for (auto &edge : initialedgelist) {
       if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(edge)) {
-        for (auto direc :
+        for (auto *direc :
              *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeEnter(edge)) {
           targetPCctx.update(direc);
         }
       }
       targetPCctx.transfer(edge);
       if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(edge)) {
-        for (auto direc :
+        for (auto *direc :
              *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeLeave(edge)) {
           targetPCctx.update(direc);
         }
@@ -535,7 +537,7 @@ MicroArchitecturalState<DerivedState, Dependencies>::handleReturn(
     const ExecutionElement &ee, InstrContextMapping &ins2ctx) {
   StateSet alternativeStates;
 
-  auto branchInstr = StaticAddrProvider->getMachineInstrByAddr(ee.first);
+  const auto *branchInstr = StaticAddrProvider->getMachineInstrByAddr(ee.first);
   assert(branchInstr->isReturn() && "No return instruction found");
 
   Context returnCtx(ee.second);
@@ -543,7 +545,7 @@ MicroArchitecturalState<DerivedState, Dependencies>::handleReturn(
     returnCtx.update(
         DirectiveHeuristicsPassInstance->getDirectiveAfterInstr(branchInstr));
   }
-  auto currFunc = branchInstr->getParent()->getParent();
+  const auto *currFunc = branchInstr->getParent()->getParent();
   if (DirectiveHeuristicsPassInstance->hasDirectiveOnReturn(currFunc)) {
     returnCtx.update(
         DirectiveHeuristicsPassInstance->getDirectiveOnReturn(currFunc));
@@ -555,7 +557,7 @@ MicroArchitecturalState<DerivedState, Dependencies>::handleReturn(
   // For all call sites compute possible return locations
   auto callsites =
       CallGraph::getGraph().getCallSites(branchInstr->getParent()->getParent());
-  for (auto callsite : callsites) {
+  for (const auto *callsite : callsites) {
     if (ins2ctx.count(callsite) > 0) { // Callsite has contexts
       for (auto &ctx : ins2ctx[callsite]) {
         Context reducedCtx(ctx);
@@ -623,15 +625,16 @@ MicroArchitecturalState<DerivedState, Dependencies>::updateContextOnReturn(
   Context resCtx(ctx);
   assert(callsite->isCall() && "Expected this instruction to be a call");
   auto targetAddr = StaticAddrProvider->getAddr(callsite) + 4;
-  auto targetInstr = StaticAddrProvider->getMachineInstrByAddr(targetAddr);
+  const auto *targetInstr =
+      StaticAddrProvider->getMachineInstrByAddr(targetAddr);
   if (DirectiveHeuristicsPassInstance->hasDirectiveAfterInstr(callsite)) {
     resCtx.update(
         DirectiveHeuristicsPassInstance->getDirectiveAfterInstr(callsite));
   }
-  auto srcMBB = callsite->getParent();
-  auto targetMBB = targetInstr->getParent();
+  const auto *srcMBB = callsite->getParent();
+  const auto *targetMBB = targetInstr->getParent();
   if (srcMBB != targetMBB) { // We also have a Basicblock edge to take on return
-    auto edgelistset = getEdgesBetween(srcMBB, targetMBB);
+    auto *edgelistset = getEdgesBetween(srcMBB, targetMBB);
     assert(edgelistset->size() == 1 &&
            "More paths from source to target basicblock");
     for (auto &mbbedge : *(edgelistset->begin())) {
@@ -674,12 +677,10 @@ bool MicroArchitecturalState<DerivedState, Dependencies>::assumedBranchOutcome(
   if (bo.btaken) {
     if (bo.target == boost::none) {
       return oldestBranchAssumption.second.btaken;
-    } else {
-      return oldestBranchAssumption.second == bo;
     }
-  } else {
-    return !oldestBranchAssumption.second.btaken;
+    return oldestBranchAssumption.second == bo;
   }
+  return !oldestBranchAssumption.second.btaken;
 }
 
 template <class DerivedState, class Dependencies>
@@ -692,9 +693,8 @@ MicroArchitecturalState<DerivedState, Dependencies>::assumedCallSite() const {
     return std::make_pair(StaticAddrProvider->getMachineInstrByAddr(
                               oldestReturnAssumption.first - 4),
                           oldestReturnAssumption.second);
-  } else {
-    return std::make_pair(nullptr, Context());
   }
+  return std::make_pair(nullptr, Context());
 }
 
 template <class DerivedState, class Dependencies>
