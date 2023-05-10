@@ -22,4 +22,4 @@ parse(){
   done
 }
 
-parse | xargs -P 4 -n 1 -I CMD ./runTestcase CMD  --ta-lpsolver-effort=maximal --ta-pathana-type=graphilp &>/dev/null &
+parse | xargs -P 16 -n 1 -I CMD ./runTestcase CMD  --ta-lpsolver-effort=maximal --ta-pathana-type=graphilp 2>> error 1>> output &

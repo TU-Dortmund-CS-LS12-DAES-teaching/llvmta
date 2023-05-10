@@ -237,3 +237,4 @@ if [[ "$build_mif" = true ]]; then
 	"$MIF_UTILS"/hex_to_mif/hex2mif final_binary
 fi
 popd
+#rm -rf "$WORKDIR"

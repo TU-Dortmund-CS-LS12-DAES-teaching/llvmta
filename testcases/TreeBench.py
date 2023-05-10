@@ -53,6 +53,8 @@ for trainingSet in trainingSets:
                     if failed:
                         print("Stuck in inft loop for: " + llvmtaRunDir)
                         continue
-                    subprocess.call(['bash', './runTestcase' , llvmtaRunDir],stdout=subprocess.DEVNULL)
+                    #subprocess.call(['bash', './runTestcase' , llvmtaRunDir],stdout=subprocess.DEVNULL)
+                    print(trainingSet + "," + optimization + "," + depth + "," + trees + "," + "-1")
+                    done=True
                     failed=True
             #print(llvmtaOptDir + "/"+optimization)
