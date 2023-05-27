@@ -36,6 +36,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <ostream>
+#include <string>
 #include <unistd.h>
 #include <vector>
 
@@ -160,8 +161,10 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
         if(newBlock){
             continueTarget=instr.addr;
             this->binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,branchTarget,continueTarget,instruction_list)));
-
+            std::vector<derivedInstr> tmp;
+            instruction_list=tmp;
             entry = instr.addr;
+            newBlock=false;
         }
         /*complete block if terminator found*/
         if(this->isBranch(instr)){
@@ -179,6 +182,28 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
     binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,NAN,NAN,instruction_list)));
 
     std::cout << "BuildBlocks: found "<<binBlocks.size()<<" basic blocks\n";
+
+    //dump blocks to file
+    std::ofstream blockDump("blockDump.txt");
+
+    for(int it=0;it<binBlocks.size();it++){
+        blockDump<<"\nBB "<< it <<": \n";
+        std::vector<derivedInstr> ins=binBlocks[it].instructions();
+        for(int instrIt=0;instrIt<ins.size();instrIt++){
+            blockDump<<"    "<<instrIt<<": "<<ins[instrIt].funct<<" ";
+            for(std::string opr:ins[instrIt].operands){
+                blockDump<<opr<<", ";
+            }
+            blockDump<<"\n";
+        }
+
+    }
+    blockDump.close();
+
+}
+
+std::vector<BinaryBasicBlock> BinaryAdressManager::getBlocks(){
+    return this->binBlocks;
 }
 
 } // namespace TimingAnalysisPass

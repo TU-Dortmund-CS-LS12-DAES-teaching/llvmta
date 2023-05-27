@@ -83,6 +83,8 @@ public:
 
     virtual bool initialize();
 
+    std::vector<BinaryBasicBlock> getBlocks();
+
 
 private:
     
