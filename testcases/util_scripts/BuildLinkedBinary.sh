@@ -3,5 +3,5 @@
 
 #binary="./dummyBinaryfile.txt"
 #echo "still TODO" >> $binary
-clang -O -c optimized.ll --target=riscv32 -o binary
+clang -O0 -c optimized.ll --target=riscv32 -o binary
 llvm-objdump binary -d -M numeric > binary.dump
