@@ -63,7 +63,7 @@ bool RiscvBinaryInstructionIterator::getNext(derivedInstr *instruction){
         instruction->isLabel=std::regex_match(line,label_expr);
 
         if(std::regex_match(line,instr_match,instr_expr)){
-            instruction->addr=std::stoul(instr_match[1].str(),nullptr,64);
+            instruction->addr=std::stoul(instr_match[1].str(),nullptr,16);
             instruction->funct=instr_match[2].str();
 
             //iterate operand string to extract operand list
@@ -143,11 +143,28 @@ bool RiscvBinaryAdressManager::isBranch(derivedInstr instruction) {
     //all and only, branch instructions start with a b; jump instructions start with a j
     std::regex terminators_expr("b.*|j.*|ret");
     std::smatch term_match;
+    bool isTerm;
+
+    //is branching operator
+    isTerm=std::regex_match(instruction.funct,term_match,terminators_expr);
+
+    //ignore PseudoBranch (uncond jump effectively PC+1)
+    if(instruction.funct == "j"){
+        std::cout<<"\n******\n jump:"<<instruction.funct<<instruction.operands[0];
+        std::string target=instruction.operands[0];
+        target = target.substr(0,target.find(" "));
+        uint64_t targetAddr=std::stoul(target,0,16);
+        std::cout<<"\ntaraddr:"<<targetAddr<<", instaddr"<<instruction.addr;
+        if(instruction.addr==(targetAddr-4)){
+            isTerm=false;
+        }
+    }
+
     /*std::cout << "entered isBranch :"<<instruction.funct<<"\n";
     if(std::regex_match(instruction.funct,term_match,terminators_expr)){
         std::cout<<"found terminator at: "<<instruction.addr<<"\n";
         }*/
-    return std::regex_match(instruction.funct,term_match,terminators_expr);
+    return isTerm;
 }
   
 
