@@ -164,7 +164,7 @@ else
 fi
 
 if [ "$enable_optimizations" = false ]; then
-	llvmtaopts+=("-O0 -disable-O0-optnone")
+	llvmtaopts+=("-O0 -disable-O0-optnone -g")
 else
 	# Note: if conversion can unfortunately not be disabled completely.
 	# One would need to comment the call to createIfConversion to stop if-conversion completely.

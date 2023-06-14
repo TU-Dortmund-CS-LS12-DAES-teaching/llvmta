@@ -22,7 +22,6 @@ if(pX[3] <=  17.574999809265137){
 				if(pX[3] <=  16.25){
 					return 2;
 				} else {
-					#pragma quality main 50
 					return 3;
 				}
 			}
