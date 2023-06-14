@@ -782,7 +782,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
 
   // Add call edges to the graph (determined earlier)
   for (auto &callsite2states : callStates) {
-    auto instr = callsite2states.first;
+    const auto *instr = callsite2states.first;
     assert(instr->isCall() && "Callsite is not a call instruction");
     // external symbol, no call to a function in the program
     DEBUG_WITH_TYPE("graphilp", dbgs() << "StateSensitiveGraph, Line: "
@@ -831,7 +831,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
         // Potentially saw a context edge if the first BB in callee was empty
         for (auto &edge : initialedgelist) {
           if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(edge)) {
-            for (auto direc :
+            for (auto *direc :
                  *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeEnter(
                      edge)) {
               calleeCtx.update(direc);
@@ -839,7 +839,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
           }
           calleeCtx.transfer(edge);
           if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(edge)) {
-            for (auto direc :
+            for (auto *direc :
                  *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeLeave(
                      edge)) {
               calleeCtx.update(direc);
@@ -901,7 +901,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
           // check whether there is a successor basic block whose in states
           // matched this state
           if (!currMBB.succ_empty()) {
-            for (auto succMBB : getNonEmptySuccessorBasicBlocks(currMBB)) {
+            for (auto *succMBB : getNonEmptySuccessorBasicBlocks(currMBB)) {
               // The current context must be updated along the edges of the
               // paths to the beginning of the next basic-block
               std::set<std::list<MBBedge>> *edgesSet = nullptr;
@@ -924,7 +924,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
                 for (auto edge : list) {
                   if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(
                           edge)) {
-                    for (auto direc : *DirectiveHeuristicsPassInstance
+                    for (auto *direc : *DirectiveHeuristicsPassInstance
                                            ->getDirectiveOnEdgeEnter(edge)) {
                       imContext.update(direc);
                     }
@@ -932,7 +932,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
                   imContext.transfer(edge);
                   if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(
                           edge)) {
-                    for (auto direc : *DirectiveHeuristicsPassInstance
+                    for (auto *direc : *DirectiveHeuristicsPassInstance
                                            ->getDirectiveOnEdgeLeave(edge)) {
                       imContext.update(direc);
                     }
@@ -1033,8 +1033,8 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
     }
   }
 
-  auto startFunc = getAnalysisEntryPoint();
-  auto startMbb = &*(startFunc->begin());
+  auto *startFunc = getAnalysisEntryPoint();
+  auto *startMbb = &*(startFunc->begin());
   assert(startMbb->getNumber() == 0 &&
          "First Basic block of function did not have number 0.");
 
@@ -1063,7 +1063,7 @@ template <class MicroArchDom>
 void StateSensitiveGraph<MicroArchDom>::buildExternalSymbolReturnEdges() {
   CallGraph &cg = CallGraph::getGraph();
   for (auto extFunc : cg.getAllExternalFunctions()) {
-    for (auto callsite : cg.getExtFuncCallSites(extFunc)) {
+    for (const auto *callsite : cg.getExtFuncCallSites(extFunc)) {
       if (returnStates.count(callsite) > 0) {
         assert(callStates.count(callsite) > 0 &&
                "Having return states, but no call states");
@@ -1084,7 +1084,7 @@ void StateSensitiveGraph<MicroArchDom>::buildExternalSymbolReturnEdges() {
 template <class MicroArchDom>
 std::set<unsigned> StateSensitiveGraph<MicroArchDom>::progressStatesForProgLoc(
     std::set<unsigned> workingSetOfStates, ProgramLocation progLoc) {
-  auto MI = progLoc.first;
+  const auto *MI = progLoc.first;
   DEBUG_WITH_TYPE("instructions", dbgs()
                                       << "State-sensitive graph construction "
                                          "currently processes instruction:\n"
@@ -1550,7 +1550,7 @@ StateSensitiveGraph<MicroArchDom>::getIncomingStates(MachineBasicBlock &mbb) {
 
   // skip empty basic blocks
   if (!isBasicBlockEmpty(&mbb)) {
-    auto firstInstr = getFirstInstrInBB(&mbb);
+    const auto *firstInstr = getFirstInstrInBB(&mbb);
     // get analysis info before the next
     auto &ctxStateInfoBefore = mai.getAnaInfoBefore(firstInstr);
     if (!ctxStateInfoBefore.isBottom()) {
@@ -1568,7 +1568,7 @@ std::unordered_map<
 StateSensitiveGraph<MicroArchDom>::getOutgoingStates(MachineBasicBlock &mbb) {
   std::unordered_map<Context, std::vector<State>> result;
   if (!isBasicBlockEmpty(&mbb)) {
-    for (auto endInstr : getAllEndInstrInMBB(&mbb)) {
+    for (const auto *endInstr : getAllEndInstrInMBB(&mbb)) {
       bool needGuarded = endInstr->isConditionalBranch() ||
                          isJumpTableBranch(endInstr) || endInstr->isReturn();
       bool needBothGuards = needGuarded && endInstr == &mbb.back();
@@ -1699,7 +1699,7 @@ void StateSensitiveGraph<MicroArchDom>::dump(
         std::set<unsigned> statesLeavingBB;
         const auto &callsites =
             CallGraph::getGraph().getCallSitesInMBB(&currMBB);
-        for (auto callsite : callsites) {
+        for (const auto *callsite : callsites) {
           if (callStates.count(callsite) > 0) {
             assert(returnStates.count(callsite) > 0 &&
                    "Calling states 	but no return states");
@@ -1739,7 +1739,7 @@ void StateSensitiveGraph<MicroArchDom>::dump(
           }
         }
         // dump return states of the basic block
-        for (auto callsite : callsites) {
+        for (const auto *callsite : callsites) {
           if (callStates.count(callsite) > 0) {
             for (auto &ctx2cSts : returnStates.at(callsite)) {
               for (auto cSt : ctx2cSts.second) {
@@ -1855,7 +1855,7 @@ void StateSensitiveGraph<MicroArchDom>::dump(
         std::set<unsigned> statesLeavingBB;
         const auto &callsites =
             CallGraph::getGraph().getCallSitesInMBB(&currMBB);
-        for (auto callsite : callsites) {
+        for (const auto *callsite : callsites) {
           if (callStates.count(callsite) > 0) {
             assert(returnStates.count(callsite) > 0 &&
                    "Calling states but no return states");
@@ -1899,7 +1899,7 @@ void StateSensitiveGraph<MicroArchDom>::dump(
           }
         }
         // dump return states of the basic block
-        for (auto callsite : callsites) {
+        for (const auto *callsite : callsites) {
           if (callStates.count(callsite) > 0) {
             for (auto &ctx2cSts : returnStates.at(callsite)) {
               for (auto cSt : ctx2cSts.second) {

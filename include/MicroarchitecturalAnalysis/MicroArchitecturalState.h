@@ -374,8 +374,9 @@ MicroArchitecturalState<DerivedState, Dependencies>::handleBranch(
       thisRef &&
       "[Internal error] We could not cast a microarch state to its subclass.");
   DerivedState thisCopy(*thisRef);
-
+ //NILS start analysis here for branches.
   if (isJumpTableBranch(branchInstr)) {
+
     // Jump table branch
     auto JTindex = getJumpTableIndex(branchInstr);
     auto &MJTEs = branchInstr->getParent()

@@ -40,6 +40,7 @@ namespace TimingAnalysisPass {
  * 3) Start constraint
  */
 class FlowConstraintProvider {
+//NILS Use this as reference to enforce a leave of the WCET Tree is taken.
 public:
   /**
    * Construct flow constraints for the given graph.

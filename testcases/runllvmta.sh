@@ -120,7 +120,7 @@ fi
 
 # -march=armv4t will generate only simply ARM instructions supported by our
 # FPGA prototype
-clangopts=( "-w" "-S" "-gline-tables-only"
+clangopts=( "-w" "-S" "-g" "-gline-tables-only"
 			"-O0" "-Xclang" "-disable-O0-optnone" "-fno-builtin")
 
 if [ $isa_type == "riscv" ]; then

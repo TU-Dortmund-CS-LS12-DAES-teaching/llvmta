@@ -190,7 +190,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
   // for each loop, add loop constraint
   for (const MachineLoop *loop : LoopBoundInfo->getAllLoops()) {
 
-    auto entryBB = loop->getHeader();
+    auto *entryBB = loop->getHeader();
     // If the loop (i.e. the header) is not reachable at all, we do not need any
     // constraints here
     if (graph->getInStates(entryBB).size() == 0) {
@@ -199,7 +199,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
 
     std::set<unsigned> outStatesWithinScope;
     std::set<unsigned> outStatesOutsideScope;
-    for (auto predBB : getNonEmptyPredecessorBasicBlocks(entryBB)) {
+    for (const auto *predBB : getNonEmptyPredecessorBasicBlocks(entryBB)) {
       if (entryBB->getParent() == predBB->getParent()) {
         auto outStates = graph->getOutStates(predBB);
         assert(outStates.size() > 0 && "Non empty BB should have out states");
@@ -210,7 +210,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
           outStatesOutsideScope.insert(outStates.begin(), outStates.end());
         }
       } else {
-        for (auto cs : cg.getCallSitesInMBB(predBB)) {
+        for (const auto *cs : cg.getCallSitesInMBB(predBB)) {
           const auto &potCallees = cg.getPotentialCallees(cs);
           if (std::find(potCallees.begin(), potCallees.end(),
                         entryBB->getParent()) != potCallees.end()) {
@@ -224,7 +224,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
     // Collect the list of states that correspond to each context
     std::unordered_map<Context, std::list<unsigned>> ctxStateMap;
     for (auto stateId : graph->getInStates(entryBB)) {
-      auto context = graph->getContextOfState(stateId);
+      const auto *context = graph->getContextOfState(stateId);
       if (context == nullptr) {
         ctxStateMap[Context()].push_back(stateId);
       } else {
@@ -302,7 +302,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
              * precise for the upper bound case.
              */
             if (!isGeneralMode() && upper && LoopPeel > 0) {
-              auto predCtx = graph->getContextOfState(predId);
+              const auto *predCtx = graph->getContextOfState(predId);
               if (predCtx == nullptr) {
                 skipConstraints = true;
                 continue;
@@ -311,9 +311,9 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
               bool whilesuccess = false;
               while (!whilesuccess && predCtxTokenList.size() > 0) {
                 // Get current topmost token
-                auto lastToken = predCtxTokenList.back();
+                auto *lastToken = predCtxTokenList.back();
                 predCtxTokenList.pop_back();
-                if (auto loopPeelToken =
+                if (auto *loopPeelToken =
                         dynamic_cast<PartitionTokenLoopPeel *>(lastToken)) {
                   // If the loops do not match (this might be due to nesting and
                   // optimizations), try the next token
@@ -325,7 +325,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
                         .insert(edge);
                     whilesuccess = true;
                   }
-                } else if (auto loopIterToken =
+                } else if (auto *loopIterToken =
                                dynamic_cast<PartitionTokenLoopIter *>(
                                    lastToken)) {
                   // If the loops do not match (this might be due to nesting and
@@ -359,7 +359,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
           for (auto &loopBB : loop->blocks()) {
             // find successor basic blocks outside of the loop
             std::set<MachineBasicBlock *> successorsBlocksOutsideLoop;
-            for (auto succBB : getNonEmptySuccessorBasicBlocks(*loopBB)) {
+            for (auto *succBB : getNonEmptySuccessorBasicBlocks(*loopBB)) {
               if (!loop->contains(succBB)) {
                 successorsBlocksOutsideLoop.insert(succBB);
               }
@@ -368,7 +368,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
             // current block to those successors
             if (!successorsBlocksOutsideLoop.empty()) {
               auto outStates = graph->getOutStates(loopBB);
-              for (auto succBB : successorsBlocksOutsideLoop) {
+              for (auto *succBB : successorsBlocksOutsideLoop) {
                 auto inStates = graph->getInStates(succBB);
                 assert(inStates.size() > 0 &&
                        "Non empty BB should have in states");
@@ -486,7 +486,7 @@ void FlowConstraintProvider::buildCallReturnConstraints() {
   for (MachineFunction *currFunc :
        machineFunctionCollector->getAllMachineFunctions()) {
     for (auto &currMBB : *currFunc) {
-      for (auto callsite : CallGraph::getGraph().getCallSitesInMBB(&currMBB)) {
+      for (const auto *callsite : CallGraph::getGraph().getCallSitesInMBB(&currMBB)) {
         auto callStates = graph->getCallStates(callsite);
         auto returnStates = graph->getReturnStates(callsite);
 
@@ -541,7 +541,7 @@ void FlowConstraintProvider::buildCallReturnConstraints() {
               callsite->getParent()->getParent();
           std::vector<const MachineBasicBlock *> potCalleeBlocks;
           bool startFunctionPotentialCallee = false;
-          for (auto potCallee :
+          for (const auto *potCallee :
                CallGraph::getGraph().getPotentialCallees(callsite)) {
             if (startFunction == potCallee) {
               startFunctionPotentialCallee = true;
@@ -615,6 +615,8 @@ void FlowConstraintProvider::buildCallReturnConstraints() {
 }
 
 void FlowConstraintProvider::buildStartConstraint() {
+  // NILS if we can put a leav as constraint =1, we can enforce its taken on the WCEP.
+
   // In program run mode we start by taking exactly one
   // outgoing edge from the special node 0.
   // Additionally, we have to specify that the

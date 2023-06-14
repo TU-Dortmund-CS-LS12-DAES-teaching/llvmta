@@ -56,6 +56,12 @@
       "type": "shell",
       "command": " cd build ; ninja ; cd ../testcases ; ./runTestcase loopexamples/dowhile ",
       "group": "test"
+    },
+    {
+      "label": "pre dbg dTree",
+      "type": "shell",
+      "command": " cd build ; ninja ; cd ../testcases ; ./runTestcase dtrees/standardif ",
+      "group": "test"
     }
   ]
 }
