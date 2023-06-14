@@ -50,6 +50,12 @@
       "type": "shell",
       "command": " cd build ; ninja",
       "group": "build"
+    },
+    {
+      "label": "pre dbg dowhile",
+      "type": "shell",
+      "command": " cd build ; ninja ; cd ../testcases ; ./runTestcase loopexamples/dowhile ",
+      "group": "test"
     }
   ]
 }

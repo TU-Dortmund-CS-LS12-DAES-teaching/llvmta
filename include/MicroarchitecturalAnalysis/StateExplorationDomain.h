@@ -226,7 +226,7 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::
     top = false;
     // Get initial program start as this is needed for setting the pc correctly
     // in MicroArchState
-    auto MF = getAnalysisEntryPoint();
+    auto *MF = getAnalysisEntryPoint();
     std::list<MBBedge> initialedgelist;
     const MachineInstr *firstInstr =
         getFirstInstrInFunction(MF, initialedgelist);
@@ -238,7 +238,7 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::
     for (auto edgeit = initialedgelist.begin(); edgeit != initialedgelist.end();
          ++edgeit) {
       if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(*edgeit)) {
-        for (auto direc :
+        for (auto *direc :
              *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeEnter(
                  *edgeit)) {
           ctx.update(direc);
@@ -246,7 +246,7 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::
       }
       ctx.transfer(*edgeit);
       if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(*edgeit)) {
-        for (auto direc :
+        for (auto *direc :
              *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeLeave(
                  *edgeit)) {
           ctx.update(direc);
@@ -485,7 +485,7 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::transferCall(
     if (callTarget.isSymbol()) {
       assert(callee == nullptr && "Cannot have function for external callee");
     } else {
-      auto val = (const Value *)callTarget.getGlobal();
+      const auto *val = (const Value *)callTarget.getGlobal();
       std::string funcName = val->getName().str();
       assert(!machineFunctionCollector->hasFunctionByName(funcName) &&
              "Ext func is not external");
@@ -516,7 +516,8 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::transferCall(
             DirectiveHeuristicsPassInstance->getDirectiveAfterInstr(callInstr));
       }
       auto addr = StaticAddrProvider->getAddr(callInstr);
-      auto afterCallInstr = StaticAddrProvider->getMachineInstrByAddr(addr + 4);
+      const auto *afterCallInstr =
+          StaticAddrProvider->getMachineInstrByAddr(addr + 4);
 
       if (DirectiveHeuristicsPassInstance->hasDirectiveBeforeInstr(
               afterCallInstr)) {
@@ -532,27 +533,26 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::transferCall(
       retVal.top = true;
     }
     return retVal;
-  } else {
-    assert(callee != nullptr && "Cannot handle call to non-existing callee");
-    // First cycle until the call instruction is final. This is then the
-    // callee-in info.
-    this->transfer(callInstr, ctx, anaInfo);
-    // TODO do the filtering on the given callee being called (only needed for
-    // multiple callees)
-
-    // Take the calleeOut information, filter on taking the correct return
-    // instruction and return it as afterCallInfo
-    StateExplorationDom<MicroArchState> retVal(AnaDomInit::BOTTOM);
-    for (auto &state : calleeOut.states) {
-      MicroArchState copy(state);
-      // If the state corresponds to the given return location, we use it
-      if (copy.assumedReturnedTo(std::make_pair(callInstr, *ctx))) {
-        copy.resetLocalMetrics();
-        StateExplorationDom<MicroArchState>::insertOnInstr(retVal.states, copy);
-      }
-    }
-    return retVal;
   }
+  assert(callee != nullptr && "Cannot handle call to non-existing callee");
+  // First cycle until the call instruction is final. This is then the
+  // callee-in info.
+  this->transfer(callInstr, ctx, anaInfo);
+  // TODO do the filtering on the given callee being called (only needed for
+  // multiple callees)
+
+  // Take the calleeOut information, filter on taking the correct return
+  // instruction and return it as afterCallInfo
+  StateExplorationDom<MicroArchState> retVal(AnaDomInit::BOTTOM);
+  for (auto &state : calleeOut.states) {
+    MicroArchState copy(state);
+    // If the state corresponds to the given return location, we use it
+    if (copy.assumedReturnedTo(std::make_pair(callInstr, *ctx))) {
+      copy.resetLocalMetrics();
+      StateExplorationDom<MicroArchState>::insertOnInstr(retVal.states, copy);
+    }
+  }
+  return retVal;
 }
 
 template <template <class> class StateExplorationDom, class MicroArchState>

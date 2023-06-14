@@ -41,13 +41,12 @@ dispatchInOrderCacheAnalysis(AnalysisType anatype,
     typedef InOrderCacheState<CacheFactory::makeOptionsDataCacheIgnComp, true>
         MuState;
     return dispatchCacheAnalysisJoin<MuState>(addrInfoTuple, "Data ");
-  } else {
-    assert(anatype == AnalysisType::L1ICACHE &&
-           "Can only choose data or instr cache");
-    typedef InOrderCacheState<CacheFactory::makeOptionsInstrCacheIgnComp, false>
-        MuState;
-    return dispatchCacheAnalysisJoin<MuState>(addrInfoTuple, "Instr ");
   }
+  assert(anatype == AnalysisType::L1ICACHE &&
+         "Can only choose data or instr cache");
+  typedef InOrderCacheState<CacheFactory::makeOptionsInstrCacheIgnComp, false>
+      MuState;
+  return dispatchCacheAnalysisJoin<MuState>(addrInfoTuple, "Instr ");
 }
 
 } // namespace TimingAnalysisPass
