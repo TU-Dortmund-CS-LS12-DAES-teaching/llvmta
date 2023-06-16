@@ -27,6 +27,8 @@
 //#include "LLVMPasses/StaticAddressProvider.h"
 #include "RISCV.h"
 #include "Util/Options.h"
+#include "llvm/CodeGen/TargetInstrInfo.h"
+#include "llvm/CodeGen/TargetSubtargetInfo.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/Target/TargetMachine.h"
@@ -120,6 +122,10 @@ bool BinaryAdressManager::initialize(){
     return false;
 }
 
+bool BinaryAdressManager::instrMatch(derivedInstr dins, MachineInstr *mins){
+    return false;
+}
+
 bool BinaryAdressManager::isBranch(derivedInstr instruction){
     return false;
 }
@@ -205,5 +211,7 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
 std::vector<BinaryBasicBlock> BinaryAdressManager::getBlocks(){
     return this->binBlocks;
 }
+
+
 
 } // namespace TimingAnalysisPass
