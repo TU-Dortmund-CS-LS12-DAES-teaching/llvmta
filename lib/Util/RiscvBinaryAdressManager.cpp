@@ -126,23 +126,6 @@ RiscvBinaryAdressManager::RiscvBinaryAdressManager(TargetMachine &TM) : BinaryAd
     }
 
 
-    std::ifstream myFile;
-    myFile.open("dummyBinaryfile.txt",std::ifstream::in);
-    std::cout << "opended binary\n";
-    char someText[256];
-    myFile.read(someText, 256);
-    myFile.close();
-    std::cout << someText;
-    std::cout << "\n";
-    char tmp[256];
-    getcwd(tmp, 256);
-    std::cout << tmp;
-    std::cout << " -dir\n";
-    system("ls");
-    std::cout << "\n";std::cout << "\n";
-
-    std::cout << "we here!!\n\n";
-
    
 }
 

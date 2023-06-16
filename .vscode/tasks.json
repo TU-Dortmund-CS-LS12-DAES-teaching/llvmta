@@ -50,6 +50,15 @@
       "type": "shell",
       "command": " cd build ; ninja",
       "group": "build"
+    },
+    {
+      "type": "typescript",
+      "tsconfig": "dependencies/llvm-14.0.6.src/utils/vscode/llvm/tsconfig.json",
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "group": "build",
+      "label": "tsc: build - dependencies/llvm-14.0.6.src/utils/vscode/llvm/tsconfig.json"
     }
   ]
 }
