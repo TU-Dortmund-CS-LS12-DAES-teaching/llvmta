@@ -26,6 +26,7 @@
 
 
 #include "Util/Util.h"
+#include "llvm/CodeGen/MachineOperand.h"
 #include "llvm/Target/TargetMachine.h"
 #include <cstdint>
 #include <fstream>
@@ -85,6 +86,8 @@ public:
 
     std::vector<BinaryBasicBlock> getBlocks();
 
+    virtual bool instrMatch(derivedInstr dins,MachineInstr *mins);
+
 
 private:
     
@@ -98,6 +101,8 @@ protected:
     void buildBlocks(BinaryInstructionIterator *binItr);
     
 };
+
+
 
 
 

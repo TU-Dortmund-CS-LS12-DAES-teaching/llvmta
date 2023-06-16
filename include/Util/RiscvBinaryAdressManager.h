@@ -46,9 +46,14 @@ public:
     RiscvBinaryAdressManager(TargetMachine &TM);
 
     bool initialize() override;
+    
+    bool instrMatch(derivedInstr dins,MachineInstr *mins) override;
+
 
 private:
     bool isBranch(derivedInstr instruction) override;
+
+    
 
     uint64_t getBranchTarget(derivedInstr instruction) override;
 
