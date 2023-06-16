@@ -86,20 +86,6 @@ bool StaticAddressProvider::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
   auto Arch = TM.getTargetTriple().getArch();
 
   for (auto &I : MBB) {
-    // Print debuglocation of the instruction I
-    if (I.getDebugLoc()) {
-
-      auto DL = I.getDebugLoc();
-      if (DL->getLine() == 25) {
-        DILocation *DILoc = DL.get();
-        // Retrieve the filename from the DebugLoc metadata
-        StringRef Filename = DILoc->getFilename();
-        // Print the filename
-        if (Filename.contains("Benchmarks")) {
-          llvm::errs() << "Filename: " << Filename << "\n";
-        }
-      }
-    }
     assert(!I.isBundle() && "We found a bundled instruction!");
 
     bool AssignAddress = false;

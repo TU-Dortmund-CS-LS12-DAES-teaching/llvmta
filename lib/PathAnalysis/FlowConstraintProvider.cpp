@@ -27,6 +27,7 @@
 
 #include "PathAnalysis/GetEdges.h"
 #include "PathAnalysis/LoopBoundInfo.h"
+#include "Util/Options.h"
 #include <cassert>
 
 namespace TimingAnalysisPass {
@@ -482,11 +483,58 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
 }
 
 void FlowConstraintProvider::buildCallReturnConstraints() {
+  // NILS implement the Tree Path constraint here.
+  // NILS Print debuglocation of the instruction I
+  if (ILPLine > 0) {
+    for (MachineFunction *currFunc :
+         machineFunctionCollector->getAllMachineFunctions()) {
+      for (auto &currMBB : *currFunc) {
+        for (auto &currInst : currMBB) {
+          if (currInst.getDebugLoc()) {
+            auto DL = currInst.getDebugLoc();
+            auto line = DL->getLine();
+            if (line == ILPLine) {
+              DILocation *DILoc = DL.get();
+              // Retrieve the filename from the DebugLoc metadata
+              StringRef Filename = DILoc->getFilename();
+              // Print the filename
+              if (Filename.contains("Benchmarks")) {
+                assert(isEndInstr(currMBB, &currInst) &&
+                       "make sure this is the last instruction of the BB");
+                // llvm::errs() << "Filename: " << Filename << "\n";
+                currInst.dump();
+                auto outStates = graph->getOutStates(&currMBB);
+                VarCoeffVector variables;
+                for (auto state : outStates) {
+                  // Iterate predecessor of state
+                  auto predecessors = graph->getGraph().getPredecessors(state);
+                  for (auto preState : predecessors) {
+                    if (preState == 0)
+                      continue;
+                    auto edge = std::make_pair(preState, state);
+                    auto edgeTimesTakenVar =
+                        Variable::getEdgeVar(timesTakenType, edge);
+                    variables.push_back(std::make_pair(edgeTimesTakenVar, 1));
+                  }
+                }
+                // NILS TODO add path constraint for all states connected to
+                // MIR.
+                startConstraints.push_back(std::make_tuple(
+                    variables, ConstraintType::GreaterEqual, 1));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  // END NILS
   // Build nodes for all states in functions and basic blocks
   for (MachineFunction *currFunc :
        machineFunctionCollector->getAllMachineFunctions()) {
     for (auto &currMBB : *currFunc) {
-      for (const auto *callsite : CallGraph::getGraph().getCallSitesInMBB(&currMBB)) {
+      for (const auto *callsite :
+           CallGraph::getGraph().getCallSitesInMBB(&currMBB)) {
         auto callStates = graph->getCallStates(callsite);
         auto returnStates = graph->getReturnStates(callsite);
 
@@ -615,8 +663,6 @@ void FlowConstraintProvider::buildCallReturnConstraints() {
 }
 
 void FlowConstraintProvider::buildStartConstraint() {
-  // NILS if we can put a leav as constraint =1, we can enforce its taken on the WCEP.
-
   // In program run mode we start by taking exactly one
   // outgoing edge from the special node 0.
   // Additionally, we have to specify that the
