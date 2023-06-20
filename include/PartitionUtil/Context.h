@@ -164,7 +164,7 @@ template <> struct hash<TimingAnalysisPass::Context> {
   size_t operator()(const TimingAnalysisPass::Context &ctx) const {
     size_t val{0};
     TimingAnalysisPass::hash_combine(val, ctx.context->size());
-    for (auto tok : *ctx.context) {
+    for (auto *tok : *ctx.context) {
       TimingAnalysisPass::hash_combine(val, *tok);
     }
     return val;

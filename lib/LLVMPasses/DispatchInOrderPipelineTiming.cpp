@@ -58,33 +58,30 @@ double getInstructionCacheMissPenaltyInOrder(double maximisses) {
       // bgmemlatency many cycles
       return maximisses * bgmemlatency +
              std::min(maximisses, maxstorestobus.get()) * bgmemlatency;
-    } else {
-      auto maxdmisses = AnalysisResults::getInstance().getResultUpperBound(
-          "IntAna_MaxDataMisses_DataMisses");
-      assert(maxdmisses && "Expected this metrics to be bounded");
-      // If there are less data misses than instruction misses, not all
-      // instruction misses can be blocked on bus +3 for instruction cache miss
-      // penalty come from negative timing anomaly to hide bus blocking and
-      // computation in the I$-hit case If there is a store, the instruction
-      // fetch can be blocked for additional bgmemlatency many cycles.
-      return maximisses * bgmemlatency +
-             std::min(maximisses, maxstorestobus.get()) * bgmemlatency +
-             std::min(maxdmisses.get(),
-                      std::max(0.0, maximisses - maxstorestobus.get())) *
-                 3;
     }
-  } else {
-    if (CompAnaType.isSet(CompositionalAnalysisType::DCACHE)) {
-      return maximisses * bgmemlatency +
-             std::min(maximisses, maxstorestobus.get()) * 3;
-    } else {
-      auto maxdmisses = AnalysisResults::getInstance().getResultUpperBound(
-          "IntAna_MaxDataMisses_DataMisses");
-      assert(maxdmisses && "Expected this metrics to be bounded");
-      return maximisses * bgmemlatency +
-             std::min(maximisses, maxstorestobus.get() + maxdmisses.get()) * 3;
-    }
+    auto maxdmisses = AnalysisResults::getInstance().getResultUpperBound(
+        "IntAna_MaxDataMisses_DataMisses");
+    assert(maxdmisses && "Expected this metrics to be bounded");
+    // If there are less data misses than instruction misses, not all
+    // instruction misses can be blocked on bus +3 for instruction cache miss
+    // penalty come from negative timing anomaly to hide bus blocking and
+    // computation in the I$-hit case If there is a store, the instruction
+    // fetch can be blocked for additional bgmemlatency many cycles.
+    return maximisses * bgmemlatency +
+           std::min(maximisses, maxstorestobus.get()) * bgmemlatency +
+           std::min(maxdmisses.get(),
+                    std::max(0.0, maximisses - maxstorestobus.get())) *
+               3;
   }
+  if (CompAnaType.isSet(CompositionalAnalysisType::DCACHE)) {
+    return maximisses * bgmemlatency +
+           std::min(maximisses, maxstorestobus.get()) * 3;
+  }
+  auto maxdmisses = AnalysisResults::getInstance().getResultUpperBound(
+      "IntAna_MaxDataMisses_DataMisses");
+  assert(maxdmisses && "Expected this metrics to be bounded");
+  return maximisses * bgmemlatency +
+         std::min(maximisses, maxstorestobus.get() + maxdmisses.get()) * 3;
 }
 
 double getDataCacheMissPenaltyInOrder(double maxdmisses) {
@@ -105,32 +102,28 @@ double getDataCacheMissPenaltyInOrder(double maxdmisses) {
     if (CompAnaType.isSet(CompositionalAnalysisType::ICACHE)) {
       return maxdmisses * bgmemlatency +
              std::min(maxstorestobus.get(), maxdmisses) * bgmemlatency;
-    } else {
-      auto maximisses = AnalysisResults::getInstance().getResultUpperBound(
-          "IntAna_MaxInstrMisses_InstrMisses");
-      assert(maximisses && "Expected this metrics to be bounded");
-      return maxdmisses * bgmemlatency +
-             std::min(maxdmisses, maxstorestobus.get()) * bgmemlatency +
-             std::min(maximisses.get(),
-                      std::max(0.0, maxdmisses - maxstorestobus.get())) *
-                 6;
     }
-  } else {
-    if (CompAnaType.isSet(CompositionalAnalysisType::ICACHE)) {
-      // If i-cache is treated compositionally as well, penalty is direct effect
-      return maxdmisses * bgmemlatency;
-    } else {
-      auto maximisses = AnalysisResults::getInstance().getResultUpperBound(
-          "IntAna_MaxInstrMisses_InstrMisses");
-      assert(maximisses && "Expected this metrics to be bounded");
-      // If there are less instruction misses than data misses, not all data
-      // misses can be blocked on bus +5 for data cache miss penalty come from
-      // negative timing anomaly to hide bus blocking and computation in the
-      // D$-hit case
-      return maxdmisses * bgmemlatency +
-             std::min(maxdmisses, maximisses.get()) * 6;
-    }
+    auto maximisses = AnalysisResults::getInstance().getResultUpperBound(
+        "IntAna_MaxInstrMisses_InstrMisses");
+    assert(maximisses && "Expected this metrics to be bounded");
+    return maxdmisses * bgmemlatency +
+           std::min(maxdmisses, maxstorestobus.get()) * bgmemlatency +
+           std::min(maximisses.get(),
+                    std::max(0.0, maxdmisses - maxstorestobus.get())) *
+               6;
   }
+  if (CompAnaType.isSet(CompositionalAnalysisType::ICACHE)) {
+    // If i-cache is treated compositionally as well, penalty is direct effect
+    return maxdmisses * bgmemlatency;
+  }
+  auto maximisses = AnalysisResults::getInstance().getResultUpperBound(
+      "IntAna_MaxInstrMisses_InstrMisses");
+  assert(maximisses && "Expected this metrics to be bounded");
+  // If there are less instruction misses than data misses, not all data
+  // misses can be blocked on bus +5 for data cache miss penalty come from
+  // negative timing anomaly to hide bus blocking and computation in the
+  // D$-hit case
+  return maxdmisses * bgmemlatency + std::min(maxdmisses, maximisses.get()) * 6;
 }
 
 boost::optional<BoundItv>

@@ -1,0 +1,51 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "DBG dowhile ",
+      "program": "${workspaceFolder}/build/bin/llvmta",
+      "args": [
+        "-disable-tail-calls",
+        "-float-abi=hard",
+        "-mattr=-neon,+vfp2",
+        "-O0",
+        "--ta-analysis-entry-point=main",
+        "--ta-muarch-type=inorder",
+        "--ta-memory-type=separatecaches",
+        "--ta-strict=false",
+        "--ta-loop-bounds-file=/workspaces/llvmta/testcases/Benchmarks/loopexamples/dowhile/LoopAnnotations_Arm|NotOptimized|HardFloat.csv",
+        "--ta-num-callsite-tokens=1",
+        "/workspaces/llvmta/testcases/Benchmarks/loopexamples/dowhile/build/main/optimized.ll"
+      ],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "pre dbg dowhile"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "DBG dTree ",
+      "program": "${workspaceFolder}/build/bin/llvmta",
+      "args": [
+        "-disable-tail-calls",
+        "-float-abi=hard",
+        "-mattr=-neon,+vfp2",
+        "-O0",
+        "--ta-analysis-entry-point=main",
+        "--ta-muarch-type=inorder",
+        "--ta-memory-type=separatecaches",
+        "--ta-strict=false",
+        "--ta-loop-bounds-file=/workspaces/llvmta/testcases/Benchmarks/loopexamples/dowhile/LoopAnnotations_Arm|NotOptimized|HardFloat.csv",
+        "--ta-num-callsite-tokens=1",
+        //"--ta-force-ILP-path=25",
+        "/workspaces/llvmta/testcases/Benchmarks/dtrees/standardif/build/optimized.ll"
+      ],
+      "cwd": "${workspaceFolder}/testcases/Benchmarks/dtrees/standardif/build",
+      "preLaunchTask": "pre dbg dTree"
+    }
+  ]
+}

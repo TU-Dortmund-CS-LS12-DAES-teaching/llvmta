@@ -369,50 +369,48 @@ InOrderCacheState<makeCache, dataCache>::cycle(
         "driverSED", for (auto &succ
                           : tmpres) { std::cerr << succ; });
     return tmpres;
-  } else {
-    StateSet res;
-    for (const auto &stateref : tmpres) {
-      InOrderCacheState state(stateref);
-      if (StaticAddrProvider->hasMachineInstrByAddr(state.pc.getPc().first)) {
-        auto nextInstr =
-            StaticAddrProvider->getMachineInstrByAddr(state.pc.getPc().first);
-        auto edge =
-            std::make_pair(currInstr->getParent(), nextInstr->getParent());
-        // Do persistence scope entering
-        if (edge.first != edge.second) {
-          DEBUG_WITH_TYPE("persistence",
-                          dbgs()
-                              << "We see edge (BB" << edge.first->getNumber()
-                              << ", BB" << edge.second->getNumber() << ")\n");
-          if (PersistenceScopeInfo::getInfo().entersScope(edge)) {
-            for (auto scope :
-                 PersistenceScopeInfo::getInfo().getEnteringScopes(edge)) {
-              DEBUG_WITH_TYPE("persistence",
-                              dbgs() << "We are going to enter a scope: "
-                                     << scope.getId() << "\n");
-              state.cachestate->enterScope(scope);
-            }
+  }
+  StateSet res;
+  for (const auto &stateref : tmpres) {
+    InOrderCacheState state(stateref);
+    if (StaticAddrProvider->hasMachineInstrByAddr(state.pc.getPc().first)) {
+      auto nextInstr =
+          StaticAddrProvider->getMachineInstrByAddr(state.pc.getPc().first);
+      auto edge =
+          std::make_pair(currInstr->getParent(), nextInstr->getParent());
+      // Do persistence scope entering
+      if (edge.first != edge.second) {
+        DEBUG_WITH_TYPE("persistence",
+                        dbgs() << "We see edge (BB" << edge.first->getNumber()
+                               << ", BB" << edge.second->getNumber() << ")\n");
+        if (PersistenceScopeInfo::getInfo().entersScope(edge)) {
+          for (auto scope :
+               PersistenceScopeInfo::getInfo().getEnteringScopes(edge)) {
+            DEBUG_WITH_TYPE("persistence",
+                            dbgs() << "We are going to enter a scope: "
+                                   << scope.getId() << "\n");
+            state.cachestate->enterScope(scope);
           }
-          // Do persistence scope leaving
-          if (PersistenceScopeInfo::getInfo().leavesScope(edge)) {
-            for (auto scope :
-                 PersistenceScopeInfo::getInfo().getLeavingScopes(edge)) {
-              DEBUG_WITH_TYPE("persistence",
-                              dbgs() << "We are going to leave a scope: "
-                                     << scope.getId() << "\n");
-              state.cachestate->leaveScope(scope);
-            }
+        }
+        // Do persistence scope leaving
+        if (PersistenceScopeInfo::getInfo().leavesScope(edge)) {
+          for (auto scope :
+               PersistenceScopeInfo::getInfo().getLeavingScopes(edge)) {
+            DEBUG_WITH_TYPE("persistence",
+                            dbgs() << "We are going to leave a scope: "
+                                   << scope.getId() << "\n");
+            state.cachestate->leaveScope(scope);
           }
         }
       }
-      res.insert(state);
     }
-
-    DEBUG_WITH_TYPE(
-        "driverSED", for (auto &succ
-                          : res) { std::cerr << succ; });
-    return res;
+    res.insert(state);
   }
+
+  DEBUG_WITH_TYPE(
+      "driverSED", for (auto &succ
+                        : res) { std::cerr << succ; });
+  return res;
 }
 
 template <dom::cache::AbstractCache *(*makeCachef)(bool), bool dataCachef>

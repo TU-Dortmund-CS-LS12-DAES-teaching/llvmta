@@ -152,7 +152,7 @@ cl::bits<LocalWorstCaseType> StallOnLocalWorstType(
     cl::values(
         //			clEnumValN(LocalWorstCaseType::ICMISS, "icmiss",
         //"Instruction cache miss"),
-        //clEnumValN(LocalWorstCaseType::DCMISS, "dcmiss", "Data cache miss"),
+        // clEnumValN(LocalWorstCaseType::DCMISS, "dcmiss", "Data cache miss"),
         //			clEnumValN(LocalWorstCaseType::WRITEBACK,
         //"writeback", "Writeback upon eviction of dirty line"),
         clEnumValN(LocalWorstCaseType::DRAMREFRESH, "dramrefresh",
@@ -887,4 +887,9 @@ cl::opt<unsigned>
     PreemptionDCacheBudget("ta-preemption-dcache-budget",
                            cl::desc("How many additional data cache misses can "
                                     "occur due to preemption? (default 0)"),
+                           cl::init(0), cl::cat(LLVMTACat));
+
+cl::opt<unsigned>
+    ILPLine("ta-force-ILP-path",
+                           cl::desc("Enforce a Line from your .c file to be Taken in the ILP. "),
                            cl::init(0), cl::cat(LLVMTACat));

@@ -35,6 +35,7 @@
 #include "llvm/CodeGen/MachineConstantPool.h"
 #include "llvm/CodeGen/MachineJumpTableInfo.h"
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_os_ostream.h"
 
@@ -358,8 +359,8 @@ bool StaticAddressProvider::doInitialization(Module &M) {
     if (!Gl2ad.first->hasInitializer())
       continue;
     const auto *GvInit = Gl2ad.first->getInitializer();
-    // If global variable refers another variable, or a constant casted to ptr,
-    // track it
+    // If global variable refers another variable, or a constant casted to
+    // ptr, track it
     if (const GlobalVariable *GV = dyn_cast<GlobalVariable>(GvInit)) {
       Addr2values.insert(std::make_pair(Gl2ad.second, Glvar2addr.at(GV)));
       Addr2symbol.insert(std::make_pair(Gl2ad.second, GV));
@@ -474,7 +475,8 @@ boost::optional<int> StaticAddressProvider::getGlobalVariableInitialValue(
 
 bool StaticAddressProvider::goesExternal(unsigned Addr) {
   if (this->hasMachineInstrByAddr(Addr)) {
-    // We have an instruction for this address, so likely it is not going extern
+    // We have an instruction for this address, so likely it is not going
+    // extern
     return false;
   }
   // Likely we are external otherwise

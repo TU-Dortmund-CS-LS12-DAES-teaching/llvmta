@@ -47,14 +47,12 @@ const MachineOperand &getBranchTargetOperand(const MachineInstr *MI) {
       TimingAnalysisMain::getTargetMachine().getTargetTriple().getArch();
   if (arch == Triple::ArchType::arm) {
     return MI->getOperand(0);
-  } else {
-    assert(arch == Triple::ArchType::riscv32);
+  }      assert(arch == Triple::ArchType::riscv32);
     if (MI->getOpcode() == RISCV::PseudoBR) {
       return MI->getOperand(0);
-    } else {
-      return MI->getOperand(2);
-    }
-  }
+    }        return MI->getOperand(2);
+
+
 }
 
 bool isJumpTableBranch(const MachineInstr *MI) {
@@ -64,11 +62,10 @@ bool isJumpTableBranch(const MachineInstr *MI) {
     return MI->getOpcode() == ARM::BR_JTr ||
            MI->getOpcode() == ARM::BR_JTm_rs ||
            MI->getOpcode() == ARM::BR_JTm_i12;
-  } else {
-    assert(arch == Triple::ArchType::riscv32);
+  }      assert(arch == Triple::ArchType::riscv32);
     // TODO riscv ???
     return false;
-  }
+
 }
 
 int getJumpTableIndex(const MachineInstr *MI) {
@@ -89,15 +86,15 @@ int getJumpTableIndex(const MachineInstr *MI) {
     }
     assert(MI->getOperand(opidx).isJTI() && "Expected jump table index");
     return MI->getOperand(opidx).getIndex();
-  } else {
-    assert(arch == Triple::ArchType::riscv32);
+  }      assert(arch == Triple::ArchType::riscv32);
     // TODO riscv ???
     assert(0 && "unreachable");
     return 0;
-  }
+
 }
 
 bool isPrefetchARM(const MachineInstr *MI) {
+  // NILS ver interesting.
   auto arch =
       TimingAnalysisMain::getTargetMachine().getTargetTriple().getArch();
   if (arch == Triple::ArchType::arm) {
@@ -114,12 +111,11 @@ bool isPrefetchARM(const MachineInstr *MI) {
     assert(!(MI->mayLoad() && MI->mayStore()) &&
            "Only prefetch instructions load and store");
     return false;
-  } else {
-    // RISCV doesn't support prefetching yet.
+  }      // RISCV doesn't support prefetching yet.
     assert(!(MI->mayLoad() && MI->mayStore()) &&
            "Only prefetch instructions load and store");
     return false;
-  }
+
 }
 
 std::ostream &operator<<(std::ostream &stream, const BranchOutcome &bo) {
@@ -312,7 +308,7 @@ getNonEmptySuccessorBasicBlocks(const MachineBasicBlock &mbb) {
       result.insert(*succIt);
     } else {
       auto succSet = getNonEmptySuccessorBasicBlocks(**succIt);
-      for (auto succ : succSet) {
+      for (auto *succ : succSet) {
         result.insert(succ);
       }
     }
@@ -327,8 +323,7 @@ getNonEmptySuccessorBasicBlock(const MachineBasicBlock *mbb) {
   const MachineBasicBlock *succ = *mbb->succ_begin();
   if (isBasicBlockEmpty(succ))
     return getNonEmptySuccessorBasicBlock(succ);
-  else
-    return succ;
+      return succ;
 }
 
 std::set<const MachineBasicBlock *, mbbComp>
@@ -343,7 +338,7 @@ getNonEmptyPredecessorBasicBlocks(const MachineBasicBlock *mbb) {
       if ((*predIt)->pred_size() == 0) {
         assert((*predIt)->getNumber() == 0 &&
                "Non first basic block has no predecessors?");
-        for (auto callsite :
+        for (const auto *callsite :
              CallGraph::getGraph().getCallSites((*predIt)->getParent())) {
           assert(!isBasicBlockEmpty(callsite->getParent()) &&
                  "MBB with callsite cannot be empty");
@@ -351,7 +346,7 @@ getNonEmptyPredecessorBasicBlocks(const MachineBasicBlock *mbb) {
         }
       } else {
         const auto &predSet = getNonEmptyPredecessorBasicBlocks(*predIt);
-        for (auto pred : predSet) {
+        for (const auto *pred : predSet) {
           result.insert(pred);
         }
       }
@@ -365,9 +360,9 @@ bool isFunctionPotentiallyReachableFrom(
     const std::vector<const MachineBasicBlock *> &basicBlocks) {
   // find directly reachable functions
   std::set<const MachineFunction *> reachableFunctions;
-  for (auto currMBB : basicBlocks) {
-    for (auto callSite : CallGraph::getGraph().getCallSitesInMBB(currMBB)) {
-      for (auto currPotCallee :
+  for (const auto *currMBB : basicBlocks) {
+    for (const auto *callSite : CallGraph::getGraph().getCallSitesInMBB(currMBB)) {
+      for (const auto *currPotCallee :
            CallGraph::getGraph().getPotentialCallees(callSite)) {
         if (currPotCallee == target) {
           return true;
@@ -381,9 +376,9 @@ bool isFunctionPotentiallyReachableFrom(
   std::list<const MachineFunction *> workList(reachableFunctions.begin(),
                                               reachableFunctions.end());
   while (!workList.empty()) {
-    auto currFunc = workList.front();
-    for (auto callSite : CallGraph::getGraph().getCallSites(currFunc)) {
-      for (auto currPotCallee :
+    const auto *currFunc = workList.front();
+    for (const auto *callSite : CallGraph::getGraph().getCallSites(currFunc)) {
+      for (const auto *currPotCallee :
            CallGraph::getGraph().getPotentialCallees(callSite)) {
         if (currPotCallee == target) {
           return true;
@@ -432,7 +427,7 @@ std::ostream &printHex(std::ostream &stream, unsigned value, unsigned width) {
 
 std::set<MBBedge> getIncomingEdgesOfLoop(const llvm::MachineLoop *loop) {
   std::set<MBBedge> res;
-  auto header = loop->getHeader();
+  auto *header = loop->getHeader();
   for (auto srcit = header->pred_begin(); srcit != header->pred_end();
        ++srcit) {
     if (!loop->contains(*srcit)) {
@@ -444,7 +439,7 @@ std::set<MBBedge> getIncomingEdgesOfLoop(const llvm::MachineLoop *loop) {
 
 std::set<MBBedge> getExitingEdgesOfLoop(const llvm::MachineLoop *loop) {
   std::set<MBBedge> res;
-  for (auto loopBB : loop->getBlocks()) {
+  for (auto *loopBB : loop->getBlocks()) {
     for (auto destit = loopBB->succ_begin(); destit != loopBB->succ_end();
          ++destit) {
       if (!loop->contains(*destit)) {
@@ -457,7 +452,7 @@ std::set<MBBedge> getExitingEdgesOfLoop(const llvm::MachineLoop *loop) {
 
 std::set<MBBedge> getBackEdgesOfLoop(const MachineLoop *loop) {
   std::set<MBBedge> res;
-  auto header = loop->getHeader();
+  auto *header = loop->getHeader();
   for (auto srcit = header->pred_begin(); srcit != header->pred_end();
        ++srcit) {
     if (loop->contains(*srcit)) {

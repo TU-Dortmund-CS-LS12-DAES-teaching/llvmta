@@ -598,8 +598,9 @@ ConvergenceType InOrderPipelineState<MemoryTopology>::isConvergedAfterCycleFrom(
     // here we have guaranteed: !instructionAccessFinished && stallMemory
     // or the corner case of an empty pipeline...
     return CONVERGED_UNTIL_ANY_MEMORY_NON_BUSY;
-  } else if (converged) { // With UnblockStores you cannot distinguish the
-                          // active port
+  }
+  if (converged) { // With UnblockStores you cannot distinguish the
+                   // active port
     return CONVERGED_UNTIL_ANY_MEMORY_NON_BUSY;
   }
 
@@ -844,8 +845,10 @@ void InOrderPipelineState<MemoryTopology>::emptyPipelineDueToBranching(
       auto nextaddr = inflightInstruction[nextPopulatedStage].get().first;
       if (StaticAddrProvider->hasMachineInstrByAddr(oldPc) &&
           StaticAddrProvider->hasMachineInstrByAddr(nextaddr)) {
-        auto fetchinstr = StaticAddrProvider->getMachineInstrByAddr(oldPc);
-        auto nextinstr = StaticAddrProvider->getMachineInstrByAddr(nextaddr);
+        const auto *fetchinstr =
+            StaticAddrProvider->getMachineInstrByAddr(oldPc);
+        const auto *nextinstr =
+            StaticAddrProvider->getMachineInstrByAddr(nextaddr);
         auto edge =
             std::make_pair(nextinstr->getParent(), fetchinstr->getParent());
         if (edge.first != edge.second &&
@@ -875,8 +878,10 @@ void InOrderPipelineState<MemoryTopology>::emptyPipelineDueToBranching(
       auto nextaddr = inflightInstruction[nextPopulatedStage].get().first;
       if (StaticAddrProvider->hasMachineInstrByAddr(fetchaddr) &&
           StaticAddrProvider->hasMachineInstrByAddr(nextaddr)) {
-        auto fetchinstr = StaticAddrProvider->getMachineInstrByAddr(fetchaddr);
-        auto nextinstr = StaticAddrProvider->getMachineInstrByAddr(nextaddr);
+        const auto *fetchinstr =
+            StaticAddrProvider->getMachineInstrByAddr(fetchaddr);
+        const auto *nextinstr =
+            StaticAddrProvider->getMachineInstrByAddr(nextaddr);
         auto edge =
             std::make_pair(nextinstr->getParent(), fetchinstr->getParent());
         if (edge.first != edge.second &&
@@ -925,7 +930,8 @@ void InOrderPipelineState<MemoryTopology>::processWriteBackStage() {
                           : this->pc.getPc().first;
       if (StaticAddrProvider->hasMachineInstrByAddr(compladdr) &&
           StaticAddrProvider->hasMachineInstrByAddr(nextaddr)) {
-        auto complinstr = StaticAddrProvider->getMachineInstrByAddr(compladdr);
+        const auto *complinstr =
+            StaticAddrProvider->getMachineInstrByAddr(compladdr);
         auto nextinstr = StaticAddrProvider->getMachineInstrByAddr(nextaddr);
         auto edge =
             std::make_pair(complinstr->getParent(), nextinstr->getParent());
@@ -1137,7 +1143,7 @@ InOrderPipelineState<MemoryTopology>::checkForBranches(
   // check whether branching happens and alter the
   if (StaticAddrProvider->hasMachineInstrByAddr(
           inflightInstruction[memory ? EX_MEM_IND : ID_EX_IND].get().first)) {
-    auto exInstr = StaticAddrProvider->getMachineInstrByAddr(
+    const auto *exInstr = StaticAddrProvider->getMachineInstrByAddr(
         inflightInstruction[memory ? EX_MEM_IND : ID_EX_IND].get().first);
     if (exInstr->isBranch() || exInstr->isCall() || exInstr->isReturn()) {
       // Skip branches that load to the pc in execute stage as they happen later
@@ -1250,7 +1256,8 @@ void InOrderPipelineState<MemoryTopology>::processInstructionFetchStage() {
           StaticAddrProvider->hasMachineInstrByAddr(nextaddr)) {
         auto fetchinstr =
             StaticAddrProvider->getMachineInstrByAddr(this->pc.getPc().first);
-        auto nextinstr = StaticAddrProvider->getMachineInstrByAddr(nextaddr);
+        const auto *nextinstr =
+            StaticAddrProvider->getMachineInstrByAddr(nextaddr);
         auto edge =
             std::make_pair(nextinstr->getParent(), fetchinstr->getParent());
         if (edge.first != edge.second &&
