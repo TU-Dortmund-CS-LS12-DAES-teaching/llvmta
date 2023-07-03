@@ -57,11 +57,11 @@ public:
   /**
    * This is a dummy function.
    */
-  bool runOnMachineFunction(llvm::MachineFunction &MF);
+  bool runOnMachineFunction(llvm::MachineFunction &MF) override;
 
-  void getAnalysisUsage(llvm::AnalysisUsage &AU) const;
+  void getAnalysisUsage(llvm::AnalysisUsage &AU) const override;
 
-  virtual llvm::StringRef getPassName() const {
+  virtual llvm::StringRef getPassName() const override {
     return "Provides loop bound information extracted from ScalarEvolution and "
            "LoopInfo";
   }

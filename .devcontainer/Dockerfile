@@ -12,10 +12,7 @@ RUN apt-get update --fix-missing && export DEBIAN_FRONTEND=noninteractive \
         lldb gcc gdb cmake make ninja-build libboost-all-dev git clangd \
         htop wget fish zsh lld time parallel lp-solve liblpsolve55-dev \
         icecc icecream-sundae libcolamd2 clang-tidy gcc-multilib \
-        build-essential ccache python3-pip
-
-RUN pip3 install numpy
-
+        build-essential clang-format doxygen clang ccache python3-pip
 
 # Set environment variables
 ENV PATH=$PATH:/workspaces/llvmta/build/bin

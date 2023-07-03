@@ -68,7 +68,7 @@ namespace TimingAnalysisPass {
 template <class AnalysisDom, typename Granularity> class AnalysisDriver {
 
   /**
-   * This is a compile-time	assert that we only want this template to be
+   * This is a compile-time assert that we only want this template to be
    * instantiated for classes inheriting and thereby implementing class
    * ContextAwareAnalysisDomain.
    */
@@ -95,6 +95,8 @@ public:
    */
   AnalysisDriver(std::string entrypoint, AnaDeps anaDeps)
       : entrypoint(entrypoint), analysisResults(anaDeps) {}
+
+  virtual ~AnalysisDriver() = default;
 
   /**
    * Perform the analysis of type AnalysisDom on function given by entrypoint on
@@ -890,6 +892,7 @@ public:
   // Allocate the InstrContext-map on the heap as it is needed even after the
   // lifetime of the analysis-driver It is freed within the state graph
   // construction, once the microarchitectural information is no longer needed
+  // NILS: Helpfull for traversing the Graph
   {
     std::tuple<> noDep;
     AnalysisDriverInstr<CollectingContextsDomain> collectCtxsAna(

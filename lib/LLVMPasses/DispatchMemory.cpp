@@ -45,6 +45,7 @@
 #include "Memory/SetWiseCountingPersistence.h"
 #include "Memory/SimpleSDRAMCyclingMemory.h"
 #include "Util/Options.h"
+#include <cassert>
 
 namespace TimingAnalysisPass {
 
@@ -230,6 +231,9 @@ using AccessCounterMemory =
  */
 template <typename MemoryType> AbstractCyclingMemory *dispatchSharedBus() {
   if (!CoRunnerSensitive) {
+    assert((SharedBus == SharedBusType::ROUNDROBIN ||
+            SharedBus == SharedBusType::NONE) &&
+           "No known shared bus type");
     switch (SharedBus) {
     case SharedBusType::NONE: {
       return new MemoryNonIterativeNonBlocking<MemoryType>();
@@ -239,11 +243,11 @@ template <typename MemoryType> AbstractCyclingMemory *dispatchSharedBus() {
       return new MemoryNonIterativeBlocking<MemoryType>();
       break;
     }
-    default:
-      assert(0 && "No known shared bus type");
-      break;
     }
   } else {
+    assert((SharedBus == SharedBusType::ROUNDROBIN ||
+            SharedBus == SharedBusType::NONE) &&
+           "No known shared bus type");
     switch (SharedBus) {
     case SharedBusType::NONE: {
       assert(0 &&
@@ -254,15 +258,15 @@ template <typename MemoryType> AbstractCyclingMemory *dispatchSharedBus() {
       return new MemoriesForIterative::AccessCounterMemory<MemoryType>();
       break;
     }
-    default:
-      assert(0 && "No known shared bus type");
-      break;
     }
   }
   return nullptr;
 }
 
 AbstractCyclingMemory *makeOptionsBackgroundMem() {
+  assert((BackgroundMemoryType == BgMemType::SRAM ||
+          BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+         "Unsupported background memory type");
   switch (BackgroundMemoryType) {
   case BgMemType::SRAM: {
     return dispatchSharedBus<
@@ -271,9 +275,6 @@ AbstractCyclingMemory *makeOptionsBackgroundMem() {
   case BgMemType::SIMPLEDRAM: {
     return dispatchSharedBus<SimpleSDRAMCyclingMemory>();
   }
-  default:
-    assert(0 && "Unsupported background memory type");
-    return nullptr;
   }
 }
 
@@ -293,11 +294,17 @@ getUbAccesses(const AbstractCyclingMemory::LocalMetrics *pBaseMetrics) {
     return 0;
   }
   if (!CoRunnerSensitive) {
+    assert((SharedBus == SharedBusType::ROUNDROBIN ||
+            SharedBus == SharedBusType::NONE) &&
+           "No known shared memory blocking type");
     switch (SharedBus) {
     case SharedBusType::NONE:
+      assert((BackgroundMemoryType == BgMemType::SRAM ||
+              BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+             "Unsupported background memory type");
       switch (BackgroundMemoryType) {
       case BgMemType::SRAM: {
-        auto casted = dynamic_cast<
+        const auto *casted = dynamic_cast<
             const MemoryNonIterativeNonBlocking<FixedLatencyCyclingMemory<
                 &fixedLatencyCyclingMemoryConfig>>::LocalMetrics *>(
             pBaseMetrics);
@@ -305,22 +312,22 @@ getUbAccesses(const AbstractCyclingMemory::LocalMetrics *pBaseMetrics) {
         return casted->accessCounter.getUb();
       }
       case BgMemType::SIMPLEDRAM: {
-        auto casted = dynamic_cast<const MemoryNonIterativeNonBlocking<
+        const auto *casted = dynamic_cast<const MemoryNonIterativeNonBlocking<
             SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
         assert(casted != nullptr);
         return casted->accessCounter.getUb();
       }
-      default:
-        assert(0 && "Unsupported background memory type");
-        return 0;
       }
     case SharedBusType::ROUNDROBIN: {
       // in non-iterative mode, we have to consider the local metrics of
       // blocking cycling memory for all possibilities of a lowest level cycling
       // memory.
+      assert((BackgroundMemoryType == BgMemType::SRAM ||
+              BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+             "Unsupported background memory type");
       switch (BackgroundMemoryType) {
       case BgMemType::SRAM: {
-        auto casted = dynamic_cast<
+        const auto *casted = dynamic_cast<
             const MemoryNonIterativeBlocking<FixedLatencyCyclingMemory<
                 &fixedLatencyCyclingMemoryConfig>>::LocalMetrics *>(
             pBaseMetrics);
@@ -328,21 +335,18 @@ getUbAccesses(const AbstractCyclingMemory::LocalMetrics *pBaseMetrics) {
         return casted->accessCounter.getUb();
       }
       case BgMemType::SIMPLEDRAM: {
-        auto casted = dynamic_cast<const MemoryNonIterativeBlocking<
+        const auto *casted = dynamic_cast<const MemoryNonIterativeBlocking<
             SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
         assert(casted != nullptr);
         return casted->accessCounter.getUb();
       }
-      default:
-        assert(0 && "Unsupported background memory type");
-        return 0;
       }
     }
-    default:
-      assert(0 && "No known shared memory blocking type");
-      return 0;
     }
   } else {
+    assert((SharedBus == SharedBusType::ROUNDROBIN ||
+            SharedBus == SharedBusType::NONE) &&
+           "No known shared memory blocking type");
     switch (SharedBus) {
     case SharedBusType::NONE: {
       assert(0 &&
@@ -352,9 +356,12 @@ getUbAccesses(const AbstractCyclingMemory::LocalMetrics *pBaseMetrics) {
     case SharedBusType::ROUNDROBIN: {
       // in iterative mode, we additionally have to add the
       // access cycle counting intermediate layer
+      assert((BackgroundMemoryType == BgMemType::SRAM ||
+              BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+             "Unsupported background memory type");
       switch (BackgroundMemoryType) {
       case BgMemType::SRAM: {
-        auto casted =
+        const auto *casted =
             dynamic_cast<const MemoriesForIterative::AccessCounterMemory<
                 FixedLatencyCyclingMemory<&fixedLatencyCyclingMemoryConfig>>::
                              LocalMetrics *>(pBaseMetrics);
@@ -362,24 +369,18 @@ getUbAccesses(const AbstractCyclingMemory::LocalMetrics *pBaseMetrics) {
         return casted->accessCounter.getUb();
       }
       case BgMemType::SIMPLEDRAM: {
-        auto casted =
+        const auto *casted =
             dynamic_cast<const MemoriesForIterative::AccessCounterMemory<
                 SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
         assert(casted != nullptr);
         return casted->accessCounter.getUb();
       }
-      default:
-        assert(0 && "Unsupported background memory type");
-        return 0;
       }
     }
-    default:
-      assert(0 && "No known shared memory blocking type");
-      return 0;
     }
   }
   //	return static_cast<const
-  //MemoriesForIterative::AccessCounterMemory::LocalMetrics*>(pBaseMetrics)
+  // MemoriesForIterative::AccessCounterMemory::LocalMetrics*>(pBaseMetrics)
   //		->accessCounter.getUb();
 }
 
@@ -393,26 +394,27 @@ getLbBlockingCycles(const AbstractCyclingMemory::LocalMetrics *pBaseMetrics) {
          "co-runner-sensitive analysis." &&
          "If you want to use it in other places, carefully add support for "
          "them and remove this assert...");
+  assert((BackgroundMemoryType == BgMemType::SRAM ||
+          BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+         "Unsupported background memory type");
   switch (BackgroundMemoryType) {
   case BgMemType::SRAM: {
-    auto casted = dynamic_cast<
+    const auto *casted = dynamic_cast<
         const MemoriesForIterative::BlockingMemory<FixedLatencyCyclingMemory<
             &fixedLatencyCyclingMemoryConfig>>::LocalMetrics *>(pBaseMetrics);
     assert(casted != nullptr);
     return casted->blockingCounter.getLb();
   }
   case BgMemType::SIMPLEDRAM: {
-    auto casted = dynamic_cast<const MemoriesForIterative::BlockingMemory<
-        SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
+    const auto *casted =
+        dynamic_cast<const MemoriesForIterative::BlockingMemory<
+            SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
     assert(casted != nullptr);
     return casted->blockingCounter.getLb();
   }
-  default:
-    assert(0 && "Unsupported background memory type");
-    return 0;
   }
   //	return static_cast<const
-  //MemoriesForIterative::BlockingMemory::LocalMetrics*>(pBaseMetrics)
+  // MemoriesForIterative::BlockingMemory::LocalMetrics*>(pBaseMetrics)
   //		->blockingCounter.getLb();
 }
 
@@ -426,9 +428,12 @@ getUbAccessCycles(const AbstractCyclingMemory::LocalMetrics *pBaseMetrics) {
          "co-runner-sensitive analysis." &&
          "If you want to use it in other places, carefully add support for "
          "them and remove this assert...");
+  assert((BackgroundMemoryType == BgMemType::SRAM ||
+          BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+         "Unsupported background memory type");
   switch (BackgroundMemoryType) {
   case BgMemType::SRAM: {
-    auto casted =
+    const auto *casted =
         dynamic_cast<const MemoriesForIterative::AccessCycleCounterMemory<
             FixedLatencyCyclingMemory<&fixedLatencyCyclingMemoryConfig>>::
                          LocalMetrics *>(pBaseMetrics);
@@ -436,18 +441,15 @@ getUbAccessCycles(const AbstractCyclingMemory::LocalMetrics *pBaseMetrics) {
     return casted->busyCycleCounter.getUb();
   }
   case BgMemType::SIMPLEDRAM: {
-    auto casted =
+    const auto *casted =
         dynamic_cast<const MemoriesForIterative::AccessCycleCounterMemory<
             SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
     assert(casted != nullptr);
     return casted->busyCycleCounter.getUb();
   }
-  default:
-    assert(0 && "Unsupported background memory type");
-    return 0;
   }
   //	return static_cast<const
-  //MemoriesForIterative::AccessCycleCounterMemory::LocalMetrics*>(pBaseMetrics)
+  // MemoriesForIterative::AccessCycleCounterMemory::LocalMetrics*>(pBaseMetrics)
   //		->busyCycleCounter.getUb();
 }
 
@@ -456,22 +458,23 @@ ForwardedCycles getFastForwardedAccessCycles(
   if (pBaseMetrics == nullptr) {
     return ForwardedCycles(0u, 0u);
   }
+  assert((BackgroundMemoryType == BgMemType::SRAM ||
+          BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+         "Unsupported background memory type");
   switch (BackgroundMemoryType) {
   case BgMemType::SRAM: {
-    auto casted = dynamic_cast<const FixedLatencyCyclingMemory<
+    const auto *casted = dynamic_cast<const FixedLatencyCyclingMemory<
         &fixedLatencyCyclingMemoryConfig>::LocalMetrics *>(pBaseMetrics);
     assert(casted != nullptr);
     return casted->fastForwardedAccessCycles;
   }
   case BgMemType::SIMPLEDRAM: {
-    auto casted = dynamic_cast<const SimpleSDRAMCyclingMemory::LocalMetrics *>(
-        pBaseMetrics);
+    const auto *casted =
+        dynamic_cast<const SimpleSDRAMCyclingMemory::LocalMetrics *>(
+            pBaseMetrics);
     assert(casted != nullptr);
     return casted->fastForwardedAccessCycles;
   }
-  default:
-    assert(0 && "Unsupported background memory type");
-    return ForwardedCycles(0u, 0u);
   }
 }
 
@@ -481,6 +484,9 @@ ForwardedCycles getFastForwardedBlocking(
     return ForwardedCycles(0u, 0u);
   }
   if (!CoRunnerSensitive) {
+    assert((SharedBus == SharedBusType::ROUNDROBIN ||
+            SharedBus == SharedBusType::NONE) &&
+           "No known shared memory blocking type");
     switch (SharedBus) {
     case SharedBusType::NONE:
       return ForwardedCycles(0u, 0u);
@@ -488,9 +494,12 @@ ForwardedCycles getFastForwardedBlocking(
       // in non-iterative mode, we have to consider the local metrics of
       // blocking cycling memory for all possibilities of a lowest level cycling
       // memory.
+      assert((BackgroundMemoryType == BgMemType::SRAM ||
+              BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+             "Unsupported background memory type");
       switch (BackgroundMemoryType) {
       case BgMemType::SRAM: {
-        auto casted = dynamic_cast<
+        const auto *casted = dynamic_cast<
             const MemoryNonIterativeBlocking<FixedLatencyCyclingMemory<
                 &fixedLatencyCyclingMemoryConfig>>::LocalMetrics *>(
             pBaseMetrics);
@@ -498,21 +507,18 @@ ForwardedCycles getFastForwardedBlocking(
         return casted->fastForwardedBlocking;
       }
       case BgMemType::SIMPLEDRAM: {
-        auto casted = dynamic_cast<const MemoryNonIterativeBlocking<
+        const auto *casted = dynamic_cast<const MemoryNonIterativeBlocking<
             SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
         assert(casted != nullptr);
         return casted->fastForwardedBlocking;
       }
-      default:
-        assert(0 && "Unsupported background memory type");
-        return ForwardedCycles(0u, 0u);
       }
     }
-    default:
-      assert(0 && "No known shared memory blocking type");
-      return ForwardedCycles(0u, 0u);
     }
   } else {
+    assert((SharedBus == SharedBusType::ROUNDROBIN ||
+            SharedBus == SharedBusType::NONE) &&
+           "No known shared memory blocking type");
     switch (SharedBus) {
     case SharedBusType::NONE: {
       assert(0 &&
@@ -522,28 +528,27 @@ ForwardedCycles getFastForwardedBlocking(
     case SharedBusType::ROUNDROBIN: {
       // in iterative mode, we additionally have to add the
       // access cycle counting intermediate layer
+      assert((BackgroundMemoryType == BgMemType::SRAM ||
+              BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+             "Unsupported background memory type");
       switch (BackgroundMemoryType) {
       case BgMemType::SRAM: {
-        auto casted = dynamic_cast<const MemoriesForIterative::BlockingMemory<
-            FixedLatencyCyclingMemory<&fixedLatencyCyclingMemoryConfig>>::
-                                       LocalMetrics *>(pBaseMetrics);
+        const auto *casted =
+            dynamic_cast<const MemoriesForIterative::BlockingMemory<
+                FixedLatencyCyclingMemory<&fixedLatencyCyclingMemoryConfig>>::
+                             LocalMetrics *>(pBaseMetrics);
         assert(casted != nullptr);
         return casted->fastForwardedBlocking;
       }
       case BgMemType::SIMPLEDRAM: {
-        auto casted = dynamic_cast<const MemoriesForIterative::BlockingMemory<
-            SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
+        const auto *casted =
+            dynamic_cast<const MemoriesForIterative::BlockingMemory<
+                SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
         assert(casted != nullptr);
         return casted->fastForwardedBlocking;
       }
-      default:
-        assert(0 && "Unsupported background memory type");
-        return ForwardedCycles(0u, 0u);
       }
     }
-    default:
-      assert(0 && "No known shared memory blocking type");
-      return ForwardedCycles(0u, 0u);
     }
   }
 }
@@ -558,26 +563,27 @@ getLbConcAccesses(const AbstractCyclingMemory::LocalMetrics *pBaseMetrics) {
          "co-runner-sensitive analysis." &&
          "If you want to use it in other places, carefully add support for "
          "them and remove this assert...");
+  assert((BackgroundMemoryType == BgMemType::SRAM ||
+          BackgroundMemoryType == BgMemType::SIMPLEDRAM) &&
+         "Unsupported background memory type");
   switch (BackgroundMemoryType) {
   case BgMemType::SRAM: {
-    auto casted = dynamic_cast<
+    const auto *casted = dynamic_cast<
         const MemoriesForIterative::BlockingMemory<FixedLatencyCyclingMemory<
             &fixedLatencyCyclingMemoryConfig>>::LocalMetrics *>(pBaseMetrics);
     assert(casted != nullptr);
     return casted->concAccesses.getLb();
   }
   case BgMemType::SIMPLEDRAM: {
-    auto casted = dynamic_cast<const MemoriesForIterative::BlockingMemory<
-        SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
+    const auto *casted =
+        dynamic_cast<const MemoriesForIterative::BlockingMemory<
+            SimpleSDRAMCyclingMemory>::LocalMetrics *>(pBaseMetrics);
     assert(casted != nullptr);
     return casted->concAccesses.getLb();
   }
-  default:
-    assert(0 && "Unsupported background memory type");
-    return 0;
   }
   //	return static_cast<const
-  //MemoriesForIterative::BlockingMemory::LocalMetrics*>(pBaseMetrics)
+  // MemoriesForIterative::BlockingMemory::LocalMetrics*>(pBaseMetrics)
   //		->blockingCounter.getLb();
 }
 

@@ -121,16 +121,16 @@ doPathAnalysis(const std::string identifier, const ExtremumType extremumType,
   // Return extremal value and (optionally) extremal path.
   if (pathAnalysis->isInfinite()) {
     return boost::none;
-  } else if (pathAnalysis->hasSolution()) {
+  }
+  if (pathAnalysis->hasSolution()) {
     if (extpath != nullptr) {
       pathAnalysis->getExtremalPath(*extpath);
     }
     return pathAnalysis->getSolution();
-  } else {
-    errs() << "Path analysis could not compute valid result, see "
-           << outputFileName << " for details.\n";
-    return boost::none;
   }
+  errs() << "Path analysis could not compute valid result, see "
+         << outputFileName << " for details.\n";
+  return boost::none;
 }
 
 void calculateSoundSlope(double lower, double upper,
@@ -218,7 +218,7 @@ void dumpInterferenceResponseCurve(
     const std::list<GraphConstraint> &constraints, const VarCoeffVector ubTime,
     const Variable interferencevar, std::string suffix, unsigned zoomFactor,
     cpp_int xstepScale) {
-  if (rightmostSamplepoint == -1 || rightmostSamplepoint == 0) {
+  if (rightmostSamplepoint <= 0) {
     outs() << "There is no rightmost sample point (or it is zero), skipping "
               "producing interference response curve\n";
     return;
@@ -500,39 +500,37 @@ cpp_int optDoubleToInt(boost::optional<double> num, bool roundUp) {
     return result;
   }
   // potentially special treatment needed
-  else {
-    // acceptable distance from an
-    // integer to still consider the
-    // double value as the integer
-    const cpp_rational epsilon(0.1);
-    // positive originals may have decreased
-    if (original > casted) {
-      assert(original - casted < 1);
-      // decreased to close integer value
-      if (original - casted <= epsilon) {
-        return result;
-      }
-      // close integer value in other direction
-      // OR explicitly round up
-      if (casted + 1 - original <= epsilon || roundUp) {
-        return result + 1;
-      }
+  // acceptable distance from an
+  // integer to still consider the
+  // double value as the integer
+  const cpp_rational epsilon(0.1);
+  // positive originals may have decreased
+  if (original > casted) {
+    assert(original - casted < 1);
+    // decreased to close integer value
+    if (original - casted <= epsilon) {
+      return result;
     }
-    // negative originals may have increased
-    if (original < casted) {
-      assert(casted - original < 1);
-      // increased to close integer value
-      if (casted - original <= epsilon) {
-        return result;
-      }
-      // close integer value in other direction
-      // OR explicitly round down
-      if (original + 1 - casted <= epsilon || !roundUp) {
-        return result - 1;
-      }
+    // close integer value in other direction
+    // OR explicitly round up
+    if (casted + 1 - original <= epsilon || roundUp) {
+      return result + 1;
     }
-    return result;
   }
+  // negative originals may have increased
+  if (original < casted) {
+    assert(casted - original < 1);
+    // increased to close integer value
+    if (casted - original <= epsilon) {
+      return result;
+    }
+    // close integer value in other direction
+    // OR explicitly round down
+    if (original + 1 - casted <= epsilon || !roundUp) {
+      return result - 1;
+    }
+  }
+  return result;
 }
 /*
  * This function computes the number of cycles the system would need to write

@@ -31,6 +31,7 @@
 #include "PathAnalysis/StateGraphEdgeWeightProvider.h"
 
 #include "Util/Options.h"
+#include "Util/UtilPathAnalysis.h"
 
 namespace TimingAnalysisPass {
 
@@ -51,19 +52,21 @@ public:
           extractor,
       const std::string wName)
       //		@User You can also use non-closure lambdas: [] (const
-      //NumericType& a, const NumericType&b) -> const NumericType& {return
-      //std::max(a,b);} )
+      // NumericType& a, const NumericType&b) -> const NumericType& {return
+      // std::max(a,b);} )
       : StateGraphEdgeWeightProvider<MuState, NumericType>(stgr),
         extractor(extractor), weightName(wName) {}
 
   virtual ~StateGraphNumericWeightProvider() {}
 
   /// See Superclass
-  virtual bool isEdgeJoinable(unsigned p, unsigned t, unsigned nt) const;
+  virtual bool isEdgeJoinable(unsigned p, unsigned t,
+                              unsigned nt) const override;
   /// See Superclass
-  virtual void addExternalEdge(std::string extfun, unsigned s, unsigned e);
+  virtual void addExternalEdge(std::string extfun, unsigned s,
+                               unsigned e) override;
   /// See Superclass
-  virtual std::string getWeightDescr(unsigned a, unsigned b) const;
+  virtual std::string getWeightDescr(unsigned a, unsigned b) const override;
 
   /**
    * Allow to set a function that checks if two weights are joinable.
@@ -111,17 +114,19 @@ public:
 protected:
   typedef typename MuState::LocalMetrics LocalMetrics;
 
-  virtual NumericType extractWeight(const LocalMetrics &metrics);
+  virtual NumericType extractWeight(const LocalMetrics &metrics) override;
 
-  virtual void joinWeight(NumericType &weight1, const NumericType &weight2);
+  virtual void joinWeight(NumericType &weight1,
+                          const NumericType &weight2) override;
 
-  virtual void concatWeight(NumericType &weight1, const NumericType &weight2);
+  virtual void concatWeight(NumericType &weight1,
+                            const NumericType &weight2) override;
 
-  virtual NumericType getNeutralWeight();
+  virtual NumericType getNeutralWeight() override;
 
   virtual NumericType advanceWeight(const NumericType &weight,
                                     const LocalMetrics &curr,
-                                    const LocalMetrics &succ);
+                                    const LocalMetrics &succ) override;
 
 private:
   /**
@@ -287,7 +292,7 @@ protected:
   typedef typename MuState::LocalMetrics LocalMetrics;
 
   virtual int advanceWeight(const int &weight, const LocalMetrics &curr,
-                            const LocalMetrics &succ) {
+                            const LocalMetrics &succ) override {
     // TODO this is hardcoded for the DRAM refresh case, make it more generic
     auto sdrammetrics =
         dynamic_cast<SimpleSDRAMCyclingMemory::LocalMetrics *>(bgMemMetr(succ));

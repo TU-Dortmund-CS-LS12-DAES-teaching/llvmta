@@ -34,6 +34,6 @@ namespace TimingAnalysisPass {
 
 boost::optional<BoundItv> dispatchFixedLatencyTimingAnalysis();
 
-}
+} // namespace TimingAnalysisPass
 
 #endif

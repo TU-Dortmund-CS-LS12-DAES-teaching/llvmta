@@ -25,7 +25,10 @@
 
 #include "PathAnalysis/FlowConstraintProvider.h"
 
+#include "PathAnalysis/GetEdges.h"
 #include "PathAnalysis/LoopBoundInfo.h"
+#include "Util/Options.h"
+#include <cassert>
 
 namespace TimingAnalysisPass {
 
@@ -188,7 +191,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
   // for each loop, add loop constraint
   for (const MachineLoop *loop : LoopBoundInfo->getAllLoops()) {
 
-    auto entryBB = loop->getHeader();
+    auto *entryBB = loop->getHeader();
     // If the loop (i.e. the header) is not reachable at all, we do not need any
     // constraints here
     if (graph->getInStates(entryBB).size() == 0) {
@@ -197,7 +200,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
 
     std::set<unsigned> outStatesWithinScope;
     std::set<unsigned> outStatesOutsideScope;
-    for (auto predBB : getNonEmptyPredecessorBasicBlocks(entryBB)) {
+    for (const auto *predBB : getNonEmptyPredecessorBasicBlocks(entryBB)) {
       if (entryBB->getParent() == predBB->getParent()) {
         auto outStates = graph->getOutStates(predBB);
         assert(outStates.size() > 0 && "Non empty BB should have out states");
@@ -208,7 +211,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
           outStatesOutsideScope.insert(outStates.begin(), outStates.end());
         }
       } else {
-        for (auto cs : cg.getCallSitesInMBB(predBB)) {
+        for (const auto *cs : cg.getCallSitesInMBB(predBB)) {
           const auto &potCallees = cg.getPotentialCallees(cs);
           if (std::find(potCallees.begin(), potCallees.end(),
                         entryBB->getParent()) != potCallees.end()) {
@@ -222,7 +225,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
     // Collect the list of states that correspond to each context
     std::unordered_map<Context, std::list<unsigned>> ctxStateMap;
     for (auto stateId : graph->getInStates(entryBB)) {
-      auto context = graph->getContextOfState(stateId);
+      const auto *context = graph->getContextOfState(stateId);
       if (context == nullptr) {
         ctxStateMap[Context()].push_back(stateId);
       } else {
@@ -300,7 +303,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
              * precise for the upper bound case.
              */
             if (!isGeneralMode() && upper && LoopPeel > 0) {
-              auto predCtx = graph->getContextOfState(predId);
+              const auto *predCtx = graph->getContextOfState(predId);
               if (predCtx == nullptr) {
                 skipConstraints = true;
                 continue;
@@ -309,9 +312,9 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
               bool whilesuccess = false;
               while (!whilesuccess && predCtxTokenList.size() > 0) {
                 // Get current topmost token
-                auto lastToken = predCtxTokenList.back();
+                auto *lastToken = predCtxTokenList.back();
                 predCtxTokenList.pop_back();
-                if (auto loopPeelToken =
+                if (auto *loopPeelToken =
                         dynamic_cast<PartitionTokenLoopPeel *>(lastToken)) {
                   // If the loops do not match (this might be due to nesting and
                   // optimizations), try the next token
@@ -323,7 +326,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
                         .insert(edge);
                     whilesuccess = true;
                   }
-                } else if (auto loopIterToken =
+                } else if (auto *loopIterToken =
                                dynamic_cast<PartitionTokenLoopIter *>(
                                    lastToken)) {
                   // If the loops do not match (this might be due to nesting and
@@ -357,7 +360,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
           for (auto &loopBB : loop->blocks()) {
             // find successor basic blocks outside of the loop
             std::set<MachineBasicBlock *> successorsBlocksOutsideLoop;
-            for (auto succBB : getNonEmptySuccessorBasicBlocks(*loopBB)) {
+            for (auto *succBB : getNonEmptySuccessorBasicBlocks(*loopBB)) {
               if (!loop->contains(succBB)) {
                 successorsBlocksOutsideLoop.insert(succBB);
               }
@@ -366,7 +369,7 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
             // current block to those successors
             if (!successorsBlocksOutsideLoop.empty()) {
               auto outStates = graph->getOutStates(loopBB);
-              for (auto succBB : successorsBlocksOutsideLoop) {
+              for (auto *succBB : successorsBlocksOutsideLoop) {
                 auto inStates = graph->getInStates(succBB);
                 assert(inStates.size() > 0 &&
                        "Non empty BB should have in states");
@@ -480,11 +483,58 @@ void FlowConstraintProvider::buildLoopConstraints(bool upper) {
 }
 
 void FlowConstraintProvider::buildCallReturnConstraints() {
+  // NILS implement the Tree Path constraint here.
+  // NILS Print debuglocation of the instruction I
+  if (ILPLine > 0) {
+    for (MachineFunction *currFunc :
+         machineFunctionCollector->getAllMachineFunctions()) {
+      for (auto &currMBB : *currFunc) {
+        for (auto &currInst : currMBB) {
+          if (currInst.getDebugLoc()) {
+            auto DL = currInst.getDebugLoc();
+            auto line = DL->getLine();
+            if (line == ILPLine) {
+              DILocation *DILoc = DL.get();
+              // Retrieve the filename from the DebugLoc metadata
+              StringRef Filename = DILoc->getFilename();
+              // Print the filename
+              if (Filename.contains("Benchmarks")) {
+                assert(isEndInstr(currMBB, &currInst) &&
+                       "make sure this is the last instruction of the BB");
+                // llvm::errs() << "Filename: " << Filename << "\n";
+                currInst.dump();
+                auto outStates = graph->getOutStates(&currMBB);
+                VarCoeffVector variables;
+                for (auto state : outStates) {
+                  // Iterate predecessor of state
+                  auto predecessors = graph->getGraph().getPredecessors(state);
+                  for (auto preState : predecessors) {
+                    if (preState == 0)
+                      continue;
+                    auto edge = std::make_pair(preState, state);
+                    auto edgeTimesTakenVar =
+                        Variable::getEdgeVar(timesTakenType, edge);
+                    variables.push_back(std::make_pair(edgeTimesTakenVar, 1));
+                  }
+                }
+                // NILS TODO add path constraint for all states connected to
+                // MIR.
+                startConstraints.push_back(std::make_tuple(
+                    variables, ConstraintType::GreaterEqual, 1));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  // END NILS
   // Build nodes for all states in functions and basic blocks
   for (MachineFunction *currFunc :
        machineFunctionCollector->getAllMachineFunctions()) {
     for (auto &currMBB : *currFunc) {
-      for (auto callsite : CallGraph::getGraph().getCallSitesInMBB(&currMBB)) {
+      for (const auto *callsite :
+           CallGraph::getGraph().getCallSitesInMBB(&currMBB)) {
         auto callStates = graph->getCallStates(callsite);
         auto returnStates = graph->getReturnStates(callsite);
 
@@ -539,7 +589,7 @@ void FlowConstraintProvider::buildCallReturnConstraints() {
               callsite->getParent()->getParent();
           std::vector<const MachineBasicBlock *> potCalleeBlocks;
           bool startFunctionPotentialCallee = false;
-          for (auto potCallee :
+          for (const auto *potCallee :
                CallGraph::getGraph().getPotentialCallees(callsite)) {
             if (startFunction == potCallee) {
               startFunctionPotentialCallee = true;
@@ -714,6 +764,12 @@ FlowConstraintProvider::initializeGetInnerEdgesImpl(
     typename GetEdges::method method) {
   if (isGeneralMode()) {
     assert(getEdges && "Did you forget to initialize the GetEdges-object?");
+    assert((method == GetEdges::method::all ||
+            method == GetEdges::method::insideProgramRuns ||
+            method == GetEdges::method::betweenInOutReachableSimple ||
+            method == GetEdges::method::betweenInOutReachableSimplePlus ||
+            method == GetEdges::method::betweenInOutReachableDetailed) &&
+           "Unsupported get-edges-method!");
     switch (method) {
     case GetEdges::method::all: {
       auto function = [this](const std::set<GraphEdge> &inEdges,
@@ -756,9 +812,6 @@ FlowConstraintProvider::initializeGetInnerEdgesImpl(
       };
       return std::make_tuple(function, true, true);
     } break;
-    default:
-      assert(false && "Unsupported get-edges-method!");
-      break;
     }
   } else {
 

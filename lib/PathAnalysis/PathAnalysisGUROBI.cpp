@@ -97,7 +97,7 @@ bool PathAnalysisGUROBI::calculateExtremalPath() {
     return false;
   }
   /* Extract model environment */
-  auto modelenv = GRBgetenv(gurobi_lp);
+  auto *modelenv = GRBgetenv(gurobi_lp);
   assert(modelenv != nullptr);
 
   /**

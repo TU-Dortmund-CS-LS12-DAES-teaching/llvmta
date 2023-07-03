@@ -120,7 +120,7 @@ fi
 
 # -march=armv4t will generate only simply ARM instructions supported by our
 # FPGA prototype
-clangopts=( "-w" "-S" "-gline-tables-only"
+clangopts=( "-w" "-S" "-g" "-gline-tables-only"
 			"-O0" "-Xclang" "-disable-O0-optnone" "-fno-builtin")
 
 if [ $isa_type == "riscv" ]; then
@@ -164,7 +164,7 @@ else
 fi
 
 if [ "$enable_optimizations" = false ]; then
-	llvmtaopts+=("-O0 -disable-O0-optnone")
+	llvmtaopts+=("-O0 -disable-O0-optnone -g")
 else
 	# Note: if conversion can unfortunately not be disabled completely.
 	# One would need to comment the call to createIfConversion to stop if-conversion completely.

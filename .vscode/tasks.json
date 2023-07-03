@@ -28,6 +28,12 @@
       "group": "build"
     },
     {
+      "label": "config clang",
+      "type": "shell",
+      "command": "./config.sh clang",
+      "group": "build"
+    },
+    {
       "label": "clean",
       "type": "shell",
       "command": "./config.sh clean",
@@ -44,6 +50,18 @@
       "type": "shell",
       "command": " cd build ; ninja",
       "group": "build"
+    },
+    {
+      "label": "pre dbg dowhile",
+      "type": "shell",
+      "command": " cd build ; ninja ; cd ../testcases ; ./runTestcase loopexamples/dowhile ",
+      "group": "test"
+    },
+    {
+      "label": "pre dbg dTree",
+      "type": "shell",
+      "command": " cd build ; ninja ; cd ../testcases ; ./runTestcase dtrees/standardif ",
+      "group": "test"
     }
   ]
 }

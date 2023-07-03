@@ -82,19 +82,20 @@ public:
     debugDumpNo++;
   }
 
-  void buildGraph();
+  void buildGraph() override;
 
-  virtual void freeMuStates() { id2state.clear(); }
+  virtual void freeMuStates() override { id2state.clear(); }
 
-  typename State::StateSet getStatesForId(unsigned id) {
+  typename State::StateSet getStatesForId(unsigned id) override {
     typename State::StateSet res;
     res.insert(id2state.at(id));
     return res;
   }
 
-  const Graph &getGraph() const { return graph; }
+  const Graph &getGraph() const override { return graph; }
 
-  std::vector<unsigned> getInStates(const MachineBasicBlock *mbb) const {
+  std::vector<unsigned>
+  getInStates(const MachineBasicBlock *mbb) const override {
     std::vector<unsigned> result;
     for (auto &ctx2ids : inStatesPerMBBPerContext.at(mbb)) {
       result.insert(result.end(), ctx2ids.second.begin(), ctx2ids.second.end());
@@ -102,7 +103,8 @@ public:
     return result;
   }
 
-  std::vector<unsigned> getOutStates(const MachineBasicBlock *mbb) const {
+  std::vector<unsigned>
+  getOutStates(const MachineBasicBlock *mbb) const override {
     std::vector<unsigned> result;
     for (auto &ctx2ids : outStatesPerMBBPerContext.at(mbb)) {
       result.insert(result.end(), ctx2ids.second.begin(), ctx2ids.second.end());
@@ -110,7 +112,7 @@ public:
     return result;
   }
 
-  std::vector<unsigned> getCallStates(const MachineInstr *mi) const {
+  std::vector<unsigned> getCallStates(const MachineInstr *mi) const override {
     assert(mi->isCall() && "Call States only at calls");
     if (callStates.count(mi) > 0) {
       return callStates.at(mi);
@@ -119,7 +121,7 @@ public:
     return res;
   }
 
-  std::vector<unsigned> getReturnStates(const MachineInstr *mi) const {
+  std::vector<unsigned> getReturnStates(const MachineInstr *mi) const override {
     assert(mi->isCall() && "Return States only at calls");
     std::vector<unsigned> res;
     if (returnStates.count(mi) > 0) {
@@ -130,14 +132,14 @@ public:
     return res;
   }
 
-  const Context *getContextOfState(unsigned stateid) const {
+  const Context *getContextOfState(unsigned stateid) const override {
     return &id2context.at(stateid);
   }
 
   void dump(std::ostream &mystream,
-            const std::map<std::string, double> *optTimesTaken) const;
+            const std::map<std::string, double> *optTimesTaken) const override;
 
-  void deleteMuArchInfo();
+  void deleteMuArchInfo() override;
 
 private:
   /**
@@ -780,7 +782,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
 
   // Add call edges to the graph (determined earlier)
   for (auto &callsite2states : callStates) {
-    auto instr = callsite2states.first;
+    const auto *instr = callsite2states.first;
     assert(instr->isCall() && "Callsite is not a call instruction");
     // external symbol, no call to a function in the program
     DEBUG_WITH_TYPE("graphilp", dbgs() << "StateSensitiveGraph, Line: "
@@ -829,7 +831,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
         // Potentially saw a context edge if the first BB in callee was empty
         for (auto &edge : initialedgelist) {
           if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(edge)) {
-            for (auto direc :
+            for (auto *direc :
                  *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeEnter(
                      edge)) {
               calleeCtx.update(direc);
@@ -837,7 +839,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
           }
           calleeCtx.transfer(edge);
           if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(edge)) {
-            for (auto direc :
+            for (auto *direc :
                  *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeLeave(
                      edge)) {
               calleeCtx.update(direc);
@@ -899,7 +901,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
           // check whether there is a successor basic block whose in states
           // matched this state
           if (!currMBB.succ_empty()) {
-            for (auto succMBB : getNonEmptySuccessorBasicBlocks(currMBB)) {
+            for (auto *succMBB : getNonEmptySuccessorBasicBlocks(currMBB)) {
               // The current context must be updated along the edges of the
               // paths to the beginning of the next basic-block
               std::set<std::list<MBBedge>> *edgesSet = nullptr;
@@ -922,7 +924,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
                 for (auto edge : list) {
                   if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(
                           edge)) {
-                    for (auto direc : *DirectiveHeuristicsPassInstance
+                    for (auto *direc : *DirectiveHeuristicsPassInstance
                                            ->getDirectiveOnEdgeEnter(edge)) {
                       imContext.update(direc);
                     }
@@ -930,7 +932,7 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
                   imContext.transfer(edge);
                   if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(
                           edge)) {
-                    for (auto direc : *DirectiveHeuristicsPassInstance
+                    for (auto *direc : *DirectiveHeuristicsPassInstance
                                            ->getDirectiveOnEdgeLeave(edge)) {
                       imContext.update(direc);
                     }
@@ -1031,8 +1033,8 @@ void StateSensitiveGraph<MicroArchDom>::buildInterBasicBlockEdges() {
     }
   }
 
-  auto startFunc = getAnalysisEntryPoint();
-  auto startMbb = &*(startFunc->begin());
+  auto *startFunc = getAnalysisEntryPoint();
+  auto *startMbb = &*(startFunc->begin());
   assert(startMbb->getNumber() == 0 &&
          "First Basic block of function did not have number 0.");
 
@@ -1061,7 +1063,7 @@ template <class MicroArchDom>
 void StateSensitiveGraph<MicroArchDom>::buildExternalSymbolReturnEdges() {
   CallGraph &cg = CallGraph::getGraph();
   for (auto extFunc : cg.getAllExternalFunctions()) {
-    for (auto callsite : cg.getExtFuncCallSites(extFunc)) {
+    for (const auto *callsite : cg.getExtFuncCallSites(extFunc)) {
       if (returnStates.count(callsite) > 0) {
         assert(callStates.count(callsite) > 0 &&
                "Having return states, but no call states");
@@ -1082,7 +1084,7 @@ void StateSensitiveGraph<MicroArchDom>::buildExternalSymbolReturnEdges() {
 template <class MicroArchDom>
 std::set<unsigned> StateSensitiveGraph<MicroArchDom>::progressStatesForProgLoc(
     std::set<unsigned> workingSetOfStates, ProgramLocation progLoc) {
-  auto MI = progLoc.first;
+  const auto *MI = progLoc.first;
   DEBUG_WITH_TYPE("instructions", dbgs()
                                       << "State-sensitive graph construction "
                                          "currently processes instruction:\n"
@@ -1548,7 +1550,7 @@ StateSensitiveGraph<MicroArchDom>::getIncomingStates(MachineBasicBlock &mbb) {
 
   // skip empty basic blocks
   if (!isBasicBlockEmpty(&mbb)) {
-    auto firstInstr = getFirstInstrInBB(&mbb);
+    const auto *firstInstr = getFirstInstrInBB(&mbb);
     // get analysis info before the next
     auto &ctxStateInfoBefore = mai.getAnaInfoBefore(firstInstr);
     if (!ctxStateInfoBefore.isBottom()) {
@@ -1566,7 +1568,7 @@ std::unordered_map<
 StateSensitiveGraph<MicroArchDom>::getOutgoingStates(MachineBasicBlock &mbb) {
   std::unordered_map<Context, std::vector<State>> result;
   if (!isBasicBlockEmpty(&mbb)) {
-    for (auto endInstr : getAllEndInstrInMBB(&mbb)) {
+    for (const auto *endInstr : getAllEndInstrInMBB(&mbb)) {
       bool needGuarded = endInstr->isConditionalBranch() ||
                          isJumpTableBranch(endInstr) || endInstr->isReturn();
       bool needBothGuards = needGuarded && endInstr == &mbb.back();
@@ -1697,7 +1699,7 @@ void StateSensitiveGraph<MicroArchDom>::dump(
         std::set<unsigned> statesLeavingBB;
         const auto &callsites =
             CallGraph::getGraph().getCallSitesInMBB(&currMBB);
-        for (auto callsite : callsites) {
+        for (const auto *callsite : callsites) {
           if (callStates.count(callsite) > 0) {
             assert(returnStates.count(callsite) > 0 &&
                    "Calling states 	but no return states");
@@ -1737,7 +1739,7 @@ void StateSensitiveGraph<MicroArchDom>::dump(
           }
         }
         // dump return states of the basic block
-        for (auto callsite : callsites) {
+        for (const auto *callsite : callsites) {
           if (callStates.count(callsite) > 0) {
             for (auto &ctx2cSts : returnStates.at(callsite)) {
               for (auto cSt : ctx2cSts.second) {
@@ -1842,8 +1844,8 @@ void StateSensitiveGraph<MicroArchDom>::dump(
     for (MachineFunction *currFunc :
          machineFunctionCollector->getAllMachineFunctions()) {
       std::string funcName = currFunc->getName().str();
-      mystream << "graph : {\n	title : \"" << funcName << "\"\n	label : \""
-               << funcName << "\"\n";
+      mystream << "graph : {\n	title : \"" << funcName
+               << "\"\n	label : \"" << funcName << "\"\n";
       for (auto &currMBB : *currFunc) {
         std::string mbbName = currMBB.getFullName();
         mystream << "graph : {\n	title : \"" << mbbName
@@ -1853,7 +1855,7 @@ void StateSensitiveGraph<MicroArchDom>::dump(
         std::set<unsigned> statesLeavingBB;
         const auto &callsites =
             CallGraph::getGraph().getCallSitesInMBB(&currMBB);
-        for (auto callsite : callsites) {
+        for (const auto *callsite : callsites) {
           if (callStates.count(callsite) > 0) {
             assert(returnStates.count(callsite) > 0 &&
                    "Calling states but no return states");
@@ -1897,7 +1899,7 @@ void StateSensitiveGraph<MicroArchDom>::dump(
           }
         }
         // dump return states of the basic block
-        for (auto callsite : callsites) {
+        for (const auto *callsite : callsites) {
           if (callStates.count(callsite) > 0) {
             for (auto &ctx2cSts : returnStates.at(callsite)) {
               for (auto cSt : ctx2cSts.second) {

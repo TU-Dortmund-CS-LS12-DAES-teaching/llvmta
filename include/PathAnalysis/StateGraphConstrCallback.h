@@ -27,11 +27,15 @@
 #define STATEGRAPHCONSTRCALLBACK_H
 
 #include "PathAnalysis/StateGraphIsEdgeJoinableCallback.h"
+#include <list>
+#include <set>
+#include <string>
 
 namespace TimingAnalysisPass {
 
 class StateGraphConstrCallback : public StateGraphIsEdgeJoinableCallback {
 public:
+  virtual ~StateGraphConstrCallback() = default;
   /**
    * Add an edge s->e while intra-basic-block weights are constructed.
    * Take the maximum time for all states at e, time for s should be zero.

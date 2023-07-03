@@ -144,28 +144,30 @@ public:
    * See superclass first.
    * Produces all possible successor states.
    */
-  virtual StateSet
-  cycle(std::tuple<InstrContextMapping &, AddressInformation &> &dep) const;
+  virtual StateSet cycle(std::tuple<InstrContextMapping &, AddressInformation &>
+                             &dep) const override;
 
   /**
    * See superclass first.
    * Checks whether a ProgramLocation left the pipeline after the last cycle.
    */
-  virtual bool isFinal(ExecutionElement &pl);
+  virtual bool isFinal(ExecutionElement &pl) override;
 
-  virtual bool isWaitingForJoin() const { return memory.isWaitingForJoin(); }
-
-  /// \see superclass
-  bool operator==(const PretPipelineState &ds) const;
-
-  /// \see superclass
-  virtual size_t hashcode() const;
+  virtual bool isWaitingForJoin() const override {
+    return memory.isWaitingForJoin();
+  }
 
   /// \see superclass
-  virtual bool isJoinable(const PretPipelineState &ds) const;
+  bool operator==(const PretPipelineState &ds) const override;
 
   /// \see superclass
-  virtual void join(const PretPipelineState &ds);
+  virtual size_t hashcode() const override;
+
+  /// \see superclass
+  virtual bool isJoinable(const PretPipelineState &ds) const override;
+
+  /// \see superclass
+  virtual void join(const PretPipelineState &ds) override;
 
   // Output operation
   template <class Mem>
@@ -490,8 +492,9 @@ ConvergenceType PretPipelineState<MemoryTopology>::isConvergedAfterCycleFrom(
 
     // or the corner case of an empty pipeline...
     return CONVERGED_UNTIL_ANY_MEMORY_NON_BUSY;
-  } else if (converged) { // With UnblockStores you cannot distinguish the
-                          // active port
+  }
+  if (converged) { // With UnblockStores you cannot distinguish the
+                   // active port
     return CONVERGED_UNTIL_ANY_MEMORY_NON_BUSY;
   }
 
@@ -794,7 +797,7 @@ PretPipelineState<MemoryTopology>::checkForBranches(
   // check whether branching happens and alter the
   if (StaticAddrProvider->hasMachineInstrByAddr(
           inflightInstruction[memory ? EX_MEM_IND : ID_EX_IND].get().first)) {
-    auto exInstr = StaticAddrProvider->getMachineInstrByAddr(
+    const auto *exInstr = StaticAddrProvider->getMachineInstrByAddr(
         inflightInstruction[memory ? EX_MEM_IND : ID_EX_IND].get().first);
     if (exInstr->isBranch() || exInstr->isCall() || exInstr->isReturn()) {
       // Skip branches that load to the pc in execute stage as they happen later

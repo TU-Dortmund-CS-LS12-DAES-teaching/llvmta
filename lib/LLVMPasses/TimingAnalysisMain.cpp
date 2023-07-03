@@ -277,6 +277,12 @@ void TimingAnalysisMain::dispatchAnalysisType(AddressInformation &AddressInfo) {
 
 boost::optional<BoundItv>
 TimingAnalysisMain::dispatchTimingAnalysis(AddressInformation &AddressInfo) {
+  assert((MuArchType == MicroArchitecturalType::FIXEDLATENCY ||
+          MuArchType == MicroArchitecturalType::PRET ||
+          MuArchType == MicroArchitecturalType::INORDER ||
+          MuArchType == MicroArchitecturalType::STRICTINORDER ||
+          MuArchType == MicroArchitecturalType::OUTOFORDER) &&
+         "No known microarchitecture chosen");
   switch (MuArchType) {
   case MicroArchitecturalType::FIXEDLATENCY:
     assert(MemTopType == MemoryTopologyType::NONE &&
@@ -289,9 +295,6 @@ TimingAnalysisMain::dispatchTimingAnalysis(AddressInformation &AddressInfo) {
     return dispatchInOrderTimingAnalysis(AddressInfo);
   case MicroArchitecturalType::OUTOFORDER:
     return dispatchOutOfOrderTimingAnalysis(AddressInfo);
-  default:
-    errs() << "No known microarchitecture chosen.\n";
-    return boost::none;
   }
 }
 

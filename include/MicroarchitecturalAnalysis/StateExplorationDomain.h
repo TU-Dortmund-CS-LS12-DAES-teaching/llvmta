@@ -115,7 +115,8 @@ public:
    * semantics of MicroArchState to a instruction-level behaviour on a CFG-like
    * structure.
    */
-  void transfer(const MachineInstr *MI, Context *currentCtx, StateDep &anaInfo);
+  void transfer(const MachineInstr *MI, Context *currentCtx,
+                StateDep &anaInfo) override;
   /**
    * This is a helper function for transfer. It wraps the cycle-based
    * microarchitectural semantics of MicroArchState to a instruction-level
@@ -133,7 +134,7 @@ public:
    * coincide with the given branch outcome at the given branch.
    */
   void guard(const MachineInstr *MI, Context *currentCtx, StateDep &anaInfo,
-             BranchOutcome bo);
+             BranchOutcome bo) override;
 
   /**
    * See superclass first.
@@ -144,30 +145,31 @@ public:
   StateExplorationDom<MicroArchState>
   transferCall(const MachineInstr *callInstr, Context *ctx, StateDep &anaInfo,
                const MachineFunction *callee,
-               StateExplorationDom<MicroArchState> &calleeOut);
+               StateExplorationDom<MicroArchState> &calleeOut) override;
   /**
    * See superclass first.
    * On entering a bsaic block, the basic-block related timings are reseted -
    * independent of mbb.
    */
-  void enterBasicBlock(const MachineBasicBlock *mbb);
+  void enterBasicBlock(const MachineBasicBlock *mbb) override;
   /**
    * See superclass first.
    * Joins sets of states. This is typically set union.
    */
-  void join(const StateExplorationDom<MicroArchState> &element);
+  void join(const StateExplorationDom<MicroArchState> &element) override;
   /**
    * See superclass first.
    * Checks for set inclusion.
    */
-  bool lessequal(const StateExplorationDom<MicroArchState> &element) const;
+  bool
+  lessequal(const StateExplorationDom<MicroArchState> &element) const override;
   // see superclass
-  std::string print() const;
+  std::string print() const override;
 
   typename MicroArchState::StateSet getStates() const;
 
   // See superclass
-  bool isBottom() const { return states.size() == 0; }
+  bool isBottom() const override { return states.size() == 0; }
 
 private:
   /**
@@ -224,7 +226,7 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::
     top = false;
     // Get initial program start as this is needed for setting the pc correctly
     // in MicroArchState
-    auto MF = getAnalysisEntryPoint();
+    auto *MF = getAnalysisEntryPoint();
     std::list<MBBedge> initialedgelist;
     const MachineInstr *firstInstr =
         getFirstInstrInFunction(MF, initialedgelist);
@@ -236,7 +238,7 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::
     for (auto edgeit = initialedgelist.begin(); edgeit != initialedgelist.end();
          ++edgeit) {
       if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeEnter(*edgeit)) {
-        for (auto direc :
+        for (auto *direc :
              *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeEnter(
                  *edgeit)) {
           ctx.update(direc);
@@ -244,7 +246,7 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::
       }
       ctx.transfer(*edgeit);
       if (DirectiveHeuristicsPassInstance->hasDirectiveOnEdgeLeave(*edgeit)) {
-        for (auto direc :
+        for (auto *direc :
              *DirectiveHeuristicsPassInstance->getDirectiveOnEdgeLeave(
                  *edgeit)) {
           ctx.update(direc);
@@ -483,7 +485,7 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::transferCall(
     if (callTarget.isSymbol()) {
       assert(callee == nullptr && "Cannot have function for external callee");
     } else {
-      auto val = (const Value *)callTarget.getGlobal();
+      const auto *val = (const Value *)callTarget.getGlobal();
       std::string funcName = val->getName().str();
       assert(!machineFunctionCollector->hasFunctionByName(funcName) &&
              "Ext func is not external");
@@ -514,7 +516,8 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::transferCall(
             DirectiveHeuristicsPassInstance->getDirectiveAfterInstr(callInstr));
       }
       auto addr = StaticAddrProvider->getAddr(callInstr);
-      auto afterCallInstr = StaticAddrProvider->getMachineInstrByAddr(addr + 4);
+      const auto *afterCallInstr =
+          StaticAddrProvider->getMachineInstrByAddr(addr + 4);
 
       if (DirectiveHeuristicsPassInstance->hasDirectiveBeforeInstr(
               afterCallInstr)) {
@@ -530,27 +533,26 @@ StateExplorationDomainBase<StateExplorationDom, MicroArchState>::transferCall(
       retVal.top = true;
     }
     return retVal;
-  } else {
-    assert(callee != nullptr && "Cannot handle call to non-existing callee");
-    // First cycle until the call instruction is final. This is then the
-    // callee-in info.
-    this->transfer(callInstr, ctx, anaInfo);
-    // TODO do the filtering on the given callee being called (only needed for
-    // multiple callees)
-
-    // Take the calleeOut information, filter on taking the correct return
-    // instruction and return it as afterCallInfo
-    StateExplorationDom<MicroArchState> retVal(AnaDomInit::BOTTOM);
-    for (auto &state : calleeOut.states) {
-      MicroArchState copy(state);
-      // If the state corresponds to the given return location, we use it
-      if (copy.assumedReturnedTo(std::make_pair(callInstr, *ctx))) {
-        copy.resetLocalMetrics();
-        StateExplorationDom<MicroArchState>::insertOnInstr(retVal.states, copy);
-      }
-    }
-    return retVal;
   }
+  assert(callee != nullptr && "Cannot handle call to non-existing callee");
+  // First cycle until the call instruction is final. This is then the
+  // callee-in info.
+  this->transfer(callInstr, ctx, anaInfo);
+  // TODO do the filtering on the given callee being called (only needed for
+  // multiple callees)
+
+  // Take the calleeOut information, filter on taking the correct return
+  // instruction and return it as afterCallInfo
+  StateExplorationDom<MicroArchState> retVal(AnaDomInit::BOTTOM);
+  for (auto &state : calleeOut.states) {
+    MicroArchState copy(state);
+    // If the state corresponds to the given return location, we use it
+    if (copy.assumedReturnedTo(std::make_pair(callInstr, *ctx))) {
+      copy.resetLocalMetrics();
+      StateExplorationDom<MicroArchState>::insertOnInstr(retVal.states, copy);
+    }
+  }
+  return retVal;
 }
 
 template <template <class> class StateExplorationDom, class MicroArchState>

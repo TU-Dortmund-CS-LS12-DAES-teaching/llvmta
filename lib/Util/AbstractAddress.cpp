@@ -26,6 +26,7 @@
 #include "Util/AbstractAddress.h"
 #include "LLVMPasses/StaticAddressProvider.h"
 #include "Util/Options.h"
+#include <cassert>
 
 namespace TimingAnalysisPass {
 /* constructors */
@@ -69,6 +70,9 @@ const GlobalVariable *AbstractAddress::getArray() const {
 }
 
 AddressInterval AbstractAddress::getAsInterval() const {
+  assert((this->type == AddressType::INTERVAL ||
+          this->type == AddressType::ARRAY) &&
+         "UNREACHABLE");
   switch (this->type) {
   case AddressType::INTERVAL:
     return value.interval;
@@ -77,8 +81,6 @@ AddressInterval AbstractAddress::getAsInterval() const {
     unsigned size = StaticAddrProvider->getArraySize(value.array);
     return AddressInterval(base, base + size - 4);
   }
-  default:
-    assert(0 && "UNREACHABLE");
   }
 }
 

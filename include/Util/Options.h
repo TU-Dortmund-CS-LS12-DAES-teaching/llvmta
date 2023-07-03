@@ -721,4 +721,11 @@ extern llvm::cl::opt<unsigned> PreemptionICacheBudget;
  */
 extern llvm::cl::opt<unsigned> PreemptionDCacheBudget;
 
+/**
+ * Enforce a Line from your .c file to be Taken in the ILP.
+ * This will calculate the longest EP through the given Line.
+ *
+ */
+extern llvm::cl::opt<unsigned> ILPLine;
+
 #endif

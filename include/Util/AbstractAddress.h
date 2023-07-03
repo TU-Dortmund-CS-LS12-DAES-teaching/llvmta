@@ -142,14 +142,15 @@ public:
 template <typename streamtype>
 streamtype &operator<<(streamtype &stream, AbstractAddress addr) {
   typedef AbstractAddress::AddressType AddressType;
+  assert(
+      (addr.type == AddressType::ARRAY || addr.type == AddressType::INTERVAL) &&
+      "UNREACHABLE");
   switch (addr.type) {
   case AddressType::ARRAY:
     stream << "Array " << addr.value.array->getName().str();
     break;
   case AddressType::INTERVAL:
     break;
-  default:
-    assert(0 && "UNREACHABLE");
   }
 
   Address lower = addr.getAsInterval().lower();

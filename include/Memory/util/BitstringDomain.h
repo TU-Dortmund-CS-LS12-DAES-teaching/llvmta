@@ -55,6 +55,7 @@ protected:
 public:
   BitstringDomain();
   BitstringDomain(const Self &y);
+  BitstringDomain &operator=(const Self &y);
   BitstringDomain(ParamType v);
   bool operator==(const Self &y) const;
   void join(const Self &y);
@@ -70,6 +71,13 @@ template <typename R> inline BitstringDomain<R>::BitstringDomain() : value() {}
 
 template <typename R>
 inline BitstringDomain<R>::BitstringDomain(const Self &y) : value(y.value) {}
+
+template <typename R>
+inline BitstringDomain<R> &BitstringDomain<R>::operator=(const Self &y) {
+  if (this != &y)
+    value = y.value;
+  return *this;
+}
 
 template <typename R>
 inline BitstringDomain<R>::BitstringDomain(ParamType v) : value(v) {}

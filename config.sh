@@ -50,6 +50,30 @@ lowRes() {
   mv compile_commands.json ../compile_commands.json
 }
 
+clang() {
+  cd build || exit
+  cmake \
+    -DCMAKE_C_COMPILER=/usr/lib/icecc/bin/clang \
+    -DCMAKE_CXX_COMPILER=/usr/lib/icecc/bin/clang++ \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
+    -Wno-dev \
+    -Wno-suggest-override \
+    -DLLVM_USE_LINKER=lld \
+    -DLLVM_ENABLE_RTTI=ON \
+    -DLLVM_ENABLE_EH=ON \
+    -DLLVM_ENABLE_ASSERTIONS=ON \
+    -DLLVM_INCLUDE_BENCHMARKS=OFF \
+    -DLLVM_TARGETS_TO_BUILD="ARM;RISCV" \
+    -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
+    -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=.. \
+    -DLLVM_EXTERNAL_PROJECTS="llvmta" \
+    -DLLVM_PARALLEL_LINK_JOBS=4 \
+    -GNinja \
+    ../dependencies/$LLVM_VER.src
+  mv compile_commands.json ../compile_commands.json
+}
+
 rele() {
   cd build || exit
   cmake \
@@ -108,6 +132,7 @@ cla() {
 
 cl() {
   rm -rf build
+  rm -rf .cache
 }
 
 getllvm() {
@@ -196,6 +221,10 @@ distributed | dis)
   pre
   dist
   ;;
+clang)
+  pre
+  clang
+  ;;
 clean)
   cl
   ;;
@@ -210,6 +239,7 @@ cleanall)
   echo "  dev | development          Configure for development."
   echo "  rel | release              Configure for Release."
   echo "  lowRes | lowResources      Configure for low Ram PC."
+  echo "  clang                      Configure build with clang."
   echo "  distributed | dis          Configure for icecc distributed compiler."
   echo "  clean                      Removes build folder."
   echo "  cleanall                   Removes build folder and llvm + clang."

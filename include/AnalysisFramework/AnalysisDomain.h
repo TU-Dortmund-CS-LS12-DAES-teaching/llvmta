@@ -51,6 +51,7 @@ class AnalysisDomain
     : public ContextAwareAnalysisDomain<AnalysisImplementation, Granularity,
                                         AnalysisDependencies> {
 public:
+  virtual ~AnalysisDomain(){};
   /**
    * Makes an in-place update of analysis information.
    * The AnalysisDomain information is changed according to the execution of the
@@ -78,14 +79,15 @@ public:
   }
 
   // see in Superclass
-  virtual void
-  handleCallingConvention(const AnalysisImplementation &preCallElement){};
+  virtual void handleCallingConvention(
+      const AnalysisImplementation &preCallElement) override{};
   // see in Superclass
-  virtual void join(const AnalysisImplementation &element) = 0;
+  virtual void join(const AnalysisImplementation &element) override = 0;
   // see in Superclass
-  virtual bool lessequal(const AnalysisImplementation &element) const = 0;
+  virtual bool
+  lessequal(const AnalysisImplementation &element) const override = 0;
   // see in Superclass
-  virtual std::string print() const = 0;
+  virtual std::string print() const override = 0;
 };
 
 } // namespace TimingAnalysisPass
