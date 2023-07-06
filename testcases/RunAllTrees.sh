@@ -21,5 +21,15 @@ parse(){
     done
   done
 }
-
-parse | xargs -P 16 -n 1 -I CMD ./runTestcase CMD  --ta-lpsolver-effort=maximal --ta-pathana-type=graphilp 2>> error 1>> output &
+parsebench(){
+  search_dir=/workspaces/llvmta/testcases/Benchmarks/llvmta_trees_u_bench
+  for entry in "$search_dir"/*
+  do
+    testcase=( "$(echo "$entry" | cut -d'/' -f2- | cut -d'/' -f2- | cut -d'/' -f2- | cut -d'/' -f2- | cut -d'/' -f2-)")
+    # --ta-force-ILP-path=$(cat $entry/index)")
+    echo "$testcase"
+  done
+}
+#parse
+parsebench | xargs -P 16 -n 1 -I CMD ./runTestcase CMD --ta-lpsolver-effort=maximal --ta-pathana-type=graphilp 2>> error 1>> output &
+#parse | xargs -P 16 -n 1 -I CMD ./runTestcase CMD  --ta-lpsolver-effort=maximal --ta-pathana-type=graphilp 2>> error 1>> output &
