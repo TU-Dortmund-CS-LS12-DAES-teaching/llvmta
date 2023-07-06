@@ -38,6 +38,7 @@
 #include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_os_ostream.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include <sstream>
 
@@ -483,12 +484,14 @@ bool StaticAddressProvider::goesExternal(unsigned Addr) {
   return true;
 }
 
-void StaticAddressProvider::dump(std::ostream &Mystream) const {
+void StaticAddressProvider::dump(std::ostream &stream) const {
+  llvm::raw_os_ostream Mystream(stream);
   Mystream << "Address Mapping\n"
            << "---------------\n\n";
   for (auto &Kv : Addr2ins) {
     printHex(Mystream, Kv.first);
-    Mystream << ": " << getMachineInstrIdentifier(Kv.second) << "\n";
+    Mystream << ": " << getMachineInstrIdentifier(Kv.second) << " ";
+    Kv.second->print(Mystream);
   }
   Mystream << "\nAddress to Address Mapping\n"
            << "------------------------\n\n";
@@ -505,7 +508,7 @@ void StaticAddressProvider::dump(std::ostream &Mystream) const {
   Mystream << "\nGlobal Variables to Address Mapping\n"
            << "-----------------------------------\n\n";
 
-  llvm::raw_os_ostream LLVMstream(Mystream);
+  llvm::raw_os_ostream LLVMstream(stream);
   if (!ArrayAnalysis) {
     LLVMstream << "Note: Array Awareness disabled\n";
   }
