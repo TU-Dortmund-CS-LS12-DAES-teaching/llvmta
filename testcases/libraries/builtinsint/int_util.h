@@ -22,7 +22,7 @@
 /** \brief Trigger a program abort (or panic for kernel code). */
 #define compilerrt_abort() compilerrt_abort_impl(__FILE__, __LINE__, __func__)
 
-NORETURN void compilerrt_abort_impl(const char *file, int line,
+__attribute__((noreturn)) void compilerrt_abort_impl(const char *file, int line,
                                     const char *function);
 
 #define COMPILE_TIME_ASSERT(expr) COMPILE_TIME_ASSERT1(expr, __COUNTER__)
