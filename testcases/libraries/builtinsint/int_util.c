@@ -51,8 +51,8 @@ void compilerrt_abort_impl(const char *file, int line, const char *function) {
 #include <stdlib.h>
 
 #ifndef _WIN32
-__attribute__((weak))
-__attribute__((visibility("hidden")))
+//__attribute__((weak))
+//__attribute__((visibility("hidden")))
 #endif
 void compilerrt_abort_impl(const char *file, int line, const char *function) {
 	// Ignore aborts
