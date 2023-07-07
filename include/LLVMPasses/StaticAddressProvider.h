@@ -46,10 +46,14 @@
 
 #include <boost/optional.hpp>
 
+#include <cstddef>
 #include <iostream>
 #include <map>
+#include <vector>
 
 #include "Util/Util.h"
+//#include "Util/BinaryAdressManager.h"
+#include "Util/RiscvBinaryAdressManager.h"
 
 using namespace llvm;
 
@@ -73,7 +77,7 @@ public:
   /**
    * Place instructions in address space.
    */
-  bool runOnMachineBasicBlock(MachineBasicBlock &MBB);
+  bool runOnMachineBasicBlock(MachineBasicBlock &MBB, const std::vector<derivedInstr> blockInstructions= std::vector<derivedInstr>());
   bool runOnMachineFunction(MachineFunction &F) override;
 
   /**
