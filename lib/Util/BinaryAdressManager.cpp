@@ -27,11 +27,15 @@
 //#include "LLVMPasses/StaticAddressProvider.h"
 #include "RISCV.h"
 #include "Util/Options.h"
+#include "llvm/CodeGen/MachineBasicBlock.h"
+#include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/CodeGen/TargetInstrInfo.h"
 #include "llvm/CodeGen/TargetSubtargetInfo.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instruction.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -51,8 +55,9 @@ BinaryBasicBlock::BinaryBasicBlock(uint64_t entry,uint64_t exit,uint64_t branchT
     this->exit=exit;
     this->branchTarget=branchTarget;
     this->continueTarget=continueTarget;
-    this->instruction_list=instruction_list;
+    this->instruction_list=std::vector<derivedInstr>(instruction_list);
 }
+
 
 uint64_t BinaryBasicBlock::getEntry(){
     return this->entry;
@@ -88,18 +93,7 @@ bool BinaryInstructionIterator::getNext(derivedInstr *instruction){
 
 /* constructors */
 BinaryAdressManager::BinaryAdressManager(TargetMachine &TM) {
-    std::cout << "initializing binary adress manager...\n";
-    auto Arch = TM.getTargetTriple().getArch();
-
-
-    system("/workspaces/llvmta/testcases/util_scripts/BuildLinkedBinary.sh");
-    if (Arch == llvm::Triple::ArchType::riscv32) {
-        //TODO run RISC binary builder shellscript
-        std::cout << "building RISCV_32 linked binary...\n";
-        system("/workspaces/llvmta/testcases/util_scripts/BuildLinkedBinary.sh");
-    }
-
-    
+    std::cout << "Initializing binary adress manager...\n";
 }
 
 bool BinaryAdressManager::initialize(){
@@ -108,6 +102,16 @@ bool BinaryAdressManager::initialize(){
 
 bool BinaryAdressManager::instrMatch(derivedInstr dins, MachineInstr *mins){
     return false;
+}
+
+int BinaryAdressManager::expandsToAmount(MachineInstr *mins){
+    return 0;
+}
+
+derivedInstr BinaryAdressManager::regroupOneToManyInstruction(MachineInstr *m_ins,
+     std::vector<derivedInstr> d_insVec){
+    derivedInstr tmp;
+    return tmp;
 }
 
 bool BinaryAdressManager::isBranch(derivedInstr instruction){
@@ -119,9 +123,9 @@ uint64_t BinaryAdressManager::getBranchTarget(derivedInstr instruction){
 
 
 void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
-    //TODO maybe need to provide binItr pointer instead
-    //TODO does llvm reconise a BB even when a jump enters not at the entry of the block?
     std::vector<derivedInstr> instruction_list;
+    derivedMF currentFunction;
+    
     uint64_t entry;
     uint64_t exit;
     uint64_t branchTarget;
@@ -130,6 +134,8 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
     /*set entry for first block*/
     derivedInstr first;
     if(binItr->getNext(&first)){
+        assert(first.isLabel&&"first instruction did not start a new Function");
+        currentFunction.functionName=first.label;
         instruction_list.push_back(first);
         entry=first.addr;
         if(this->isBranch(first)){
@@ -146,15 +152,27 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
     /*iterate instructions*/
     derivedInstr instr;
     while(binItr->getNext(&instr)){
+        if(instr.isLabel && binMF.size()>0){   
+            /*mark block as complete when encountering function start inside*/
+            /*containing function likely marked as noreturn */         
+            newBlock=true;
+        }
         /*if pref block was read completly get continueTarget and commit block*/
         /*then set entry for new block*/
         if(newBlock){
             continueTarget=instr.addr;
-            this->binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,branchTarget,continueTarget,instruction_list)));
+            currentFunction.binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,branchTarget,continueTarget,instruction_list)));
             std::vector<derivedInstr> tmp;
             instruction_list=tmp;
             entry = instr.addr;
             newBlock=false;
+            //commit blocks and start new function when reaching function label
+            if(instr.isLabel){
+                this->binMF.push_back(currentFunction);
+                derivedMF tmp;
+                currentFunction=tmp;
+                currentFunction.functionName=instr.label;
+            }
         }
         /*complete block if terminator found*/
         if(this->isBranch(instr)){
@@ -169,31 +187,110 @@ void BinaryAdressManager::buildBlocks(BinaryInstructionIterator *binItr){
 
     /*when reaching eof commit last block without targets*/
     exit=instr.addr;
-    binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,NAN,NAN,instruction_list)));
+    currentFunction.binBlocks.push_back(*(new BinaryBasicBlock(entry,exit,0,0,instruction_list)));
 
-    std::cout << "BuildBlocks: found "<<binBlocks.size()<<" basic blocks\n";
+    /*commit last function*/
+    this->binMF.push_back(currentFunction);
 
     //dump blocks to file
     std::ofstream blockDump("blockDump.txt");
-
-    for(int it=0;it<binBlocks.size();it++){
-        blockDump<<"\nBB "<< it <<": \n";
-        std::vector<derivedInstr> ins=binBlocks[it].instructions();
-        for(int instrIt=0;instrIt<ins.size();instrIt++){
-            blockDump<<"    "<<instrIt<<": "<<ins[instrIt].funct<<" ";
-            for(std::string opr:ins[instrIt].operands){
-                blockDump<<opr<<", ";
+    for(long unsigned int fIt=0;fIt<binMF.size();fIt++){
+        blockDump<<"\nFUNCTION "<<fIt<<": "<<binMF[fIt].functionName<<"\n";
+        for(long unsigned int it=0;it<binMF[fIt].binBlocks.size();it++){
+            blockDump<<"\n BB "<< it <<": \n";
+            std::vector<derivedInstr> ins=binMF[fIt].binBlocks[it].instructions();
+            for(long unsigned int instrIt=0;instrIt<ins.size();instrIt++){
+                blockDump<<"    "<<instrIt<<": "<<ins[instrIt].funct<<" ";
+                for(std::string opr:ins[instrIt].operands){
+                    blockDump<<opr<<", ";
+                }
+                blockDump<<"\n";
             }
-            blockDump<<"\n";
-        }
 
+        }
     }
     blockDump.close();
 
 }
 
-std::vector<BinaryBasicBlock> BinaryAdressManager::getBlocks(){
-    return this->binBlocks;
+std::vector<derivedMF> BinaryAdressManager::getMFs(){
+    return this->binMF;
+}
+
+derivedMF BinaryAdressManager::getMFbyName(std::string strRefName){
+    for(derivedMF mf:this->binMF){
+        if(mf.functionName==strRefName){
+            return mf;
+        }
+    }
+    std::cout<<"unknown function name:"<<strRefName<<"\n";
+    assert(false&&"function lookup failed, Name unknown");
+}
+
+std::vector<std::vector<derivedInstr>> BinaryAdressManager::getInstructionsInLLVMStructure(MachineFunction* F){
+    derivedMF mf=this->getMFbyName(F->getName().str());
+    std::vector<BinaryBasicBlock> sourceBlocks=mf.binBlocks;
+    unsigned blockIt=0;
+    unsigned instrIt=0;
+    std::vector<std::vector<derivedInstr>> restructuredList;
+
+    for (MachineFunction::iterator FI = F->begin(); FI != F->end(); ++FI) {
+        //assert(instrIt==0 &&"start of MBB should correspond to start of binBB, even if MBB isn't well terminated");
+        if(instrIt>=sourceBlocks[blockIt].instructions().size()){
+            blockIt++;
+            instrIt=0;
+        }
+
+        //create a instrList for each MBB
+        std::vector<derivedInstr> instructions;
+
+        assert(sourceBlocks.size()>blockIt && sourceBlocks[blockIt].instructions().size()>instrIt);
+        //uint64_t blockEntry=sourceBlocks[blockIt].instructions()[instrIt].addr;
+
+        //iterate MBB instructions
+        for(MachineInstr &mi: *FI){
+
+            //ignore instructions that have no effect later on and thus have no real instruction to match to
+            if(!mi.isTransient()){
+
+                //regroup one to many instructions
+                int expandsTo=this->expandsToAmount(&mi);
+                if(expandsTo>1){
+
+                    std::vector<derivedInstr> expandedInstr;
+                    for(int i=0;i<expandsTo;i++){
+                        if(sourceBlocks[blockIt].instructions().size()<=instrIt){
+                            instrIt=0;
+                            blockIt++;
+                            assert(blockIt<sourceBlocks.size());
+                        }
+                        expandedInstr.push_back(sourceBlocks[blockIt].instructions()[instrIt]);
+                        instrIt++;
+                    }
+                    //regenerate pseudo instr and add to list
+                    derivedInstr pseudo=this->regroupOneToManyInstruction(&mi, expandedInstr);
+                    assert(this->instrMatch(pseudo, &mi));
+                    instructions.push_back(pseudo);
+
+                }else{
+                    if(sourceBlocks[blockIt].instructions().size()<=instrIt){
+                            instrIt=0;
+                            blockIt++;
+                            assert(blockIt<sourceBlocks.size());
+                    }
+                    //assert instructions match
+                    assert(this->instrMatch(sourceBlocks[blockIt].instructions()[instrIt],&mi));
+                    instructions.push_back(sourceBlocks[blockIt].instructions()[instrIt]);
+                    instrIt++;
+                }
+            }
+        }
+
+        //end of MBB
+
+        restructuredList.push_back(std::vector<derivedInstr>(instructions));
+    }
+    return restructuredList;
 }
 
 

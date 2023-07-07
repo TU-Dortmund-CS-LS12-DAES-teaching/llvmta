@@ -26,6 +26,7 @@
 
 
 #include "Util/Util.h"
+#include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/CodeGen/MachineOperand.h"
 #include "llvm/Target/TargetMachine.h"
 #include <cstdint>
@@ -40,10 +41,12 @@ namespace TimingAnalysisPass {
 
 struct derivedInstr{
     bool isLabel;
+    std::string label;
     uint64_t addr;
     std::string funct;
     std::vector<std::string> operands;
 };
+
 
 /*internal utility class to hold basicblock adresses*/
 /*while deriving block structure from binary*/
@@ -58,6 +61,8 @@ public:
     /*constructor*/
     BinaryBasicBlock(uint64_t entry,uint64_t exit,uint64_t branchTarget,
         uint64_t continueTarget, std::vector<derivedInstr> instruction_list);
+
+    //BinaryBasicBlock(BinaryBasicBlock &bBB);
     /*attribute accessors*/
     uint64_t getEntry();
     uint64_t getExit();
@@ -75,18 +80,59 @@ public:
     virtual bool getNext(derivedInstr *instruction);
 };
 
-/*main utility to derive adress information from binary executable*/
-class BinaryAdressManager {
+
+struct derivedMF{
+    std::string functionName;
     std::vector<BinaryBasicBlock> binBlocks;
+};
+
+/*main utility to derive address information from binary executable*/
+class BinaryAdressManager {
+    std::vector<derivedMF> binMF;
+    
 public:
     /* constructor */
     BinaryAdressManager(TargetMachine &TM);
 
+
     virtual bool initialize();
 
-    std::vector<BinaryBasicBlock> getBlocks();
+    std::vector<derivedMF> getMFs();
+
+    derivedMF getMFbyName(std::string strRefName);
 
     virtual bool instrMatch(derivedInstr dins,MachineInstr *mins);
+
+    /**
+     * @brief returns amount of real instructions this expands to 
+     * 
+     * @param mins MachineInstruction
+     * @return int 
+     */
+    virtual int expandsToAmount(MachineInstr *mins);
+
+    /**
+     * @brief returns Pseudo derivedInstr thats trivial matchable to m_ins
+     * 
+     * @param m_ins input Pseudo Instruction
+     * @param d_insVec list of Instructions m_ins expands to
+     * @return derivedInstr 
+     */
+    virtual derivedInstr regroupOneToManyInstruction(MachineInstr *m_ins
+        ,std::vector<derivedInstr> d_insVec);
+
+
+    /**
+     * @brief get Block vector, restructured to match Blocks in LLVM
+     * 
+     * In some cases instructions in llvm that should terminate a block don't;
+     * And not all terminating conditions are respected when generationg binBB's.
+     * This function generates a restructured Blocklist that accounts for this.
+     *      
+     * @param F MachineFunction to align structure to
+     * @return std::vector<BinaryBasicBlock> 
+     */
+    std::vector<std::vector<derivedInstr>> getInstructionsInLLVMStructure(MachineFunction* F);
 
 
 private:
