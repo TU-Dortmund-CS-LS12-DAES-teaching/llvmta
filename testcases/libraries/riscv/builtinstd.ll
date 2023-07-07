@@ -99,9 +99,9 @@ attributes #0 = { noinline nounwind "frame-pointer"="all" "min-legal-vector-widt
 !llvm.ident = !{!2}
 !llvm.module.flags = !{!3, !4, !5, !6, !7, !8}
 
-!0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 14.0.6 (https://github.com/TU-Dortmund-CS-LS12-DAES-teaching/llvmta.git 9437178c1ff4dda587abb470cbceda979f22ce27)", isOptimized: false, runtimeVersion: 0, emissionKind: LineTablesOnly, splitDebugInlining: false, nameTableKind: None)
+!0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 14.0.6 (https://github.com/TU-Dortmund-CS-LS12-DAES-teaching/llvmta.git 58dad2a888cb8167383a89c0b8100e9f8ee3ed06)", isOptimized: false, runtimeVersion: 0, emissionKind: LineTablesOnly, splitDebugInlining: false, nameTableKind: None)
 !1 = !DIFile(filename: "../memory.c", directory: "/workspaces/llvmta/testcases/libraries/builtinsstd/buildriscv", checksumkind: CSK_MD5, checksum: "fa9c872a007b30a353222cd13b38538d")
-!2 = !{!"clang version 14.0.6 (https://github.com/TU-Dortmund-CS-LS12-DAES-teaching/llvmta.git 9437178c1ff4dda587abb470cbceda979f22ce27)"}
+!2 = !{!"clang version 14.0.6 (https://github.com/TU-Dortmund-CS-LS12-DAES-teaching/llvmta.git 58dad2a888cb8167383a89c0b8100e9f8ee3ed06)"}
 !3 = !{i32 7, !"Dwarf Version", i32 5}
 !4 = !{i32 2, !"Debug Info Version", i32 3}
 !5 = !{i32 1, !"wchar_size", i32 4}
