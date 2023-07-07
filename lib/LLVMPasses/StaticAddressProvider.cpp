@@ -34,24 +34,31 @@
 
 #include "llvm/CodeGen/MachineBasicBlock.h"
 #include "llvm/CodeGen/MachineConstantPool.h"
+#include "llvm/CodeGen/MachineFunction.h"
 #include "llvm/CodeGen/MachineInstr.h"
 #include "llvm/CodeGen/MachineJumpTableInfo.h"
 #include "llvm/CodeGen/MachineOperand.h"
 #include "llvm/CodeGen/TargetInstrInfo.h"
 #include "llvm/CodeGen/TargetRegisterInfo.h"
 #include "llvm/IR/Constants.h"
+#include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/Error.h"
+#include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_os_ostream.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/MC/MCStreamer.h"
+#include "llvm/CodeGen/AsmPrinter.h"
 
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
 #include <strings.h>
 #include <vector>
 
-#include "Util/RiscvBinaryAdressManager.h"
+//#include "Util/RiscvBinaryAdressManager.h"
 
 
 using namespace llvm;
@@ -64,6 +71,7 @@ char StaticAddressProvider::ID = 0;
 
 BinaryAdressManager *binMan;
 
+
 StaticAddressProvider::StaticAddressProvider(TargetMachine &TM)
     : MachineFunctionPass(ID), TM(TM) {
   if(AdressMapping){
@@ -74,116 +82,13 @@ StaticAddressProvider::StaticAddressProvider(TargetMachine &TM)
   CodeAddress = CodeStartAddress;
   RodataAddress = 0; // Will be set after the doInitialization()
 }
-int mfcount=0;
-    int bb_iteration=0;
-int matchedBlocks=0;
-bool StaticAddressProvider::runOnMachineFunction(MachineFunction &F) {
-  //dumb match of blocks
-  if(AdressMapping && &F){
-    const TargetInstrInfo *TII=F.getSubtarget().getInstrInfo();
-    const TargetRegisterInfo *TRI=F.getSubtarget().getRegisterInfo();
+
     
-    std::vector<BinaryBasicBlock> myBlocks=binMan->getBlocks();
-    std::vector<std::string> mfunctionlist;
-    std::vector<MachineInstr*> IR_instrList;
-    for (MachineFunction::iterator FI = F.begin(); FI != F.end(); ++FI) {
-      //MachineBasicBlock &myMBB=*FI;
-      if(!&(*FI))break;
-      for(auto &myI:*FI){
-        if(!&myI){
-          std::cout << "void machine Instruction\n";
-          break;
-        }
-        /*llvm::outs()<<"\n######\n";
-        myI.print(llvm::outs());
-        llvm::outs()<<" is Term:"<<myI.isTerminator();
-        llvm::outs()<<"\n"<<(TII->getName(myI.getOpcode()).str())<<"\n";
-        for(auto op:myI.operands()){
-            llvm::outs()<<"\n+++++\nop: type:"<< static_cast<unsigned>(op.getType())<<" content:";
-            op.print(llvm::outs());
-            
-            //if(op.getType()==MachineOperand::MO_Immediate || op.getType()==MachineOperand::MO_Register){
-            //  op.print(llvm::outs());
-            //}
-          }*/
 
-        //clean check
-        if(!(TII->getName(myI.getOpcode()).str()=="CFI_INSTRUCTION") && !(myI.isKill()) && !(myI.isImplicitDef())){
-          IR_instrList.push_back(&myI);
-          if(myI.isCall()){
-            //std::cout<<"call                            "<<TII->getName(myI.getOpcode()).str()<<"\n";
-          }
-          if(myBlocks.size()<=bb_iteration){
-            myI.print(llvm::outs());
-            std::exit(EXIT_FAILURE);
-          }
-          
-          if(myI.isTerminator() || myI.isCall() ){
-            bool bbmatch=true;
-            for(int i=0;i<IR_instrList.size();i++){
-              if(myBlocks.size()>bb_iteration){
-                if(myBlocks[bb_iteration].instructions().size()>i){
-                  //unwind PseudoCALL (-> results in 2 instructions) TODO needs an elegant solution
-                  if(TII->getName(IR_instrList[i]->getOpcode()).str()=="PseudoCALL"){
-                    //std::cout<<"\n\nPseudocall is call: "<<IR_instrList[i]->isCall()<<"\n\n";
-                    if(TII->getName(i>0 && IR_instrList[i-1]->getOpcode()).str()!="PseudoCALL"){
-                      //double PseudoCALL so Listlengths are matchable. Hacky solution TODO: switch d_ins to consumable iterator
-                      IR_instrList.insert(IR_instrList.begin() +i,IR_instrList[i]);
-                    }
-                  }
+bool StaticAddressProvider::runOnMachineFunction(MachineFunction &F) {
 
+  //TODO: provide addressinformation for constand entrys from binary
 
-                  if(binMan->instrMatch(myBlocks[bb_iteration].instructions()[i], IR_instrList[i])){
-                    //match
-                   // std::cout <<"match: "<<myBlocks[bb_iteration].instructions()[i].funct<<" : "
-                   // <<TII->getName(IR_instrList[i]->getOpcode()).str()<<" addr"<<myBlocks[bb_iteration].instructions()[i].addr<<"\n";
-                  }else{
-                    bbmatch=false;
-                    std::cout <<"missmatch: "<<myBlocks[bb_iteration].instructions()[i].funct<<" : "
-                    <<TII->getName(IR_instrList[i]->getOpcode()).str()<<"\n";
-                    IR_instrList[i]->print(llvm::outs());
-                    derivedInstr dins=myBlocks[bb_iteration].instructions()[i];
-                    std::cout<<"\ndins:"<<dins.addr<<" "<<dins.funct;
-                    for(auto st: dins.operands){
-                      std::cout<<"["<<st<<"],";
-                    }std::cout<<"\n";
-                    for(auto op: IR_instrList[i]->operands()){
-                      if(op.isReg()){
-                        std::cout<<"{"<<TRI->getName(op.getReg())<<"},";
-                      }
-                      if(op.isImm()){
-                        std::cout<<"{"<<op.getImm()<<"},";
-                      }
-                    }
-                    std::exit(EXIT_FAILURE);
-                  }
-                  //compare
-                }else{
-                  //std::cout << "Dumb match: instr count doesnt match :"<<IR_instrList.size()<<", bin instr count:"<<myBlocks[bb_iteration].instructions().size()<<"\n";
-                }
-              }else{
-                std::cout << "Dumb match: block count doesnt match :"<<bb_iteration<<"\n";
-
-              }
-              //std::string mfunc=binMan->getBlocks()[bb_iteration].instructions()[i].funct;
-            }
-            //if(bbmatch)std::cout <<"matched block :"<<matchedBlocks++<<"\n";
-            //void list
-            std::vector<MachineInstr*> tmpEmpty;
-            IR_instrList=tmpEmpty;
-            bb_iteration++;
-            
-          }
-        }
-
-
-        
-      }
-      //runOnMachineBasicBlock(*FI);
-    }
-
-    //std::cout << mfcount++<<" -mf\n";
-  }
   auto Arch = TM.getTargetTriple().getArch();
   // RISC-V has constant pools for constants of size "double"
   // They are put in a part of the rodata segment
@@ -198,24 +103,38 @@ bool StaticAddressProvider::runOnMachineFunction(MachineFunction &F) {
     }
   }
 
+  /*provide block extracted from binary to match instructions */
+  /*and use the binary's adressinformation*/
+  if(AdressMapping){
+    std::vector<std::vector<derivedInstr>> blocks=binMan->getInstructionsInLLVMStructure(&F);
+    assert(blocks.size()==F.size() && "Block count in MF differ");
+    int PosInMF=0;
+    bool Changed = false;
+    for (MachineFunction::iterator FI = F.begin(); FI != F.end(); ++FI)
+      Changed |= runOnMachineBasicBlock(*FI,blocks[PosInMF++]);
+  return Changed;
+  }//implicit else:
+
   // Run on basic blocks individually
+  //default/legacy adress estimation
   bool Changed = false;
   for (MachineFunction::iterator FI = F.begin(); FI != F.end(); ++FI)
     Changed |= runOnMachineBasicBlock(*FI);
   return Changed;
+  
+
+
+
+
+
 }
 
 
-int myI=0;
-int bbcount=0;
-int r_term_c=0;
-int p_term_c=0;
-int numnum=0;
-bool StaticAddressProvider::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
+bool StaticAddressProvider::runOnMachineBasicBlock(MachineBasicBlock &MBB, const std::vector<derivedInstr> blockInstructions) {
   unsigned SkipAddresses = 0; // Skip that many words in address space, e.g. for
                               // the jump table allocation
   int PosInMbb = 0;
-  
+  unsigned PosInBbb = 0;
   
 
   auto Arch = TM.getTargetTriple().getArch();
@@ -456,11 +375,24 @@ bool StaticAddressProvider::runOnMachineBasicBlock(MachineBasicBlock &MBB) {
     if (AssignAddress) {
       assert(!I.isTransient() &&
              "Instructions might have no effect, but allocate anyway?");
-      assert(Ins2addr.count(&I) == 0 && "We saw the same instruction twice.");
-      Ins2addr.insert(std::make_pair(&I, CodeAddress));
-      assert(Addr2ins.count(CodeAddress) == 0 &&
+      if(AdressMapping){ 
+        //use binary address information
+        assert(blockInstructions.size()>PosInBbb);
+        assert(Ins2addr.count(&I) == 0 && "We saw the same instruction twice.");
+        Ins2addr.insert(std::make_pair(&I, blockInstructions[PosInBbb].addr));
+        assert(Addr2ins.count(CodeAddress) == 0 &&
              "We saw the same address for different instr.");
-      Addr2ins.insert(std::make_pair(CodeAddress, &I));
+        Addr2ins.insert(std::make_pair(blockInstructions[PosInBbb].addr, &I));
+        PosInBbb++;
+      }else{
+        //default address assumption
+        assert(Ins2addr.count(&I) == 0 && "We saw the same instruction twice.");
+        Ins2addr.insert(std::make_pair(&I, CodeAddress));
+        assert(Addr2ins.count(CodeAddress) == 0 &&
+             "We saw the same address for different instr.");
+        Addr2ins.insert(std::make_pair(CodeAddress, &I));
+      }
+      
 
       CodeAddress += InstrAllocSizeInBytes;
     }
