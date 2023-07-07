@@ -48,6 +48,18 @@ public:
     bool initialize() override;
     
     bool instrMatch(derivedInstr dins,MachineInstr *mins) override;
+    
+    int expandsToAmount(MachineInstr *mins) override;
+
+    /**
+     * @brief returns Pseudo derivedInstr thats trivial matchable to m_ins
+     * 
+     * @param m_ins input Pseudo Instruction
+     * @param d_insVec list of Instructions m_ins expands to
+     * @return derivedInstr 
+     */
+    derivedInstr regroupOneToManyInstruction(MachineInstr *m_ins
+        ,std::vector<derivedInstr> d_insVec) override;
 
 
 private:
@@ -58,7 +70,7 @@ private:
     uint64_t getBranchTarget(derivedInstr instruction) override;
 
 protected:
-    //void buildBlocks(BinaryInstructionIterator *binItr);
+    
     
 };
 
