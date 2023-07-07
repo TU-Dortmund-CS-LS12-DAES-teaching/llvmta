@@ -94,7 +94,7 @@ buildriscv(){
   mkdir buildriscv
   cd buildriscv
   rm -rf *
-  clang --target=riscv32-unknown-unknown -mfloat-abi=soft -emit-llvm \
+  clang --target=riscv32-unknown-unknown -I /usr/include -mfloat-abi=soft -emit-llvm \
     -S -w -gline-tables-only -O0 -Xclang -disable-O0-optnone -fno-builtin \
     -fno-discard-value-names ../*.c
   llvm-link -S *.ll -o builtinfloat.ll
@@ -106,7 +106,7 @@ buildriscv(){
   mkdir buildriscv
   cd buildriscv
   rm -rf *
-  clang --target=riscv32-unknown-unknown -mfloat-abi=soft -emit-llvm \
+  clang --target=riscv32-unknown-unknown -I /usr/include -mfloat-abi=soft -emit-llvm \
     -S -w -gline-tables-only -O0 -Xclang -disable-O0-optnone -fno-builtin \
     -fno-discard-value-names ../*.c
   llvm-link -S *.ll -o builtininteger.ll
@@ -118,7 +118,7 @@ buildriscv(){
   mkdir buildriscv
   cd buildriscv
   rm -rf *
-  clang --target=riscv32-unknown-unknown -mfloat-abi=soft -emit-llvm \
+  clang --target=riscv32-unknown-unknown -I /usr/include -mfloat-abi=soft -emit-llvm \
     -S -w -gline-tables-only -O0 -Xclang -disable-O0-optnone -fno-builtin \
     -fno-discard-value-names ../*.c
   llvm-link -S *.ll -o builtinstd.ll
