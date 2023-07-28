@@ -102,7 +102,7 @@ dist() {
   cmake \
     -DCMAKE_C_COMPILER=/usr/lib/icecc/bin/gcc \
     -DCMAKE_CXX_COMPILER=/usr/lib/icecc/bin/g++ \
-    -DCMAKE_BUILD_TYPE=Debug \ #RelWithDebInfo \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
     -Wno-dev \
     -Wno-suggest-override \
@@ -115,7 +115,7 @@ dist() {
     -DLLVM_EXTERNAL_CLANG_SOURCE_DIR=../dependencies/$CLANG_VER.src \
     -DLLVM_EXTERNAL_LLVMTA_SOURCE_DIR=.. \
     -DLLVM_EXTERNAL_PROJECTS="llvmta" \
-    -DLLVM_PARALLEL_COMPILE_JOBS=42 \
+    -DLLVM_PARALLEL_COMPILE_JOBS=300 \
     -DLLVM_PARALLEL_LINK_JOBS=1 \
     -GNinja \
     ../dependencies/$LLVM_VER.src
