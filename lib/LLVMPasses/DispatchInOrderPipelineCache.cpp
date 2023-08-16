@@ -29,6 +29,8 @@
 #include "LLVMPasses/DispatchMemory.h"
 #include "LLVMPasses/DispatchMuArchAnalysis.h"
 #include "MicroarchitecturalAnalysis/InOrderCacheState.h"
+#include "MicroarchitecturalAnalysis/InOrderForwardState.h"
+#include "Util/Options.h"
 
 namespace TimingAnalysisPass {
 
@@ -37,6 +39,16 @@ dispatchInOrderCacheAnalysis(AnalysisType anatype,
                              AddressInformation &addressInfo) {
   std::tuple<AddressInformation &> addrInfoTuple(addressInfo);
 
+  if (anatype == AnalysisType::FwIDistance) {
+    typedef InOrderForwardState<CacheFactory::makeOptionsDataCacheIgnComp, true>
+        MuState;
+    return dispatchCacheAnalysisJoin<MuState>(addrInfoTuple, "Instr ");
+  }
+  if (anatype == AnalysisType::FwDDistance) {
+    typedef InOrderForwardState<CacheFactory::makeOptionsDataCacheIgnComp, true>
+        MuState;
+    return dispatchCacheAnalysisJoin<MuState>(addrInfoTuple, "Data ");
+  }
   if (anatype == AnalysisType::L1DCACHE) {
     typedef InOrderCacheState<CacheFactory::makeOptionsDataCacheIgnComp, true>
         MuState;
@@ -47,6 +59,7 @@ dispatchInOrderCacheAnalysis(AnalysisType anatype,
   typedef InOrderCacheState<CacheFactory::makeOptionsInstrCacheIgnComp, false>
       MuState;
   return dispatchCacheAnalysisJoin<MuState>(addrInfoTuple, "Instr ");
+  // NILS Add my Analysis here, as self written CacheState clone
 }
 
 } // namespace TimingAnalysisPass

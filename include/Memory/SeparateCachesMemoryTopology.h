@@ -515,9 +515,8 @@ SeparateCachesMemoryTopology<makeInstrCache, makeDataCache, BgMem>::accessData(
         Access(resId, addr, load_store, numWords));
     incrementCurrentId();
     return boost::optional<unsigned>(resId);
-  } else {
-    return boost::none;
   }
+  return boost::none;
 }
 
 template <AbstractCache *(*makeInstrCache)(bool),
@@ -852,7 +851,7 @@ SeparateCachesMemoryTopology<makeInstrCache, makeDataCache,
         if (isWBCache) {
           /* If the report is a WriteBackReport improve our writeback/dirtifying
            * store information */
-          auto wbreport = dynamic_cast<WritebackReport *>(report);
+          auto *wbreport = dynamic_cast<WritebackReport *>(report);
           if (wbreport && StaticallyRefuteWritebacks) {
             WBVictimItv = wbreport->potentialWritebacks();
           }

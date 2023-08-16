@@ -31,9 +31,11 @@
 
 #include "Memory/CacheTraits.h"
 #include "Memory/Classification.h"
+#include "Memory/UpdateReports.h"
 #include "Memory/progana/Lattice.h"
 #include "Memory/util/ImplicitSet.h"
 
+#include "Util/AbstractAddress.h"
 #include "Util/PersistenceScope.h"
 
 namespace TimingAnalysisPass {

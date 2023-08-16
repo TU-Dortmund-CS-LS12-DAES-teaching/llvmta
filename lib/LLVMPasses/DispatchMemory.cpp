@@ -126,7 +126,8 @@ makeOptionsCache(CacheReplPolicyType replpol, PersistenceType persType,
       replpol == CacheReplPolicyType::ALMISS) {
     typedef AlwaysCache<CacheConfig> AbsDataCache;
     return new AbsDataCache(replpol);
-  } else if (compositional) {
+  }
+  if (compositional) {
     typedef AlwaysCache<CacheConfig> AbsDataCache;
     return new AbsDataCache(CacheReplPolicyType::ALHIT);
   }

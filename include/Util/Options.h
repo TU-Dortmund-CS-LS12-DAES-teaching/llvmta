@@ -38,18 +38,20 @@
 //#include "PathAnalysis/GetEdges.h"
 namespace TimingAnalysisPass {
 enum class GetEdges_method : char;
-}
+} // namespace TimingAnalysisPass
 using TimingAnalysisPass::GetEdges_method;
 
 /**
  * The available analysis types
  */
 enum class AnalysisType {
-  VALANA,   /// Perform value & address analysis
-  TIMING,   /// Compute worst-case execution time bound
-  CRPD,     /// Compute cache-related preemption
-  L1ICACHE, /// Count the number of (Level-1) instruction cache hits and misses
-  L1DCACHE  /// Count the number of (Level-1) data cache hits and misses
+  VALANA,    /// Perform value & address analysis
+  TIMING,    /// Compute worst-case execution time bound
+  CRPD,      /// Compute cache-related preemption
+  L1ICACHE,  /// Count the number of (Level-1) instruction cache hits and misses
+  L1DCACHE,  /// Count the number of (Level-1) data cache hits and misses
+  FwIDistance, /// Calculate the forward distance of each L1 I Cache load
+  FwDDistance /// Calculate the forward distance of each L1 I Cache load
 };
 
 /**

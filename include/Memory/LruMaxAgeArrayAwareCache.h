@@ -31,6 +31,7 @@
 
 #include "Memory/ArrayAwareMustAges.h"
 #include "Memory/Classification.h"
+#include "Memory/UpdateReports.h"
 #include "Memory/progana/Lattice.h"
 #include "Memory/util/CacheUtils.h"
 #include "Memory/util/ImplicitSet.h"
