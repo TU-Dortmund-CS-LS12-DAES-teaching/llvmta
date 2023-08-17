@@ -50,6 +50,14 @@ cl::opt<bool>
                        "for performance measurements (default 'false')"),
               cl::cat(LLVMTACat));
 
+cl::opt<int>
+    OptMode("ta-opt2", cl::init(0),
+            cl::desc("Opt mode: run custom optimizations before timing "
+                     "analysis. 0 = None, 2 = Noninvasive Passes, 1 = All "
+                     "including Invasive Passes "
+                     "for performance measurements (default '0')"),
+            cl::cat(LLVMTACat));
+
 cl::opt<bool>
     DumpVcgGraph("ta-dumpb-vcg-graph",
                  cl::desc("Dumps the StateGraph in .vcg format (default:.dot)"),
@@ -889,7 +897,7 @@ cl::opt<unsigned>
                                     "occur due to preemption? (default 0)"),
                            cl::init(0), cl::cat(LLVMTACat));
 
-cl::opt<unsigned>
-    ILPLine("ta-force-ILP-path",
-                           cl::desc("Enforce a Line from your .c file to be Taken in the ILP. "),
-                           cl::init(0), cl::cat(LLVMTACat));
+cl::opt<unsigned> ILPLine(
+    "ta-force-ILP-path",
+    cl::desc("Enforce a Line from your .c file to be Taken in the ILP. "),
+    cl::init(0), cl::cat(LLVMTACat));

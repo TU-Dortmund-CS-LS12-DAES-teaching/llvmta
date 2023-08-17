@@ -246,6 +246,11 @@ enum class ArrivalCurveIlpObjectiveType { VARIANT1, VARIANT2, COMBINED };
 extern llvm::cl::opt<bool> QuietMode;
 
 /**
+ * Optimization mode: Execute optimizationpasses before Timing analysis.
+ */
+extern llvm::cl::opt<int> OptMode;
+
+/**
  * Dumps the state graph in .vcg instead of .dot
  */
 extern llvm::cl::opt<bool> DumpVcgGraph;

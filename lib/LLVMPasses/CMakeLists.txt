@@ -10,10 +10,10 @@ DispatchMemory.cpp
 DispatchOutOfOrderPipelineCache.cpp
 DispatchOutOfOrderPipelineTiming.cpp
 DispatchPathAnalysis.cpp
+ForwardDistanceAnalysisPass.cpp
 MachineFunctionCollector.cpp
 StaticAddressProvider.cpp
 TimingAnalysisMain.cpp
 TimingAnalysisPasses.cpp
 DEPENDS LLVMAnalysis LLVMCodeGen LLVMCore LLVMSupport LLVMTarget
 )
-

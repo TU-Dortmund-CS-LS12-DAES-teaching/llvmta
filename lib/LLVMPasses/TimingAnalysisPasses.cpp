@@ -25,9 +25,11 @@
 
 #include "LLVMPasses/TimingAnalysisPasses.h"
 #include "LLVMPasses/AsmDumpAndCheckPass.h"
+#include "LLVMPasses/ForwardDistanceAnalysisPass.h"
 #include "LLVMPasses/MachineFunctionCollector.h"
 #include "LLVMPasses/StaticAddressProvider.h"
 #include "LLVMPasses/TimingAnalysisMain.h"
+
 #include "PartitionUtil/DirectiveHeuristics.h"
 #include "PathAnalysis/LoopBoundInfo.h"
 
@@ -35,12 +37,21 @@ namespace llvm {
 
 std::list<FunctionPass *> getTimingAnalysisPasses(TargetMachine &TM) {
   std::list<FunctionPass *> Passes;
+  if (OptMode >= 1) {
+  }
   Passes.push_back(createAsmDumpAndCheckPass(TM));
   Passes.push_back(createMachineFunctionCollector());
   Passes.push_back(createLoopBoundInfoPass());
   Passes.push_back(createStaticAddressProvider(TM));
   Passes.push_back(createDirectiveHeuristicsPass());
+  if (OptMode >= 2) {
+    // Add Forward Distance Analysis here, as uArchitectural Analysis is not
+    // needed.
+    Passes.push_back(createForwardDistanceAnalysisPass());
+  }
   Passes.push_back(createTimingAnalysisMain(TM));
+  if (OptMode >= 3) {
+  }
   return Passes;
 }
 

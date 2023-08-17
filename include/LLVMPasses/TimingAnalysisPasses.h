@@ -33,6 +33,6 @@ namespace llvm {
 
 std::list<FunctionPass *> getTimingAnalysisPasses(TargetMachine &TM);
 
-}
+} // namespace llvm
 
 #endif
