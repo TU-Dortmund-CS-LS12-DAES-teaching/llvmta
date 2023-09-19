@@ -2,7 +2,7 @@
 
 
 parse(){
-  search_dir=/workspaces/llvmta/testcases/Benchmarks/trees
+  search_dir=/workspaces/llvmta/testcases/Benchmarks/treesA
   for entry in "$search_dir"/*
   do
     #result=$(echo "$entry" | sed "s/Suzi/$secondString/")
@@ -21,6 +21,7 @@ parse(){
     done
   done
 }
+
 parsebench(){
   search_dir=/workspaces/llvmta/testcases/Benchmarks/llvmta_trees_u_bench
   for entry in "$search_dir"/*
@@ -31,5 +32,5 @@ parsebench(){
   done
 }
 #parse
-parsebench | xargs -P 16 -n 1 -I CMD ./runTestcase CMD --ta-lpsolver-effort=maximal --ta-pathana-type=graphilp 2>> error 1>> output &
+parse | xargs -P 8 -n 1 -I CMD ./runTestcase CMD --ta-lpsolver-effort=maximal --ta-pathana-type=graphilp 2>> error 1>> output &
 #parse | xargs -P 16 -n 1 -I CMD ./runTestcase CMD  --ta-lpsolver-effort=maximal --ta-pathana-type=graphilp 2>> error 1>> output &

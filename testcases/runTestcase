@@ -126,6 +126,9 @@ fi
 
 # Generate the final command line that will be executed. We do this in order to
 # be able to print the entire command line to stdout.
+echo "Running testcase: $TESTCASE_DIR"
+echo "With options: ${USEROPTS[@]}"
+echo "${USEROPTS[@]}"
 cmdline=("${SCRIPT_DIR}/runllvmta.sh" "$TESTCASE_DIR" "${USEROPTS[@]}")
 
 echo "${cmdline[@]}"
