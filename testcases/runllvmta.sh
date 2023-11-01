@@ -89,7 +89,7 @@ while [ $# -gt 0 ]; do
 			"--llvmta-entry-point") entry_point=$val;;
 			"--llvmta-limit-memory") limit_mem=true;;
 			"--llvmta-isa") isa_type=$val;;
-			"--use-linktime-adress-information") map_bin_adr=true;; 
+			"--use-binary-extracted-address-information") map_bin_adr=true;; 
 			"--") shift; break;;
 			*) echo "Unknown Option: $opt" >&2; exit 1;;
 		esac
