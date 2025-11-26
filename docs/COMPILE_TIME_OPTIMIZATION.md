@@ -109,10 +109,16 @@ Focus your changes on one module at a time to minimize rebuilds.
 
 The slowest components to compile are:
 
-1. **Pipeline States** (`InOrderPipelineState.h`, `OutOfOrderPipelineState.h`) - ~1300-1000 lines of template code
-2. **Memory Topologies** (`SeparateCachesMemoryTopology.h`, `SingleMemoryTopology.h`) - ~600-1300 lines
-3. **Path Analysis** (`DispatchPathAnalysis.h`, `StateSensitiveGraph.h`) - ~2400-2000 lines
-4. **Cache Implementations** (`AbstractCache.h`) - ~780 lines
+1. **Pipeline States** 
+   - `InOrderPipelineState.h` - ~1342 lines of template code
+   - `OutOfOrderPipelineState.h` - ~1018 lines of template code
+2. **Memory Topologies**
+   - `SeparateCachesMemoryTopology.h` - ~1334 lines  
+   - `SingleMemoryTopology.h` - ~571 lines
+3. **Path Analysis**
+   - `DispatchPathAnalysis.h` - ~2427 lines
+   - `StateSensitiveGraph.h` - ~1990 lines
+4. **Cache Implementations** (`AbstractCache.h`) - ~778 lines
 
 Each of these files is included by multiple translation units, and each inclusion requires full template instantiation.
 

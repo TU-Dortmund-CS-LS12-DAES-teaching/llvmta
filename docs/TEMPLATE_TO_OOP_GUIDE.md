@@ -206,9 +206,10 @@ auto factory = MemoryTopologyFactory(makeOptionsBackgroundMem);
 auto* memory = factory.createMemory();
 ```
 
-This demonstrates how to replace:
+This demonstrates how to replace the template-based approach:
 ```cpp
-SingleMemoryTopology<makeOptionsBackgroundMem> topology;
+// Old template-based approach (each function pointer creates a new type)
+auto* memory = SingleMemoryTopology<makeOptionsBackgroundMem>().createMemory();
 ```
 
 With runtime polymorphism that doesn't require template instantiation.
