@@ -57,6 +57,16 @@ ninja -j [#CPUs] llvmta
 
 ![alt text](dependencies/img/build.gif)
 
+## Compile Time Optimization
+
+LLVMTA uses extensive C++ template metaprogramming which can result in long compilation times. For tips on reducing compilation times and working more efficiently with the codebase, see [docs/COMPILE_TIME_OPTIMIZATION.md](docs/COMPILE_TIME_OPTIMIZATION.md).
+
+**Quick tips:**
+- Use incremental builds: `ninja llvmta` instead of full rebuild
+- For low-memory systems: Use `./config.sh lowRes` and limit parallel jobs
+- Enable ccache to cache compilation results
+- Make changes in `.cpp` files rather than `.h` files when possible
+
 ## Using LLVMTA
 This section showcases how to use LLVMTA on a simple test case of a nested loop example. Make sure LLVMTA is compiled and in your $PATH variable.
 
