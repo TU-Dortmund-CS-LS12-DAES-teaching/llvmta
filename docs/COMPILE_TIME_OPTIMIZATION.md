@@ -46,18 +46,29 @@ ninja -j 4  # Limit parallel jobs
 
 ### 4. Use ccache
 
-Install and enable ccache to cache compilation results:
+LLVMTA now automatically detects and uses ccache if available. To install:
 
 ```bash
 sudo apt-get install ccache
-export CC="ccache gcc"
-export CXX="ccache g++"
+# ccache will be automatically used in your next build
 ./config.sh dev
 cd build
 ninja -j $(nproc)
 ```
 
-### 5. Selective Compilation
+### 5. Enable Unity Builds (Experimental)
+
+Unity builds can significantly reduce compilation time by combining source files:
+
+```bash
+cd build
+cmake -DLLVMTA_ENABLE_UNITY_BUILD=ON ..
+ninja -j $(nproc)
+```
+
+**Note:** Unity builds may increase memory usage during compilation.
+
+### 6. Selective Compilation
 
 When working on specific components, you can build only those targets:
 
